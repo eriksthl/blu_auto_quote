@@ -282,6 +282,85 @@
     @media (max-width: 700px) {
       .route-rate-tools, .sync-grid, .custom-charge-row { grid-template-columns: 1fr; }
     }
+
+
+    /* Version 8.2.0 split workspace */
+    main { width: min(1180px, calc(100% - 24px)); }
+    .file-state { display: grid; gap: 4px; min-width: 285px; }
+    .file-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 26px; }
+    .file-line .btn { white-space: nowrap; }
+    .fcl-workspace { display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 12px; align-items: start; }
+    .fcl-left-stack, .fcl-right-stack { display: grid; gap: 12px; align-content: start; }
+    .fcl-workspace .section { margin-top: 0; }
+    .span-two { grid-column: 1 / -1; }
+    .advanced-panel { margin-top: 10px; border: 1px solid #bbb; }
+    .advanced-panel > summary { padding: 7px 9px; background: #f4f4f4; color: #555; font-size: 12px; }
+    .advanced-panel-body { padding: 9px; }
+    .option-row, .equipment-option-row { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    .compact-select { width: 145px; }
+    .route-core-grid { margin-top: 10px; }
+    .compact-route-grid { grid-template-columns: 1fr; margin-top: 10px; }
+    .compact-route-grid .location-box { grid-template-columns: 112px minmax(0, 1fr); gap: 7px; }
+    .free-days-grid { margin-top: 10px; }
+    .route-options-panel { margin-top: 10px; }
+    .route-rate-tools { grid-template-columns: minmax(0, 1fr) auto; }
+    .route-rate-tools .small-note { grid-column: 1 / -1; }
+    .quote-summary { border: 1px solid #888; background: #fff; }
+    .quote-summary h2 { margin: 0; padding: 9px 10px; background: #222; color: #fff; font-size: 13px; }
+    .quote-summary-body { padding: 9px; }
+    .summary-subject { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #ccc; font-size: 12px; font-weight: 700; overflow-wrap: anywhere; }
+    .summary-status { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid #e1e1e1; font-size: 11px; }
+    .summary-status span { color: #666; }
+    .summary-status strong { text-align: right; }
+    .summary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+    .summary-actions .primary { grid-column: 1 / -1; }
+    .sticky-summary { position: sticky; top: 10px; }
+    .equipment-workspace .section-body { padding: 9px; }
+    .equipment-list { gap: 8px; }
+    .equipment-card { border-color: #999; }
+    .equipment-head { padding: 6px 8px; background: #eee; }
+    .equipment-title strong { font-size: 13px; }
+    .equipment-title span { display: inline-flex; padding: 2px 6px; border: 1px solid #aaa; background: #fff; color: #444; font-size: 10px; font-weight: 700; }
+    .equipment-body { padding: 8px; }
+    .equipment-core-grid { display: grid; grid-template-columns: 58px minmax(105px, .7fr) 64px minmax(155px, 1.2fr); gap: 7px; align-items: end; }
+    .compact-number-field input { text-align: center; font-weight: 700; }
+    .equipment-cost-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.25fr); gap: 8px; margin-top: 8px; }
+    .cost-block { padding: 8px; border: 1px solid #bbb; background: #fafafa; }
+    .cost-block-title { margin-bottom: 5px; color: #555; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .money-pair { display: grid; grid-template-columns: minmax(90px, 1fr) 82px; gap: 6px; align-items: end; }
+    .supplier-pair { grid-template-columns: minmax(90px, 1fr) 82px minmax(120px, 1.1fr); }
+    .currency-field select { min-width: 0; }
+    .equipment-option-row { margin-top: 7px; padding: 6px 8px; border: 1px solid #ccc; background: #fff; }
+    .equipment-advanced { margin-top: 7px; }
+    .equipment-advanced .sync-grid { margin: 0; }
+    .custom-charge-section { margin-top: 8px; }
+    .profit-panel .section-body { padding: 9px; }
+    .profit-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 10px; align-items: start; }
+    .roe-details { margin-top: 0; }
+    .script-section { margin-top: 12px; }
+    #lclPane { max-width: 960px; margin: 0 auto; }
+    @media (max-width: 1000px) {
+      .fcl-workspace { grid-template-columns: 350px minmax(0, 1fr); }
+      .equipment-core-grid { grid-template-columns: 58px minmax(100px, 1fr) 64px minmax(140px, 1fr); }
+      .supplier-pair { grid-template-columns: minmax(90px, 1fr) 82px; }
+      .supplier-pair .supplier-field { grid-column: 1 / -1; }
+      .profit-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 850px) {
+      .fcl-workspace { grid-template-columns: 1fr; }
+      .sticky-summary { position: static; }
+      .equipment-core-grid { grid-template-columns: 64px minmax(0, 1fr) 70px minmax(0, 1fr); }
+      .file-line { justify-content: flex-start; }
+      .file-state { min-width: 0; text-align: left; }
+    }
+    @media (max-width: 620px) {
+      .equipment-core-grid, .equipment-cost-grid, .money-pair, .supplier-pair, .profit-layout { grid-template-columns: 1fr; }
+      .compact-number-field input { text-align: left; }
+      .summary-actions { grid-template-columns: 1fr; }
+      .summary-actions .primary { grid-column: auto; }
+      .compact-route-grid .location-box { grid-template-columns: 1fr; }
+      .location-title { grid-column: 1; }
+    }
 </style>
 </head>
 <body>
@@ -290,12 +369,13 @@
     <header>
       <div>
         <h1>BLU Auto Quote</h1>
-        <div class="app-version">AHK Script Gen // Version 8.1.0</div>
+        <div class="app-version">AHK Script Gen // Version 8.2.0</div>
       </div>
       <div class="file-state">
-        <span id="locStatus">Loading LocCodes.xlsx...</span><br>
-        <button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button>
+        <div class="file-line"><span id="locStatus">Loading LocCodes.xlsx...</span><button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button></div>
         <input id="locFileInput" class="hidden" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+        <div class="file-line"><span id="textStatus">Loading QuoteTexts.txt...</span><button id="openTextFile" class="btn small hidden" type="button">Select QuoteTexts.txt</button></div>
+        <input id="textFileInput" class="hidden" type="file" accept=".txt,.json,text/plain,application/json">
       </div>
     </header>
 
@@ -305,128 +385,159 @@
     </nav>
 
     <div id="fclPane" class="mode-pane">
-    <section class="section">
-      <div class="section-head"><h2>Quote</h2></div>
-      <div class="section-body">
-        <div class="grid three">
-          <label class="field">Client name<input id="clientName" data-required autocomplete="off"></label>
-          <label class="field">Attention to<input id="attentionTo" data-required autocomplete="off"></label>
-          <label class="field">Sales operator<select id="salesOperator" data-required><option>Christoffer Josefsson</option><option selected>Erik Stahl</option><option>Hilma Stahl</option><option>Malin Noren</option><option>Malin Stahl</option><option>Markus Odenstam</option><option>Martin Soderberg</option><option>Par Kjellstrand</option><option>Sakar Mustafa</option><option>Sven Karlund</option><option>Teo Sjogren</option></select></label>
-        </div>
-        <div class="separator"></div>
-        <div class="grid three">
-          <label class="field">Valid to<input id="validTo" data-required type="date"></label>
-          <label class="field">Payment term days<input id="paymentDays" data-required type="number" min="0" step="1" value="30"></label>
-          <label class="field">Incoterm<select id="incoterm" data-required><option>EXW</option><option>FCA</option><option>FOB</option></select></label>
-          <label class="field hidden">Legacy carrier<select id="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
-        </div>
-        <div class="waiting-option">
-          <label class="waiting-check"><input id="useAgent" type="checkbox"> AGENT</label>
-          <label class="field hidden" id="agentField">Agent<select id="agent"><option>CHS</option></select></label>
-          <label class="waiting-check"><input id="exportQuote" type="checkbox"> Export quote</label>
-        </div>
-        <div class="separator"></div>
-        <div class="route-manager">
-          <div class="route-manager-top">
-            <div id="routeTabs" class="route-tabs" role="tablist" aria-label="Routes"></div>
-            <div class="route-buttons">
-              <button type="button" class="btn small" id="addRoute">+ Add route</button>
-              <button type="button" class="btn small" id="duplicateRoute">Duplicate route</button>
-              <button type="button" class="btn small danger" id="removeRoute">Remove route</button>
+      <div class="fcl-workspace">
+        <div class="fcl-left-stack">
+          <section class="section quote-panel">
+            <div class="section-head"><h2>Quote</h2></div>
+            <div class="section-body">
+              <div class="grid two quote-core-grid">
+                <label class="field span-two">Client name<input id="clientName" data-required autocomplete="off"></label>
+                <label class="field span-two">Attention to<input id="attentionTo" data-required autocomplete="off"></label>
+                <label class="field">Sales operator<select id="salesOperator" data-required><option>Christoffer Josefsson</option><option selected>Erik Stahl</option><option>Hilma Stahl</option><option>Malin Noren</option><option>Malin Stahl</option><option>Markus Odenstam</option><option>Martin Soderberg</option><option>Par Kjellstrand</option><option>Sakar Mustafa</option><option>Sven Karlund</option><option>Teo Sjogren</option></select></label>
+                <label class="field">Valid to<input id="validTo" data-required type="date"></label>
+              </div>
+              <details class="advanced-panel">
+                <summary>Payment, agent and export</summary>
+                <div class="advanced-panel-body">
+                  <div class="grid two">
+                    <label class="field">Payment term days<input id="paymentDays" data-required type="number" min="0" step="1" value="30"></label>
+                    <label class="field hidden">Legacy carrier<select id="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
+                  </div>
+                  <div class="option-row">
+                    <label class="waiting-check"><input id="useAgent" type="checkbox"> AGENT</label>
+                    <label class="field hidden compact-select" id="agentField">Agent<select id="agent"><option>CHS</option></select></label>
+                    <label class="waiting-check"><input id="exportQuote" type="checkbox"> Export quote</label>
+                  </div>
+                </div>
+              </details>
             </div>
-          </div>
-          <div class="route-rate-tools">
-            <label class="field">Get rates from<select id="rateSourceRoute"></select></label>
-            <button type="button" class="btn small" id="getRatesFromRoute">Copy buying rates</button>
-            <span id="routeRateStatus" class="small-note"></span>
-          </div>
-        </div>
-        <div class="separator"></div>
-        <div class="grid two">
-          <label class="field" id="collectionField">Collection city<div id="collectionLocation" class="combo"><input id="collectionCity" autocomplete="off"><div class="combo-menu hidden"></div></div></label>
-          <label class="field hidden">Legacy precarriage supplier<select id="precarriageSupplier"><option>DANIA</option><option>SKARASLÄTTEN</option><option>PGF</option></select></label>
-          <label class="field">Transit time <span class="hint">days; blank = TBA</span><input id="transitDays" type="number" min="1" step="1"></label>
-        </div>
-        <div class="waiting-option" id="waitingOption">
-          <label class="waiting-check"><input id="includeWaitingTime" type="checkbox"> Include free waiting time</label>
-          <label class="field waiting-hours hidden" id="waitingHoursField">Hours<input id="waitingHours" type="number" min="0.5" step="0.5" value="1"></label>
-        </div>
-        <input id="collectionName" type="hidden"><input id="collectionCode" type="hidden">
-        <div class="separator"></div>
-        <div class="route-grid">
-          <div class="location-box">
-            <div class="location-title">POL</div>
-            <label class="field">Country<div id="polCountry" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
-            <label class="field">Location<div id="polLocation" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
-          </div>
-          <div class="location-box">
-            <div class="location-title">POD</div>
-            <label class="field">Country<div id="podCountry" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
-            <label class="field">Location<div id="podLocation" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
-          </div>
-        </div>
-        <input id="polName" type="hidden"><input id="polCode" type="hidden">
-        <input id="podName" type="hidden"><input id="podCode" type="hidden">
-        <div class="separator"></div>
-        <div class="grid three">
-          <label class="field">Free days<select id="freeDaysMode"><option value="standard">Standard</option><option value="custom">Specify</option></select></label>
-          <label class="field custom-free hidden">Number of free days<input id="freeDays" type="number" min="1" step="1" value="7"></label>
-          <label class="field custom-free hidden">Type<select id="freeDaysType"><option value="detention">detention</option><option value="merged">merged</option></select></label>
-        </div>
-      </div>
-    </section>
+          </section>
 
-    <section class="section">
-      <div class="section-head">
-        <div><h2>Equipment and buying costs</h2><div id="activeRouteLabel" class="small-note"></div></div>
-        <button type="button" class="btn" id="addEquipment">+ Add equipment</button>
-      </div>
-      <div class="section-body"><div id="equipmentList" class="equipment-list"></div></div>
-    </section>
+          <section class="section route-panel">
+            <div class="section-head"><h2>Route</h2></div>
+            <div class="section-body">
+              <div class="route-manager">
+                <div class="route-manager-top">
+                  <div id="routeTabs" class="route-tabs" role="tablist" aria-label="Routes"></div>
+                  <div class="route-buttons">
+                    <button type="button" class="btn small" id="addRoute">+ Route</button>
+                    <button type="button" class="btn small" id="duplicateRoute">Duplicate</button>
+                    <button type="button" class="btn small danger" id="removeRoute">Remove</button>
+                  </div>
+                </div>
+              </div>
 
-    <section class="section">
-      <div class="section-head"><h2>Profit</h2></div>
-      <div class="section-body">
-        <div class="grid two">
-          <label class="field">Selling currency<select id="targetCurrency"><option>USD</option><option>EUR</option></select></label>
-          <label class="field">Profit per detail <span class="hint">SEK</span><input id="profitSek" type="number" min="0" step="100" value="8000"></label>
-        </div>
-        <details class="compact-details">
-          <summary>ROE</summary>
-          <div class="roe-panel">
-            <div class="roe-line"><div id="roeStatus" class="roe-status loading"><span class="dot"></span><span>Loading current rates...</span></div><span id="roeSource" class="small-note"></span></div>
-            <div class="grid two">
-              <label class="field">1 SEK = USD<input id="sekUsd" type="number" min="0" step="0.000001"></label>
-              <label class="field">1 SEK = EUR<input id="sekEur" type="number" min="0" step="0.000001"></label>
+              <div class="grid two route-core-grid">
+                <label class="field">Incoterm<select id="incoterm" data-required><option>EXW</option><option>FCA</option><option>FOB</option></select></label>
+                <label class="field">Transit time <span class="hint">blank = TBA</span><input id="transitDays" type="number" min="1" step="1"></label>
+                <label class="field span-two" id="collectionField">Collection city<div id="collectionLocation" class="combo"><input id="collectionCity" autocomplete="off"><div class="combo-menu hidden"></div></div></label>
+                <label class="field hidden">Legacy precarriage supplier<select id="precarriageSupplier"><option>DANIA</option><option>SKARASLÄTTEN</option><option>PGF</option></select></label>
+              </div>
+              <input id="collectionName" type="hidden"><input id="collectionCode" type="hidden">
+
+              <div class="route-grid compact-route-grid">
+                <div class="location-box">
+                  <div class="location-title">POL</div>
+                  <label class="field">Country<div id="polCountry" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                  <label class="field">Location<div id="polLocation" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                </div>
+                <div class="location-box">
+                  <div class="location-title">POD</div>
+                  <label class="field">Country<div id="podCountry" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                  <label class="field">Location<div id="podLocation" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                </div>
+              </div>
+              <input id="polName" type="hidden"><input id="polCode" type="hidden">
+              <input id="podName" type="hidden"><input id="podCode" type="hidden">
+
+              <div class="grid three free-days-grid">
+                <label class="field">Free days<select id="freeDaysMode"><option value="standard">Standard</option><option value="custom">Specify</option></select></label>
+                <label class="field custom-free hidden">Days<input id="freeDays" type="number" min="1" step="1" value="7"></label>
+                <label class="field custom-free hidden">Type<select id="freeDaysType"><option value="detention">detention</option><option value="merged">merged</option></select></label>
+              </div>
+
+              <details class="advanced-panel route-options-panel">
+                <summary>Waiting time and rate tools</summary>
+                <div class="advanced-panel-body">
+                  <div class="route-rate-tools">
+                    <label class="field">Get rates from<select id="rateSourceRoute"></select></label>
+                    <button type="button" class="btn small" id="getRatesFromRoute">Copy buying rates</button>
+                    <span id="routeRateStatus" class="small-note"></span>
+                  </div>
+                  <div class="waiting-option" id="waitingOption">
+                    <label class="waiting-check"><input id="includeWaitingTime" type="checkbox"> Include free waiting time</label>
+                    <label class="field waiting-hours hidden" id="waitingHoursField">Hours<input id="waitingHours" type="number" min="0.5" step="0.5" value="1"></label>
+                  </div>
+                </div>
+              </details>
             </div>
-            <div class="roe-actions"><button type="button" class="btn small" id="refreshRates">Refresh ROE</button></div>
-          </div>
-        </details>
-      </div>
-    </section>
+          </section>
 
-    <div id="errorBox" class="alert error"></div>
-    <div id="warningBox" class="alert warning"></div>
-    <div class="actions">
-      <button type="button" class="btn primary" id="generateScript">Generate AHK script</button>
-      <button type="button" class="btn" id="importScript">Import .ahk</button>
-      <input id="importScriptFile" class="hidden" type="file" accept=".ahk,.txt,text/plain">
-      <button type="button" class="btn" id="resetForm">Reset</button>
+          <aside class="quote-summary sticky-summary">
+            <h2>Live quote summary</h2>
+            <div class="quote-summary-body">
+              <div id="summarySubject" class="summary-subject">FCL</div>
+              <div class="summary-status"><span>Routes</span><strong id="summaryRouteCount">1</strong></div>
+              <div class="summary-status"><span>Details rows</span><strong id="summaryDetailCount">1</strong></div>
+              <div class="summary-status"><span>Cargo equipment</span><strong id="summaryContainerCount">1</strong></div>
+              <div class="summary-status"><span>Carrier</span><strong id="summaryCarrier">MSC</strong></div>
+              <div class="summary-status"><span>Profit target</span><strong id="summaryProfit">8 000 SEK / detail</strong></div>
+              <div class="summary-status"><span>Selling currency</span><strong id="summaryCurrency">USD</strong></div>
+              <div class="summary-actions">
+                <button type="button" class="btn primary" id="generateScript" disabled>Generate AHK script</button>
+                <button type="button" class="btn" id="importScript">Import .ahk</button>
+                <input id="importScriptFile" class="hidden" type="file" accept=".ahk,.txt,text/plain">
+                <button type="button" class="btn" id="resetForm">Reset</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="fcl-right-stack">
+          <section class="section equipment-workspace">
+            <div class="section-head">
+              <div><h2>Equipment workspace</h2><div id="activeRouteLabel" class="small-note"></div></div>
+              <button type="button" class="btn" id="addEquipment">+ Add equipment</button>
+            </div>
+            <div class="section-body"><div id="equipmentList" class="equipment-list"></div></div>
+          </section>
+
+          <section class="section profit-panel">
+            <div class="section-head"><h2>Profit</h2></div>
+            <div class="section-body profit-layout">
+              <div class="grid two">
+                <label class="field">Selling currency<select id="targetCurrency"><option>USD</option><option>EUR</option></select></label>
+                <label class="field">Profit per detail <span class="hint">SEK</span><input id="profitSek" type="number" min="0" step="100" value="8000"></label>
+              </div>
+              <details class="compact-details roe-details">
+                <summary>ROE</summary>
+                <div class="roe-panel">
+                  <div class="roe-line"><div id="roeStatus" class="roe-status loading"><span class="dot"></span><span>Loading current rates...</span></div><span id="roeSource" class="small-note"></span></div>
+                  <div class="grid two">
+                    <label class="field">1 SEK = USD<input id="sekUsd" type="number" min="0" step="0.000001"></label>
+                    <label class="field">1 SEK = EUR<input id="sekEur" type="number" min="0" step="0.000001"></label>
+                  </div>
+                  <div class="roe-actions"><button type="button" class="btn small" id="refreshRates">Refresh ROE</button></div>
+                </div>
+              </details>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div id="errorBox" class="alert error"></div>
+      <div id="warningBox" class="alert warning"></div>
+      <details id="scriptSection" class="script-section">
+        <summary>Generated AutoHotkey script</summary>
+        <div class="script-toolbar">
+          <button type="button" class="btn" id="copyScript" disabled>Copy</button>
+          <button type="button" class="btn primary" id="downloadScript" disabled>Download .ahk</button>
+        </div>
+        <textarea id="scriptOutput" readonly spellcheck="false"></textarea>
+      </details>
     </div>
 
-    <details id="scriptSection">
-      <summary>Generated AutoHotkey script</summary>
-      <div class="script-toolbar">
-        <button type="button" class="btn" id="copyScript" disabled>Copy</button>
-        <button type="button" class="btn primary" id="downloadScript" disabled>Download .ahk</button>
-      </div>
-      <textarea id="scriptOutput" readonly spellcheck="false"></textarea>
-    </details>
-  </main>
-
-    </div>
-
-    <div id="lclPane" class="mode-pane hidden">
+<div id="lclPane" class="mode-pane hidden">
       <section class="section paste-box">
         <div class="section-head"><h2>Nordicon quote</h2></div>
         <div class="section-body">
@@ -533,7 +644,7 @@
       <div id="lclErrorBox" class="alert error"></div>
       <div id="lclWarningBox" class="alert warning"></div>
       <div class="actions">
-        <button type="button" class="btn primary" id="lclGenerateScript">Generate AHK script</button>
+        <button type="button" class="btn primary" id="lclGenerateScript" disabled>Generate AHK script</button>
         <button type="button" class="btn" id="lclImportScript">Import .ahk</button>
         <input id="lclImportScriptFile" class="hidden" type="file" accept=".ahk,.txt,text/plain">
         <button type="button" class="btn" id="lclResetForm">Reset</button>
@@ -549,6 +660,7 @@
       </details>
     </div>
 
+  </main>
 
   <template id="equipmentTemplate">
     <article class="equipment-card">
@@ -560,45 +672,59 @@
         </div>
       </div>
       <div class="equipment-body">
-        <div class="grid four">
-          <label class="field">Quantity<input class="eq-input" data-key="quantity" type="number" min="1" step="1"></label>
+        <div class="equipment-core-grid">
+          <label class="field compact-number-field">Qty<input class="eq-input" data-key="quantity" type="number" min="1" step="1"></label>
           <label class="field">Equipment type<select class="eq-input" data-key="type"><option value="20'DV">20'DV</option><option value="40'DV">40'DV</option><option value="40'HC">40'HC</option><option value="20'RE">20'RE</option><option value="40'RE">40'RE</option></select></label>
-          <label class="field">Details row<input class="eq-input" data-key="detailRow" type="number" min="1" step="1"></label>
-          <label class="field">Carrier <span class="hint">synced within detail</span><select class="eq-input" data-key="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
+          <label class="field compact-number-field">Detail<input class="eq-input" data-key="detailRow" type="number" min="1" step="1"></label>
+          <label class="field carrier-field">Carrier <span class="hint">synced within detail</span><select class="eq-input" data-key="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
         </div>
-        <div class="separator"></div>
-        <div class="cost-grid">
-          <label class="field">Freight buying<input class="eq-input" data-key="freightAmount" type="number" min="0" step="0.01"></label>
-          <label class="field">Currency<select class="eq-input" data-key="freightCurrency"><option>USD</option><option>EUR</option><option>SEK</option></select></label>
-          <label class="field precarriage-field">Precarriage buying<input class="eq-input" data-key="precarriageAmount" type="number" min="0" step="0.01"></label>
-          <label class="field precarriage-field">Currency<select class="eq-input" data-key="precarriageCurrency"><option>SEK</option><option>USD</option><option>EUR</option></select></label>
+
+        <div class="equipment-cost-grid">
+          <div class="cost-block">
+            <div class="cost-block-title">Ocean freight</div>
+            <div class="money-pair">
+              <label class="field">Buying<input class="eq-input" data-key="freightAmount" type="number" min="0" step="0.01"></label>
+              <label class="field currency-field">Currency<select class="eq-input" data-key="freightCurrency"><option>USD</option><option>EUR</option><option>SEK</option></select></label>
+            </div>
+          </div>
+          <div class="cost-block precarriage-field">
+            <div class="cost-block-title">Precarriage</div>
+            <div class="money-pair supplier-pair">
+              <label class="field">Buying<input class="eq-input" data-key="precarriageAmount" type="number" min="0" step="0.01"></label>
+              <label class="field currency-field">Currency<select class="eq-input" data-key="precarriageCurrency"><option>SEK</option><option>USD</option><option>EUR</option></select></label>
+              <label class="field supplier-field">Supplier<select class="eq-input" data-key="precarriageSupplier"><option>DANIA</option><option>SKARASLÄTTEN</option><option>PGF</option></select></label>
+            </div>
+          </div>
         </div>
-        <div class="grid two precarriage-field" style="margin-top:8px">
-          <label class="field">Precarriage supplier<select class="eq-input" data-key="precarriageSupplier"><option>DANIA</option><option>SKARASLÄTTEN</option><option>PGF</option></select></label>
+
+        <div class="equipment-option-row">
+          <label class="waiting-check"><input class="eq-input origin-toggle" data-key="includeOriginCharges" type="checkbox"> Origin charges</label>
+          <label class="waiting-check stuffing-field"><input class="eq-input stuff-toggle" data-key="includeStuff" type="checkbox"> Stuff / lash / shunt</label>
         </div>
-        <div class="sync-grid">
-          <label class="waiting-check"><input class="sync-toggle" data-sync-kind="freight" type="checkbox"> Keep freight buying synced between routes</label>
-          <label class="waiting-check precarriage-field"><input class="sync-toggle" data-sync-kind="precarriage" type="checkbox"> Keep precarriage buying synced between routes</label>
-        </div>
-        <div class="waiting-option">
-          <label class="waiting-check"><input class="eq-input origin-toggle" data-key="includeOriginCharges" type="checkbox"> Include origin charges</label>
-        </div>
+
         <div class="cost-grid origin-fields hidden">
           <label class="field">Origin charges buying<input class="eq-input" data-key="originAmount" type="number" min="0" step="0.01"></label>
           <label class="field">Currency<select class="eq-input" data-key="originCurrency"><option>SEK</option><option>USD</option><option>EUR</option></select></label>
-        </div>
-        <div class="waiting-option stuffing-field">
-          <label class="waiting-check"><input class="eq-input stuff-toggle" data-key="includeStuff" type="checkbox"> Include stuff / lash / shunt</label>
         </div>
         <div class="cost-grid stuffing-fields stuffing-field hidden">
           <label class="field">Stuffing buying<input class="eq-input" data-key="stuffAmount" type="number" min="0" step="0.01"></label>
           <label class="field">Currency<select class="eq-input" data-key="stuffCurrency"><option>SEK</option><option>USD</option><option>EUR</option></select></label>
           <label class="field">Stuffing supplier<select class="eq-input" data-key="stuffSupplier"><option value="">Select supplier</option><option value="IMEX">IMEX</option><option value="SOREN THYR">SÖREN THYR</option><option value="HCC">HCC</option></select></label>
         </div>
-        <div class="custom-charge-section">
-          <div class="custom-charge-head"><strong>Custom Other charges for this details row</strong><button type="button" class="btn small add-custom-charge">+ Add custom charge</button></div>
-          <div class="custom-charge-list"></div>
-        </div>
+
+        <details class="advanced-panel equipment-advanced">
+          <summary>Syncing and custom charges</summary>
+          <div class="advanced-panel-body">
+            <div class="sync-grid">
+              <label class="waiting-check"><input class="sync-toggle" data-sync-kind="freight" type="checkbox"> Keep freight buying synced between routes</label>
+              <label class="waiting-check precarriage-field"><input class="sync-toggle" data-sync-kind="precarriage" type="checkbox"> Keep precarriage buying synced between routes</label>
+            </div>
+            <div class="custom-charge-section">
+              <div class="custom-charge-head"><strong>Custom Other charges for this details row</strong><button type="button" class="btn small add-custom-charge">+ Add custom charge</button></div>
+              <div class="custom-charge-list"></div>
+            </div>
+          </div>
+        </details>
         <details class="compact-details calculation-details">
           <summary>Calculation for details row</summary>
           <div class="preview-box"></div>
@@ -611,17 +737,17 @@
 "use strict";
 
     const FIXED = Object.freeze({
-      project: "949",
-      internalComment: "Agent Ocean Export",
-      clientCode: "fhb",
-      coverLetter: "Many thanks for your inquiry. We are pleased to offer the following",
-      goodsDescription: "GENERAL CARGO - NON HAZARDOUS",
-      excluding: "DESTINATION CHARGES",
-      subjectTo: `Space/equipment and any charge imposed by the line VATOS.\n\nAny additional requirement not previously notified could derive into this quote being reviewed.\n\nShipping line approval of commodity.\n\nAll quotes & tenders are subject to our Middle East Conflict Disclaimer, available on our website.\n\nAny Emergency Conflict/War Risk Surcharges, additional premiums, Route Changes and/or End of Voyage costs, whether existing, increased or newly imposed prior to or during the transport/voyage.`,
-      freightDescription: "OCEAN FREIGHT",
-      originChargesDescription: "ORIGIN CHARGES",
-      grossWeight: "20000",
-      exportCustomDescription: "CUSTOM EXPORT DECLARATION INCL. 3 HS CODES",
+      get project() { return quoteText("common.project"); },
+      get internalComment() { return quoteText("common.internalComment"); },
+      get clientCode() { return quoteText("common.clientCode"); },
+      get coverLetter() { return quoteText("common.coverLetter"); },
+      get goodsDescription() { return quoteText("fcl.cargoDescription"); },
+      get excluding() { return quoteText("fcl.excluding.destinationCharges"); },
+      get subjectTo() { return quoteText("common.subjectTo"); },
+      get freightDescription() { return quoteText("fcl.charges.oceanFreight"); },
+      get originChargesDescription() { return quoteText("fcl.charges.originCharges"); },
+      get grossWeight() { return quoteText("common.grossWeight"); },
+      get exportCustomDescription() { return quoteText("fcl.charges.exportCustom"); },
       clickDelay: 80,
       fieldDelay: 120,
       menuKeyDelay: 180,
@@ -688,6 +814,8 @@
       pendingImport: null,
       pendingLclImport: null,
       activeMode: "fcl",
+      quoteTexts: null,
+      quoteTextsSource: "",
       lcl: newLclState()
     };
 
@@ -719,6 +847,95 @@
       ? new Intl.DisplayNames(["en"], { type: "region" })
       : null;
     const LOC_FILE_CANDIDATES = ["LocCodes.xlsx", "loccodes.xlsx", "LocCodes(1).xlsx"];
+    const QUOTE_TEXT_FILE_CANDIDATES = ["QuoteTexts.txt", "quote_texts.txt", "QuoteTexts.json"];
+    const REQUIRED_QUOTE_TEXT_KEYS = Object.freeze([
+      "common.project", "common.internalComment", "common.clientCode", "common.coverLetter", "common.salutation",
+      "common.detailBasis", "common.subjectTo", "common.grossWeight", "common.transitTime", "common.transitTimeTba",
+      "fcl.subject", "fcl.cargoDescription", "fcl.freeDays.standard", "fcl.freeDays.custom",
+      "fcl.including.customFreeDays", "fcl.including.reeferMonitoring",
+      "fcl.excluding.destinationCharges", "fcl.excluding.fcaCustomExport", "fcl.excluding.fobOriginCharges", "fcl.excluding.reeferGenset",
+      "fcl.remarks.roe", "fcl.remarks.carrierFreeDays", "fcl.remarks.profitShare", "fcl.remarks.waiting", "fcl.remarks.shipperStuff", "fcl.remarks.additionalHsCodes",
+      "fcl.charges.waitingIncluded", "fcl.charges.waitingNotIncluded", "fcl.charges.precarriage", "fcl.charges.precarriageByEquipment",
+      "fcl.charges.pickup", "fcl.charges.stuffing", "fcl.charges.oceanFreight", "fcl.charges.oceanFreightByEquipment",
+      "fcl.charges.originCharges", "fcl.charges.originChargesByEquipment", "fcl.charges.exportCustom", "fcl.charges.reeferMonitoring",
+      "lcl.subject", "lcl.cargoDescription", "lcl.excluding", "lcl.remarks.carrier", "lcl.remarks.profitShare",
+      "lcl.remarks.loadingTime", "lcl.remarks.additionalHsCodes", "lcl.charges.inlandHaulage", "lcl.charges.oceanFreight",
+      "lcl.charges.fuelContingency", "lcl.charges.solasFee", "lcl.charges.customsCheckMrn"
+    ]);
+
+    function nestedValue(source, path) {
+      return String(path).split(".").reduce((value, key) => value && Object.prototype.hasOwnProperty.call(value, key) ? value[key] : undefined, source);
+    }
+
+    function quoteText(path, replacements = {}) {
+      if (!state.quoteTexts) return "";
+      const template = nestedValue(state.quoteTexts, path);
+      if (typeof template !== "string") throw new Error(`QuoteTexts.txt is missing text key: ${path}`);
+      const result = template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (match, key) => Object.prototype.hasOwnProperty.call(replacements, key) ? String(replacements[key]) : match);
+      const unresolved = result.match(/\{\{([A-Z0-9_]+)\}\}/);
+      if (unresolved) throw new Error(`Quote text ${path} requires value: ${unresolved[1]}`);
+      return result;
+    }
+
+    function validateQuoteTextData(data) {
+      if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("QuoteTexts.txt must contain one JSON object.");
+      const missing = REQUIRED_QUOTE_TEXT_KEYS.filter((key) => typeof nestedValue(data, key) !== "string");
+      if (missing.length) throw new Error(`QuoteTexts.txt is missing: ${missing.join(", ")}`);
+      return data;
+    }
+
+    function setQuoteTextReady(data, sourceLabel) {
+      state.quoteTexts = validateQuoteTextData(data);
+      state.quoteTextsSource = sourceLabel;
+      const status = $("textStatus");
+      status.textContent = `${sourceLabel} ready`;
+      status.classList.remove("error");
+      $("openTextFile").classList.add("hidden");
+      ["generateScript", "lclGenerateScript"].forEach((id) => { if ($(id)) $(id).disabled = false; });
+      updateAllPreviews();
+      updateLclCalculation();
+    }
+
+    function parseQuoteTextData(rawText) {
+      return validateQuoteTextData(JSON.parse(String(rawText || "").replace(/^\uFEFF/, "")));
+    }
+
+    async function loadQuoteTexts() {
+      const status = $("textStatus");
+      let lastError = null;
+      for (const filename of QUOTE_TEXT_FILE_CANDIDATES) {
+        try {
+          const response = await fetch(filename, { cache: "no-store" });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          setQuoteTextReady(parseQuoteTextData(await response.text()), filename);
+          return;
+        } catch (error) { lastError = error; }
+      }
+      state.quoteTexts = null;
+      status.textContent = `QuoteTexts.txt not loaded${lastError ? ` (${lastError.message})` : ""}`;
+      status.classList.add("error");
+      $("openTextFile").classList.remove("hidden");
+      ["generateScript", "lclGenerateScript"].forEach((id) => { if ($(id)) $(id).disabled = true; });
+    }
+
+    async function readSelectedQuoteTextFile() {
+      const file = $("textFileInput").files?.[0];
+      if (!file) return;
+      try { setQuoteTextReady(parseQuoteTextData(await file.text()), file.name); }
+      catch (error) {
+        state.quoteTexts = null;
+        $("textStatus").textContent = error instanceof Error ? error.message : "Could not read QuoteTexts.txt.";
+        $("textStatus").classList.add("error");
+        $("openTextFile").classList.remove("hidden");
+        ["generateScript", "lclGenerateScript"].forEach((id) => { if ($(id)) $(id).disabled = true; });
+      } finally { $("textFileInput").value = ""; }
+    }
+
+    function bindQuoteTextEvents() {
+      $("openTextFile").addEventListener("click", () => $("textFileInput").click());
+      $("textFileInput").addEventListener("change", readSelectedQuoteTextFile);
+    }
+
 
     function normaliseSearch(value) {
       return String(value ?? "")
@@ -1378,7 +1595,21 @@
     }
 
     function updateSummary() {
-      // The visible summary was removed to keep the interface compact.
+      const subject = state.quoteTexts ? buildSubject() : "FCL";
+      const routes = Array.isArray(state.routes) ? state.routes : [];
+      const details = routes.reduce((sum, route) => sum + groupRouteEquipment(route).length, 0);
+      const cargoEquipment = routes.length ? cargoEquipmentForQuote() : [];
+      const containers = cargoEquipment.reduce((sum, equipment) => sum + Math.max(1, Number(equipment.quantity) || 1), 0);
+      const carriers = [...new Set(routes.flatMap((route) => (route.equipment || []).map((equipment) => upper(equipment.carrier)).filter(Boolean)))];
+      const profit = numberValue($("profitSek")?.value || 0);
+      const profitLabel = Number.isFinite(profit) ? `${new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 }).format(profit)} SEK / detail` : "—";
+      if ($("summarySubject")) $("summarySubject").textContent = subject || "FCL";
+      if ($("summaryRouteCount")) $("summaryRouteCount").textContent = String(routes.length || 1);
+      if ($("summaryDetailCount")) $("summaryDetailCount").textContent = String(details || 1);
+      if ($("summaryContainerCount")) $("summaryContainerCount").textContent = String(containers || 1);
+      if ($("summaryCarrier")) $("summaryCarrier").textContent = carriers.length === 1 ? carriers[0] : (carriers.length ? "Mixed" : "MSC");
+      if ($("summaryProfit")) $("summaryProfit").textContent = profitLabel;
+      if ($("summaryCurrency")) $("summaryCurrency").textContent = $("targetCurrency")?.value || "USD";
     }
 
     async function fetchRates() {
@@ -1431,20 +1662,26 @@
     }
 
     function freeDaysText() {
-      if ($("freeDaysMode").value === "standard") return "Standard";
-      return `${$("freeDays").value} free days ${$("freeDaysType").value}`;
+      if ($("freeDaysMode").value === "standard") return quoteText("fcl.freeDays.standard");
+      return quoteText("fcl.freeDays.custom", { FREE_DAYS: $("freeDays").value, FREE_DAYS_TYPE: $("freeDaysType").value });
     }
 
     function includingText() {
       if ($("freeDaysMode").value !== "custom") return "";
-      return `${$("freeDays").value} free days ${$("freeDaysType").value} at POD.`;
+      return quoteText("fcl.including.customFreeDays", { FREE_DAYS: $("freeDays").value, FREE_DAYS_TYPE: $("freeDaysType").value });
     }
 
     function remarksText() {
       const carrier = upper(textValue("carrier"));
       const pol = upper(textValue("polName"));
       const collection = upper(collectionCityValue());
-      return `Rate of Exchange is subject to fluctuations, quoted amounts will be adjusted to the rate of exchange at time of shipping.\n\nRates based on shipment via ${carrier} who offer ${freeDaysText()} at POD.\n\nOur profit share is already INCLUDED in this quotation.\n\nAdditional waiting time in port of ${pol} and/or at Shipper's site in ${collection} to be charged as per tariff from Truckers. Approx. USD 50 per initiated 0,5h.\n\nQuotation based on that shipper stuff & lash cargo into container(s).`;
+      return [
+        quoteText("fcl.remarks.roe"),
+        quoteText("fcl.remarks.carrierFreeDays", { CARRIER: carrier, FREE_DAYS: freeDaysText() }),
+        quoteText("fcl.remarks.profitShare"),
+        quoteText("fcl.remarks.waiting", { POL: pol, COLLECTION: collection }),
+        quoteText("fcl.remarks.shipperStuff")
+      ].join("\n\n");
     }
 
     function validateForm() {
@@ -1511,11 +1748,9 @@
       const target = $("targetCurrency").value;
       const collection = upper(collectionCityValue());
       const waitingText = $("includeWaitingTime").checked
-        ? `${formatPlainNumber(numberValue($("waitingHours").value))}H WAITING TIME INCLUDED, ADDITIONAL TIME TO BE CHARGED AT COST - APPROX. USD 50 PER 0,5H.`
-        : "WAITING TIME NOT INCLUDED, TO BE CHARGED AT COST - APPROX. USD 50 PER 0,5H.";
-      const precDescription = `PRECARRIAGE (${collection}), CHASSIS INCL. FUEL (VATOS - MONTHLY UPDATE)
-
-${waitingText}`;
+        ? quoteText("fcl.charges.waitingIncluded", { HOURS: formatPlainNumber(numberValue($("waitingHours").value)) })
+        : quoteText("fcl.charges.waitingNotIncluded");
+      const precDescription = quoteText("fcl.charges.precarriage", { COLLECTION: collection, WAITING_TEXT: waitingText });
       const q = calc.quantity;
       const consignment = "CONSIGNMENT";
       const carrier = carrierConfig();
@@ -1752,7 +1987,7 @@ ${waitingText}`;
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.1.0
+; Generated by BLU Auto Quote → AutoHotkey v8.2.0
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
 ; Selling currency: ${$("targetCurrency").value}
@@ -1848,7 +2083,7 @@ quote := Map(
   "collectionCode", ${ahkString(upper(textValue("collectionCode")))},
   "polCode", ${ahkString(upper(textValue("polCode")))},
   "podCode", ${ahkString(upper(textValue("podCode")))},
-  "transitTime", ${ahkString(`${$("transitDays").value} DAYS // PORT-PORT`)},
+  "transitTime", ${ahkString(transitTimeText($("transitDays").value))},
   "carrier", ${ahkString(carrier)},
   "including", ${ahkString(includingText())},
   "remarks", ${ahkString(remarksText())},
@@ -1893,7 +2128,7 @@ RunQuote() {
   TypeField("Attention to", quote["attentionTo"])
   TypeField("Subject", quote["subject"])
   TypeField("Salution", "Dear " quote["attentionTo"] ",")
-  TypeField("Cover letter", "Many thanks for your inquiry. We are pleased to offer the following")
+  TypeField("Cover letter", ${ahkString(FIXED.coverLetter)})
 
   ClickField("Display costs")
   SendText "c"
@@ -1917,7 +2152,7 @@ RunQuote() {
     TypeField("equipment quantity", detail["quantity"], false, true)
     SelectField("kind of equipment", detail["equipmentSearch"])
     TypeField("gross weight", "20000")
-    TypeField("description of goods", "GENERAL CARGO - NON HAZARDOUS", false, true)
+    TypeField("description of goods", ${ahkString(FIXED.goodsDescription)}, false, true)
   }
 
   ToolTip "BLU automation: details and charges"
@@ -1943,7 +2178,7 @@ RunQuote() {
     TypeField("transit time", quote["transitTime"])
     if quote["including"] != ""
       PasteField("including", quote["including"], true)
-    TypeField("excluding", "DESTINATION CHARGES")
+    TypeField("excluding", ${ahkString(FIXED.excluding)})
     PasteField("subject to", ${ahkString(FIXED.subjectTo)})
     TypeField("terms of payment days", quote["paymentDays"])
     SelectField("service type", "f")
@@ -2501,7 +2736,7 @@ RestoreClipboard(*) {
     function lclSubject() {
       const collection = upper(lclCollectionValue()) || "COLLECTION";
       const pod = upper(textValue("lclPodName")) || "POD";
-      return `LCL - ${collection} - GOTEBORG - ${pod} - ${$("lclStackable").value}`;
+      return quoteText("lcl.subject", { COLLECTION: collection, POD: pod, STACKABLE: $("lclStackable").value });
     }
 
     function lclFormattedValidTo() {
@@ -2519,7 +2754,11 @@ RestoreClipboard(*) {
 
     function lclRemarksText() {
       const supplier = lclSupplierConfig().display.toUpperCase();
-      return `Rates based on shipment via ${supplier}.\n\nOur profit share is already INCLUDED in this quotation.\n\n*) Inland haulage to shippers premises INCL 30 MINUTES FREE LOADING TIME.`;
+      return [
+        quoteText("lcl.remarks.carrier", { SUPPLIER: supplier }),
+        quoteText("lcl.remarks.profitShare"),
+        quoteText("lcl.remarks.loadingTime")
+      ].join("\n\n");
     }
 
     function updateLclCalculation() {
@@ -2605,9 +2844,9 @@ RestoreClipboard(*) {
       const volumePer = calc.volumeBased ? "v" : "";
       const weightPer = calc.weightBased ? "w" : "";
       const charges = [
-        { type: "trucking", description: `INLAND HAULAGE (${collection})*`, ...source("trucking"), sellingRate: formatPlainNumber(calc.truckingSelling), sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "freight", description: "OCEAN FREIGHT", ...source("ocean"), sellingRate: formatPlainNumber(calc.oceanSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
-        { type: "fuel", description: "FUEL CONTINGENCY SURCHARGE", ...source("fuel"), sellingRate: formatPlainNumber(calc.fuelSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
+        { type: "trucking", description: quoteText("lcl.charges.inlandHaulage", { COLLECTION: collection }), ...source("trucking"), sellingRate: formatPlainNumber(calc.truckingSelling), sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "freight", description: quoteText("lcl.charges.oceanFreight"), ...source("ocean"), sellingRate: formatPlainNumber(calc.oceanSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
+        { type: "fuel", description: quoteText("lcl.charges.fuelContingency"), ...source("fuel"), sellingRate: formatPlainNumber(calc.fuelSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
         { type: "eu", description: "", ...source("eu"), sellingRate: formatPlainNumber(calc.euSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" }
       ];
       if ($("lclIncludeWar").checked) charges.push({ type: "war", description: "", ...source("war"), sellingRate: formatPlainNumber(calc.warSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" });
@@ -2617,8 +2856,8 @@ RestoreClipboard(*) {
         { type: "forwarding fee", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "100", sellingCurrency: "USD", per: "", weightUnit: "" },
         { type: "handling", description: "", ...source("handling"), sellingRate: "45", sellingCurrency: "USD", per: "", weightUnit: "" },
         { type: "isps", description: "", ...source("isps"), sellingRate: "4", sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "other", description: "SOLAS FEE", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "10", sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "other", description: "CUSTOMS CHECK MRN", ...source("customs"), sellingRate: "5", sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "other", description: quoteText("lcl.charges.solasFee"), buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "10", sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "other", description: quoteText("lcl.charges.customsCheckMrn"), ...source("customs"), sellingRate: "5", sellingCurrency: "USD", per: "", weightUnit: "" },
         { type: "profit", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "50", sellingCurrency: "USD", per: "", weightUnit: "" }
       );
       return charges;
@@ -2711,7 +2950,8 @@ RestoreClipboard(*) {
       const incoterm = upper($("lclIncoterm").value);
       const collection = upper(lclCollectionValue());
       const podName = upper(textValue("lclPodName"));
-      const cargoDescription = `GENERAL CARGO - ${$("lclStackable").value}`;
+      const cargoDescription = quoteText("lcl.cargoDescription", { STACKABLE: $("lclStackable").value });
+      const basisText = quoteText("common.detailBasis", { SUPPLIER: supplier.display, INCOTERM: incoterm });
       const volumeText = formatBluDecimal($("lclVolume").value);
       const stackable = $("lclStackable").value === "STACKABLE";
 
@@ -2719,7 +2959,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL AutoHotkey v8.1.0
+; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.0
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -2804,8 +3044,16 @@ C := Map(
 )
 
 quote := Map(
+  "project", ${ahkString(FIXED.project)},
+  "internalComment", ${ahkString(FIXED.internalComment)},
+  "clientCode", ${ahkString(FIXED.clientCode)},
   "clientName", ${ahkString(client)},
   "attentionTo", ${ahkString(attention)},
+  "salutation", ${ahkString(quoteText("common.salutation", { ATTENTION: attention }))},
+  "coverLetter", ${ahkString(FIXED.coverLetter)},
+  "subjectTo", ${ahkString(FIXED.subjectTo)},
+  "excluding", ${ahkString(quoteText("lcl.excluding"))},
+  "basisText", ${ahkString(basisText)},
   "salesOperator", ${ahkString(textValue("lclSalesOperator"))},
   "subject", ${ahkString(subject)},
   "validTo", ${ahkString(lclFormattedValidTo())},
@@ -2857,14 +3105,14 @@ RunQuote() {
   SavedClipboard := ClipboardAll()
 
   ToolTip "BLU automation: main quote fields"
-  TypeField("Project", "949", true)
-  TypeField("Internal comment", "Agent Ocean Export")
-  TypeField("client", "fhb", true)
+  TypeField("Project", quote["project"], true)
+  TypeField("Internal comment", quote["internalComment"])
+  TypeField("client", quote["clientCode"], true)
   TypeField("address", StrUpper(quote["clientName"]), false, true)
   TypeField("Attention to", quote["attentionTo"])
   TypeField("Subject", quote["subject"])
-  TypeField("Salution", "Dear " quote["attentionTo"] ",")
-  TypeField("Cover letter", "Many thanks for your inquiry. We are pleased to offer the following")
+  TypeField("Salution", quote["salutation"])
+  TypeField("Cover letter", quote["coverLetter"])
 
   ClickField("Display costs")
   SendText "c"
@@ -2898,7 +3146,7 @@ RunQuote() {
   ClickField("details tab", TAB_DELAY)
   ClickField("create new detail", ROW_DELAY)
   TypeField("detail subtitle", quote["subtitle"])
-  TypeLclDetailDescription(quote["clientName"], quote["supplierDisplay"], quote["incoterm"])
+  TypeLclDetailDescription(quote["clientName"], quote["basisText"])
   if quote["collectionCode"] != ""
     SelectField("plor loc code", quote["collectionCode"])
   SelectField("polout loc code", quote["polCode"])
@@ -2908,8 +3156,8 @@ RunQuote() {
   DoubleSelectField("plor mot", "t")
   DoubleSelectField("polout/podin mot", "v")
   TypeField("transit time", quote["transitTime"])
-  TypeField("excluding", "DESTINATION CHARGES")
-  PasteField("subject to", ${ahkString(FIXED.subjectTo)})
+  TypeField("excluding", quote["excluding"])
+  PasteField("subject to", quote["subjectTo"])
   TypeField("terms of payment days", quote["paymentDays"])
   SelectField("service type", "lcl/lcl")
   SelectField("incoterm", quote["incoterm"])
@@ -3066,7 +3314,7 @@ DoubleSelectField(name, value) {
   Sleep MENU_AFTER_DELAY
 }
 
-TypeLclDetailDescription(clientName, supplier, incoterm) {
+TypeLclDetailDescription(clientName, basisText) {
   global FIELD_DELAY
   ClickField("detail short description", 250)
   Send "^a"
@@ -3076,7 +3324,7 @@ TypeLclDetailDescription(clientName, supplier, incoterm) {
   Sleep 250
   Send "{Enter}"
   Sleep 350
-  SendText "Based on " supplier " (" StrUpper(incoterm) ")"
+  SendText basisText
   Sleep FIELD_DELAY + 200
   Send "{Tab}"
   Sleep 180
@@ -3125,6 +3373,10 @@ RestoreClipboard(*) {
     }
 
     function generateLclScript() {
+      if (!state.quoteTexts) {
+        alert("QuoteTexts.txt must be loaded before an LCL script can be generated.");
+        return;
+      }
       const validation = validateLcl();
       showLclMessages(validation);
       if (validation.errors.length) {
@@ -3253,6 +3505,10 @@ RestoreClipboard(*) {
     }
 
     function generateScript() {
+      if (!state.quoteTexts) {
+        alert("QuoteTexts.txt must be loaded before an FCL script can be generated.");
+        return;
+      }
       const validation = validateForm();
       showMessages(validation);
       if (validation.errors.length) {
@@ -3412,7 +3668,7 @@ RestoreClipboard(*) {
     }
 
     // ==============================
-    // v8.1.0 FCL route/detail overrides
+    // v8.2.0 FCL route/detail overrides
     // ==============================
 
     function makeStableId(prefix = "id") {
@@ -3636,9 +3892,9 @@ RestoreClipboard(*) {
       const samePrefix = paths.every((parts) => parts.length === paths[0].length && parts.slice(0, -1).every((value, index) => value === commonPrefix[index]));
       if (sameEquipment && samePrefix) {
         const destinations = paths.map((parts) => parts[parts.length - 1]).join(" / ");
-        return `FCL ${equipmentSummaries[0]} - ${[...commonPrefix, destinations].join(" - ")}`;
+        return quoteText("fcl.subject", { EQUIPMENT: equipmentSummaries[0], ROUTE: [...commonPrefix, destinations].join(" - ") });
       }
-      return routes.map((route) => `FCL ${routeEquipmentSummary(route)} - ${routePath(route)}`).join(" / ");
+      return routes.map((route) => quoteText("fcl.subject", { EQUIPMENT: routeEquipmentSummary(route), ROUTE: routePath(route) })).join(" / ");
     }
 
     function equipmentSearchValue(type) {
@@ -4260,51 +4516,47 @@ RestoreClipboard(*) {
     }
 
     function freeDaysText(route = activeRoute()) {
-      if (route.freeDaysMode === "standard") return "Standard free days";
-      return `${route.freeDays} free days ${route.freeDaysType}`;
+      if (route.freeDaysMode === "standard") return quoteText("fcl.freeDays.standard");
+      return quoteText("fcl.freeDays.custom", { FREE_DAYS: route.freeDays, FREE_DAYS_TYPE: route.freeDaysType });
     }
 
     function includingText(route, hasReefer = false) {
       const lines = [];
-      if (route.freeDaysMode === "custom") lines.push(`${route.freeDays} free days ${route.freeDaysType} at POD.`);
-      if (hasReefer) lines.push("0 DAYS REEFER MONITORING, ADDL. TO BE CHARGED AT 80 USD/DAY");
-      return lines.join("\n");
+      if (route.freeDaysMode === "custom") lines.push(quoteText("fcl.including.customFreeDays", { FREE_DAYS: route.freeDays, FREE_DAYS_TYPE: route.freeDaysType }));
+      if (hasReefer) lines.push(quoteText("fcl.including.reeferMonitoring"));
+      return lines.filter(Boolean).join("\n");
     }
 
     function excludingText(hasReefer = false, incoterm = currentIncoterm()) {
-      const lines = ["DESTINATION CHARGES"];
+      const lines = [quoteText("fcl.excluding.destinationCharges")];
       const term = upper(incoterm);
-      if (term === "FCA") lines.push("CUSTOM EXPORT DECLARATION (OPTIONAL ADDL. AT 100 USD)");
-      if (term === "FOB") lines.push("ORIGIN CHARGES");
-      if (hasReefer) lines.push("GENSET (OPTIONAL ADDL. AT 375 USD)");
-      return lines.join("\n");
+      if (term === "FCA") lines.push(quoteText("fcl.excluding.fcaCustomExport"));
+      if (term === "FOB") lines.push(quoteText("fcl.excluding.fobOriginCharges"));
+      if (hasReefer) lines.push(quoteText("fcl.excluding.reeferGenset"));
+      return lines.filter(Boolean).join("\n");
     }
 
     function remarksText(route = activeRoute(), carrierCode = "MSC", hasIncludedStuff = false) {
       const lines = [
-        "Rate of Exchange is subject to fluctuations, quoted amounts will be adjusted to the rate of exchange at time of shipping.",
-        `Rates based on shipment via ${upper(carrierCode)} who offer ${freeDaysText(route)} at POD.`,
-        "Our profit share is already INCLUDED in this quotation."
+        quoteText("fcl.remarks.roe"),
+        quoteText("fcl.remarks.carrierFreeDays", { CARRIER: upper(carrierCode), FREE_DAYS: freeDaysText(route) }),
+        quoteText("fcl.remarks.profitShare")
       ];
       if (!isFobIncoterm()) {
-        const pol = routePol(route);
-        const collection = routeCollection(route);
-        lines.push(`Additional waiting time in port of ${pol} and/or at Shipper's site in ${collection} to be charged as per tariff from Truckers. Approx. USD 50 per initiated 0,5h.`);
-        if (!hasIncludedStuff) lines.push("Quotation based on that shipper stuff & lash cargo into container(s).");
-        lines.push("Additional HS codes to be charged at 4 USD per code.");
+        lines.push(quoteText("fcl.remarks.waiting", { POL: routePol(route), COLLECTION: routeCollection(route) }));
+        if (!hasIncludedStuff) lines.push(quoteText("fcl.remarks.shipperStuff"));
+        lines.push(quoteText("fcl.remarks.additionalHsCodes"));
       }
-      return lines.join("\n\n");
+      return lines.filter(Boolean).join("\n\n");
     }
 
     function createChargeMaps(route, equipment, calc) {
       const target = calc.target;
       const collection = routeCollection(route);
       const waitingText = route.includeWaitingTime
-        ? `${formatPlainNumber(numberValue(route.waitingHours))}H WAITING TIME INCLUDED, ADDITIONAL TIME TO BE CHARGED AT COST - APPROX. USD 50 PER 0,5H.`
-        : "WAITING TIME NOT INCLUDED, TO BE CHARGED AT COST - APPROX. USD 50 PER 0,5H.";
-      const basePrecDescription = `PRECARRIAGE (${collection}), CHASSIS INCL. FUEL (VATOS - MONTHLY UPDATE)
-
-${waitingText}`;
+        ? quoteText("fcl.charges.waitingIncluded", { HOURS: formatPlainNumber(numberValue(route.waitingHours)) })
+        : quoteText("fcl.charges.waitingNotIncluded");
+      const basePrecDescription = quoteText("fcl.charges.precarriage", { COLLECTION: collection, WAITING_TEXT: waitingText });
       const carrier = calc.liner;
       const agent = agentConfig();
       const carrierSupplier = agent ?? carrier;
@@ -4313,9 +4565,10 @@ ${waitingText}`;
       if (calc.includePrecarriage && calc.commonPrecarriage) {
         const row = calc.rows[0];
         const trucker = PRE_CARRIAGE_CONFIG[upper(row.equipment.precarriageSupplier)] ?? PRE_CARRIAGE_CONFIG.DANIA;
-        const precarriageSupplier = agent ?? trucker;
+        const precarriageSupplier = row.includeStuff ? trucker : (agent ?? trucker);
         charges.push({
-          type: "precarriage", description: row.includeStuff ? `PICKUP (${collection})` : basePrecDescription,
+          type: "precarriage",
+          description: row.includeStuff ? quoteText("fcl.charges.pickup", { COLLECTION: collection }) : basePrecDescription,
           buyRate: formatPlainNumber(numberValue(row.equipment.precarriageAmount) * calc.totalQuantity), buyCurrency: row.equipment.precarriageCurrency,
           supplier: precarriageSupplier.supplier, supplierArrow: precarriageSupplier.supplierArrow,
           sellingRate: formatPlainNumber(row.precarriageSelling), sellingCurrency: target,
@@ -4324,12 +4577,12 @@ ${waitingText}`;
       } else if (calc.includePrecarriage) {
         calc.rows.forEach((row) => {
           const trucker = PRE_CARRIAGE_CONFIG[upper(row.equipment.precarriageSupplier)] ?? PRE_CARRIAGE_CONFIG.DANIA;
-          const precarriageSupplier = agent ?? trucker;
+          const precarriageSupplier = row.includeStuff ? trucker : (agent ?? trucker);
           const description = row.includeStuff
-            ? `PICKUP (${collection})`
-            : `PRECARRIAGE (${row.quantity}X${row.equipment.type}) - ${collection}, CHASSIS INCL. FUEL (VATOS - MONTHLY UPDATE)
-
-${waitingText}`;
+            ? quoteText("fcl.charges.pickup", { COLLECTION: collection })
+            : quoteText("fcl.charges.precarriageByEquipment", {
+                QUANTITY: row.quantity, EQUIPMENT: row.equipment.type, COLLECTION: collection, WAITING_TEXT: waitingText
+              });
           charges.push({
             type: "precarriage", description,
             buyRate: formatPlainNumber(numberValue(row.equipment.precarriageAmount) * row.quantity), buyCurrency: row.equipment.precarriageCurrency,
@@ -4343,7 +4596,7 @@ ${waitingText}`;
       calc.rows.filter((row) => row.includeStuff).forEach((row) => {
         const stuffingSupplier = stuffingSupplierConfig(row.equipment.stuffSupplier);
         charges.push({
-          type: "stuffing", description: "STUFF/LASH/SHUNT",
+          type: "stuffing", description: quoteText("fcl.charges.stuffing"),
           buyRate: formatPlainNumber(numberValue(row.equipment.stuffAmount) * row.quantity), buyCurrency: row.equipment.stuffCurrency,
           supplier: stuffingSupplier?.supplier || "", supplierArrow: stuffingSupplier?.supplierArrow || 0,
           sellingRate: formatPlainNumber(row.stuffSelling), sellingCurrency: target,
@@ -4352,7 +4605,8 @@ ${waitingText}`;
       });
 
       calc.rows.forEach((row) => charges.push({
-        type: "freight", description: `OCEAN FREIGHT (${row.quantity}X${row.equipment.type})`,
+        type: "freight",
+        description: quoteText("fcl.charges.oceanFreightByEquipment", { QUANTITY: row.quantity, EQUIPMENT: row.equipment.type }),
         buyRate: formatPlainNumber(numberValue(row.equipment.freightAmount) * row.quantity), buyCurrency: row.equipment.freightCurrency,
         supplier: carrierSupplier.supplier, supplierArrow: carrierSupplier.supplierArrow,
         sellingRate: formatPlainNumber(row.freightSelling), sellingCurrency: target,
@@ -4361,7 +4615,9 @@ ${waitingText}`;
 
       calc.rows.filter((row) => row.equipment.includeOriginCharges).forEach((row) => charges.push({
         type: "freight",
-        description: calc.rows.length > 1 ? `${FIXED.originChargesDescription} (${row.quantity}X${row.equipment.type})` : FIXED.originChargesDescription,
+        description: calc.rows.length > 1
+          ? quoteText("fcl.charges.originChargesByEquipment", { QUANTITY: row.quantity, EQUIPMENT: row.equipment.type })
+          : quoteText("fcl.charges.originCharges"),
         buyRate: formatPlainNumber(numberValue(row.equipment.originAmount) * row.quantity), buyCurrency: row.equipment.originCurrency,
         supplier: carrierSupplier.supplier, supplierArrow: carrierSupplier.supplierArrow,
         sellingRate: formatPlainNumber(row.originSelling), sellingCurrency: target,
@@ -4376,7 +4632,7 @@ ${waitingText}`;
       });
       if (calc.includeCustomExport) {
         charges.push({
-          type: "custom export", description: FIXED.exportCustomDescription,
+          type: "custom export", description: quoteText("fcl.charges.exportCustom"),
           buyRate: agent ? formatPlainNumber(agent.exportCustomAmount) : "", buyCurrency: agent ? agent.exportCustomCurrency : "",
           supplier: agent ? agent.supplier : "", supplierArrow: agent ? agent.supplierArrow : 0,
           sellingRate: "100", sellingCurrency: target, quantity: "1", quantityDescription: "CONSIGNMENT"
@@ -4388,7 +4644,7 @@ ${waitingText}`;
       });
       if (calc.reeferQuantity > 0) {
         charges.push({
-          type: "other", description: "REEFER MONITORING COSTS AT PORT (USD 80/DAY PER CONTAINER)",
+          type: "other", description: quoteText("fcl.charges.reeferMonitoring"),
           buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
           sellingRate: "0", sellingCurrency: target,
           quantity: String(calc.reeferQuantity), quantityDescription: "CONTAINER"
@@ -4586,7 +4842,7 @@ ${waitingText}`;
         groupRouteEquipment(route).forEach((group) => {
           const calc = calculateDetailGroup(route, group.equipment);
           const hasReefer = calc.reeferQuantity > 0;
-          const subtitle = `FCL ${equipmentGroupSummary(group.equipment)} - ${routePath(route)}`;
+          const subtitle = quoteText("fcl.subject", { EQUIPMENT: equipmentGroupSummary(group.equipment), ROUTE: routePath(route) });
           const charges = createChargeMaps(route, group.equipment, calc).map((charge) => ahkMap(Object.entries(charge))).join(",\n            ");
           const removePlor = incoterm === "FOB";
           const incotermLocation = removePlor ? routePol(route) : routeCollection(route);
@@ -4600,7 +4856,7 @@ ${waitingText}`;
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.1.0
+; Generated by BLU Auto Quote → AutoHotkey v8.2.0
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
 ; Selling currency: ${$("targetCurrency").value}
@@ -4684,8 +4940,16 @@ C := Map(
 )
 
 quote := Map(
+  "project", ${ahkString(FIXED.project)},
+  "internalComment", ${ahkString(FIXED.internalComment)},
+  "clientCode", ${ahkString(FIXED.clientCode)},
   "clientName", ${ahkString(client)},
   "attentionTo", ${ahkString(attention)},
+  "salutation", ${ahkString(quoteText("common.salutation", { ATTENTION: attention }))},
+  "coverLetter", ${ahkString(FIXED.coverLetter)},
+  "grossWeight", ${ahkString(FIXED.grossWeight)},
+  "cargoDescription", ${ahkString(FIXED.goodsDescription)},
+  "subjectTo", ${ahkString(FIXED.subjectTo)},
   "salesOperator", ${ahkString(textValue("salesOperator"))},
   "subject", ${ahkString(subject)},
   "validTo", ${ahkString(formattedValidTo())},
@@ -4729,14 +4993,14 @@ RunQuote() {
   SavedClipboard := ClipboardAll()
 
   ToolTip "BLU automation: main quote fields"
-  TypeField("Project", "949", true)
-  TypeField("Internal comment", "Agent Ocean Export")
-  TypeField("client", "fhb", true)
+  TypeField("Project", quote["project"], true)
+  TypeField("Internal comment", quote["internalComment"])
+  TypeField("client", quote["clientCode"], true)
   TypeField("address", StrUpper(quote["clientName"]), false, true)
   TypeField("Attention to", quote["attentionTo"])
   TypeField("Subject", quote["subject"])
-  TypeField("Salution", "Dear " quote["attentionTo"] ",")
-  TypeField("Cover letter", "Many thanks for your inquiry. We are pleased to offer the following")
+  TypeField("Salution", quote["salutation"])
+  TypeField("Cover letter", quote["coverLetter"])
 
   ClickField("Display costs")
   SendText "c"
@@ -4759,8 +5023,8 @@ RunQuote() {
     ClickField("add equipment", ROW_DELAY)
     TypeField("equipment quantity", equipment["quantity"], false, true)
     SelectField("kind of equipment", equipment["equipmentSearch"])
-    TypeField("gross weight", "20000")
-    TypeField("description of goods", "GENERAL CARGO - NON HAZARDOUS", false, true)
+    TypeField("gross weight", quote["grossWeight"])
+    TypeField("description of goods", quote["cargoDescription"], false, true)
   }
 
   ToolTip "BLU automation: details and charges"
@@ -4770,7 +5034,7 @@ RunQuote() {
       ScrollDetailUp()
     ClickField("create new detail", ROW_DELAY)
     TypeField("detail subtitle", detail["subtitle"])
-    TypeDetailDescription(quote["clientName"], detail["carrier"], quote["incoterm"])
+    TypeDetailDescription(quote["clientName"], detail["basisText"])
     if !detail["removePlor"] && detail["collectionCode"] != ""
       SelectField("plor loc code", detail["collectionCode"])
     SelectField("polout loc code", detail["polCode"])
@@ -4788,7 +5052,7 @@ RunQuote() {
     if detail["including"] != ""
       PasteField("including", detail["including"], true)
     PasteField("excluding", detail["excluding"], true)
-    PasteField("subject to", ${ahkString(FIXED.subjectTo)})
+    PasteField("subject to", quote["subjectTo"])
     TypeField("terms of payment days", quote["paymentDays"])
     SelectField("service type", "f")
     SelectField("incoterm", quote["incoterm"])
@@ -4951,7 +5215,7 @@ DoubleSelectField(name, value) {
   Sleep MENU_AFTER_DELAY
 }
 
-TypeDetailDescription(clientName, carrier, incoterm) {
+TypeDetailDescription(clientName, basisText) {
   global FIELD_DELAY
   ClickField("detail short description", 250)
   Send "^a"
@@ -4961,7 +5225,7 @@ TypeDetailDescription(clientName, carrier, incoterm) {
   Sleep 250
   Send "{Enter}"
   Sleep 350
-  SendText "Based on " carrier " (" StrUpper(incoterm) ")"
+  SendText basisText
   Sleep FIELD_DELAY + 200
   Send "{Tab}"
   Sleep 180
@@ -5034,7 +5298,7 @@ RestoreClipboard(*) {
 
     function transitTimeText(value) {
       const text = String(value ?? "").trim();
-      return text ? `${text} DAYS // PORT-PORT` : "TBA DAYS // PORT-PORT";
+      return text ? quoteText("common.transitTime", { DAYS: text }) : quoteText("common.transitTimeTba");
     }
 
     function toggleIncotermFields(refresh = true) {
@@ -5159,7 +5423,7 @@ RestoreClipboard(*) {
     }
 
     // =====================================
-    // v8.1.0 Nordicon / LCL compatibility work
+    // v8.2.0 Nordicon / LCL compatibility work
     // =====================================
 
     function parseNordiconCharge(lines, pattern) {
@@ -5437,12 +5701,17 @@ RestoreClipboard(*) {
     function lclSubject() {
       const collection = normalisedLocationName(lclCollectionValue()) || "COLLECTION";
       const pod = normalisedLocationName(textValue("lclPodName")) || "POD";
-      return `LCL - ${collection} - GOTHENBURG - ${pod} - ${$("lclStackable").value}`;
+      return quoteText("lcl.subject", { COLLECTION: collection, POD: pod, STACKABLE: $("lclStackable").value });
     }
 
     function lclRemarksText() {
       const supplier = lclSupplierConfig().display.toUpperCase();
-      return `Rates based on shipment via ${supplier}.\n\nOur profit share is already INCLUDED in this quotation.\n\n*) Inland haulage to shippers premises INCL 30 MINUTES FREE LOADING TIME.\n\nAdditional HS codes to be charged at 4 USD per code.`;
+      return [
+        quoteText("lcl.remarks.carrier", { SUPPLIER: supplier }),
+        quoteText("lcl.remarks.profitShare"),
+        quoteText("lcl.remarks.loadingTime"),
+        quoteText("lcl.remarks.additionalHsCodes")
+      ].filter(Boolean).join("\n\n");
     }
 
     function lclCreateCharges(calc) {
@@ -5453,21 +5722,21 @@ RestoreClipboard(*) {
       const volumePer = calc.volumeBased ? "v" : "";
       const weightPer = calc.weightBased ? "w" : "";
       const charges = [
-        { type: "trucking", description: `INLAND HAULAGE (${collection})*`, ...source("trucking"), sellingRate: formatPlainNumber(calc.truckingSelling), sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "freight", description: "OCEAN FREIGHT", ...source("ocean"), sellingRate: formatPlainNumber(calc.oceanSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
-        { type: "fuel", description: "FUEL CONTINGENCY SURCHARGE", ...source("fuel"), sellingRate: formatPlainNumber(calc.fuelSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
+        { type: "trucking", description: quoteText("lcl.charges.inlandHaulage", { COLLECTION: collection }), ...source("trucking"), sellingRate: formatPlainNumber(calc.truckingSelling), sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "freight", description: quoteText("lcl.charges.oceanFreight"), ...source("ocean"), sellingRate: formatPlainNumber(calc.oceanSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
+        { type: "fuel", description: quoteText("lcl.charges.fuelContingency"), ...source("fuel"), sellingRate: formatPlainNumber(calc.fuelSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
         { type: "eu", description: "", ...source("eu"), sellingRate: formatPlainNumber(calc.euSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" }
       ];
       if ($("lclIncludeWar").checked) charges.push({ type: "war", description: "", ...source("war"), sellingRate: formatPlainNumber(calc.warSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" });
       charges.push(
         { type: "terminal", description: "", ...source("terminal"), sellingRate: "40", sellingCurrency: "USD", per: weightPer, weightUnit: weightPer ? "t" : "" },
         { type: "port", description: "", ...source("port"), sellingRate: "4", sellingCurrency: "USD", per: weightPer, weightUnit: weightPer ? "t" : "" },
-        { type: "custom export", description: FIXED.exportCustomDescription, buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "100", sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "custom export", description: quoteText("fcl.charges.exportCustom"), buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "100", sellingCurrency: "USD", per: "", weightUnit: "" },
         { type: "forwarding fee", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "100", sellingCurrency: "USD", per: "", weightUnit: "" },
         { type: "handling", description: "", ...source("handling"), sellingRate: "45", sellingCurrency: "USD", per: "", weightUnit: "" },
         { type: "isps", description: "", ...source("isps"), sellingRate: "4", sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "other", description: "SOLAS FEE", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "10", sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "other", description: "CUSTOMS CHECK MRN", ...source("customs"), sellingRate: "5", sellingCurrency: "USD", per: "", weightUnit: "" }
+        { type: "other", description: quoteText("lcl.charges.solasFee"), buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "10", sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "other", description: quoteText("lcl.charges.customsCheckMrn"), ...source("customs"), sellingRate: "5", sellingCurrency: "USD", per: "", weightUnit: "" }
       );
       (state.lcl.extraCharges || []).forEach((charge) => charges.push({
         type: "other", description: upper(charge.name),
@@ -5637,6 +5906,7 @@ RestoreClipboard(*) {
     setDefaultLclValidity();
     bindEvents();
     bindLclEvents();
+    bindQuoteTextEvents();
     setLclCosts(state.lcl.costs);
     renderEquipment();
     toggleFreeDays();
@@ -5646,6 +5916,7 @@ RestoreClipboard(*) {
     updateLclCalculation();
     activateMode("fcl");
     fetchRates();
+    loadQuoteTexts();
     loadLocCodes();
   </script>
 </body>
