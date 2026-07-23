@@ -284,7 +284,7 @@
     }
 
 
-    /* Version 8.2.1 split workspace */
+    /* Version 8.2.2 split workspace */
     main { width: min(1180px, calc(100% - 24px)); }
     .file-state { display: grid; gap: 4px; min-width: 285px; }
     .file-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 26px; }
@@ -363,7 +363,7 @@
     }
 
 
-    /* Version 8.2.1 compact LCL workspace */
+    /* Version 8.2.2 compact LCL workspace */
     :root { --line: #999; --muted: #666; }
     #lclPane { max-width: none; margin: 0; }
     .lcl-workspace { display: grid; grid-template-columns: 370px minmax(0, 1fr); gap: 12px; align-items: start; }
@@ -397,7 +397,7 @@
     <header>
       <div>
         <h1>BLU Auto Quote</h1>
-        <div class="app-version">AHK Script Gen // Version 8.2.1</div>
+        <div class="app-version">AHK Script Gen // Version 8.2.2</div>
       </div>
       <div class="file-state">
         <div class="file-line"><span id="locStatus">Loading LocCodes.xlsx...</span><button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button></div>
@@ -846,6 +846,7 @@
 
     const state = {
       rates: { USD: null, EUR: null, date: null },
+      ratesLoadingPromise: null,
       locations: new Map(),
       equipment: [newEquipment()],
       generatedScript: "",
@@ -1650,46 +1651,133 @@
       if ($("summaryCurrency")) $("summaryCurrency").textContent = $("targetCurrency")?.value || "USD";
     }
 
+    const ROE_CACHE_KEY = "bluAutoQuote.roe.v1";
+
+    function validRoePair(rates) {
+      return Boolean(rates && Number(rates.USD) > 0 && Number(rates.EUR) > 0);
+    }
+
+    function applyRoeRates(rates, source = "Frankfurter") {
+      if (!validRoePair(rates)) return false;
+      const normalized = {
+        USD: Number(rates.USD),
+        EUR: Number(rates.EUR),
+        date: String(rates.date || "latest"),
+        source
+      };
+      state.rates = normalized;
+      $("sekUsd").value = normalized.USD.toFixed(6);
+      $("sekEur").value = normalized.EUR.toFixed(6);
+      $("lclSekUsd").value = normalized.USD.toFixed(6);
+      $("lclSekEur").value = normalized.EUR.toFixed(6);
+      try { localStorage.setItem(ROE_CACHE_KEY, JSON.stringify(normalized)); } catch {}
+      return true;
+    }
+
+    function loadCachedRoe() {
+      try {
+        const cached = JSON.parse(localStorage.getItem(ROE_CACHE_KEY) || "null");
+        return applyRoeRates(cached, cached?.source || "cached Frankfurter rate");
+      } catch {
+        return false;
+      }
+    }
+
+    async function fetchJsonWithTimeout(url, timeoutMs = 9000) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    async function requestCurrentRoe() {
+      const errors = [];
+      try {
+        const payload = await fetchJsonWithTimeout("https://api.frankfurter.dev/v1/latest?base=SEK&symbols=USD,EUR");
+        const rates = { USD: Number(payload?.rates?.USD), EUR: Number(payload?.rates?.EUR), date: payload?.date || "latest" };
+        if (!validRoePair(rates)) throw new Error("v1 response is missing USD or EUR");
+        return rates;
+      } catch (error) {
+        errors.push(`v1: ${error.message}`);
+      }
+      try {
+        const rows = await fetchJsonWithTimeout("https://api.frankfurter.dev/v2/rates?base=SEK&quotes=USD,EUR");
+        const byQuote = Object.fromEntries((Array.isArray(rows) ? rows : []).map((row) => [row.quote, Number(row.rate)]));
+        const rates = { USD: byQuote.USD, EUR: byQuote.EUR, date: rows?.[0]?.date || "latest" };
+        if (!validRoePair(rates)) throw new Error("v2 response is missing USD or EUR");
+        return rates;
+      } catch (error) {
+        errors.push(`v2: ${error.message}`);
+      }
+      throw new Error(errors.join(" | "));
+    }
+
     async function fetchRates() {
+      if (state.ratesLoadingPromise) return state.ratesLoadingPromise;
       const status = $("roeStatus");
       status.className = "roe-status loading";
       status.innerHTML = `<span class="dot"></span><span>Hämtar aktuella kurser…</span>`;
       $("refreshRates").disabled = true;
+      $("lclRefreshRates").disabled = true;
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-      try {
-        const response = await fetch("https://api.frankfurter.dev/v2/rates?base=SEK&quotes=USD,EUR", {
-          cache: "no-store",
-          signal: controller.signal
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const rows = await response.json();
-        const rates = Object.fromEntries(rows.map((row) => [row.quote, Number(row.rate)]));
-        const date = rows[0]?.date || "okänt datum";
-        if (!(rates.USD > 0) || !(rates.EUR > 0)) throw new Error("Kurssvaret saknar USD eller EUR");
+      state.ratesLoadingPromise = (async () => {
+        try {
+          const rates = await requestCurrentRoe();
+          applyRoeRates(rates, "Frankfurter");
+          $("lclRoeStatus").textContent = `Current rates loaded (${rates.date}).`;
+          $("lclRoeStatus").classList.remove("status-error");
+          status.className = "roe-status ok";
+          status.innerHTML = `<span class="dot"></span><span>Kurser hämtade (${rates.date})</span>`;
+          $("roeSource").textContent = `Källa: Frankfurter daily reference rates, kursdatum ${rates.date}. Fälten kan justeras manuellt.`;
+          return true;
+        } catch (error) {
+          const cached = validRoePair(state.rates) || loadCachedRoe();
+          if (cached) {
+            const date = state.rates.date || "cached";
+            status.className = "roe-status ok";
+            status.innerHTML = `<span class="dot"></span><span>Senast sparade kurser används (${date})</span>`;
+            $("roeSource").textContent = `Livehämtningen misslyckades. Senast sparade Frankfurter-kurs används. ${error.message}`;
+            $("lclRoeStatus").textContent = `Using last saved rates (${date}).`;
+            $("lclRoeStatus").classList.remove("status-error");
+            return true;
+          }
+          status.className = "roe-status error";
+          status.innerHTML = `<span class="dot"></span><span>Kunde inte hämta ROE. Försök igen.</span>`;
+          $("roeSource").textContent = `Fel vid ROE-hämtning: ${error.message}`;
+          $("lclRoeStatus").textContent = "Could not load ROE. Refresh or enter the rates manually.";
+          $("lclRoeStatus").classList.add("status-error");
+          return false;
+        } finally {
+          $("refreshRates").disabled = false;
+          $("lclRefreshRates").disabled = false;
+          state.ratesLoadingPromise = null;
+          updateAllPreviews();
+          updateLclCalculation();
+        }
+      })();
+      return state.ratesLoadingPromise;
+    }
 
-        state.rates = { USD: rates.USD, EUR: rates.EUR, date };
-        $("sekUsd").value = rates.USD.toFixed(6);
-        $("sekEur").value = rates.EUR.toFixed(6);
-        $("lclSekUsd").value = rates.USD.toFixed(6);
-        $("lclSekEur").value = rates.EUR.toFixed(6);
-        $("lclRoeStatus").textContent = `Current rates loaded (${date}).`;
-        status.className = "roe-status ok";
-        status.innerHTML = `<span class="dot"></span><span>Kurser hämtade (${date})</span>`;
-        $("roeSource").textContent = `Källa: Frankfurter daily reference rates, kursdatum ${date}. Fälten kan justeras manuellt.`;
-      } catch (error) {
-        status.className = "roe-status error";
-        status.innerHTML = `<span class="dot"></span><span>Kunde inte hämta ROE. Ange kurser manuellt.</span>`;
-        $("roeSource").textContent = `Fel vid ROE-hämtning: ${error.message}`;
-        $("lclRoeStatus").textContent = "Could not load ROE. Enter the rates manually.";
-        $("lclRoeStatus").classList.add("status-error");
-      } finally {
-        clearTimeout(timeoutId);
-        $("refreshRates").disabled = false;
-        updateAllPreviews();
-        updateLclCalculation();
-      }
+    function ensureRoeFields() {
+      if (!(numberValue($("sekUsd").value) > 0) && Number(state.rates.USD) > 0) $("sekUsd").value = Number(state.rates.USD).toFixed(6);
+      if (!(numberValue($("sekEur").value) > 0) && Number(state.rates.EUR) > 0) $("sekEur").value = Number(state.rates.EUR).toFixed(6);
+      if (!(numberValue($("lclSekUsd").value) > 0) && Number(state.rates.USD) > 0) $("lclSekUsd").value = Number(state.rates.USD).toFixed(6);
+      if (!(numberValue($("lclSekEur").value) > 0) && Number(state.rates.EUR) > 0) $("lclSekEur").value = Number(state.rates.EUR).toFixed(6);
+    }
+
+    async function ensureRoeBeforeGenerate(mode = state.activeMode) {
+      const ids = mode === "lcl" ? ["lclSekUsd", "lclSekEur"] : ["sekUsd", "sekEur"];
+      const valid = () => ids.every((id) => numberValue($(id).value) > 0);
+      ensureRoeFields();
+      if (valid()) return true;
+      await fetchRates();
+      ensureRoeFields();
+      return valid();
     }
 
     function formattedValidTo() {
@@ -2025,7 +2113,7 @@
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.2.1
+; Generated by BLU Auto Quote → AutoHotkey v8.2.2
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
 ; Selling currency: ${$("targetCurrency").value}
@@ -2449,6 +2537,7 @@ RestoreClipboard(*) {
         costs: cloneLclCosts(),
         extraCharges: [],
         directNonStackRemark: false,
+        imoDescription: "",
         generatedScript: "",
         ...overrides
       };
@@ -3064,7 +3153,7 @@ RestoreClipboard(*) {
       const collectionCode = fob ? "" : upper(textValue("lclCollectionCode"));
       const incotermLocation = fob ? "GOTHENBURG" : collection;
       const podName = normalisedLocationName(textValue("lclPodName"));
-      const cargoDescription = quoteText("lcl.cargoDescription", { STACKABLE: $("lclStackable").value });
+      const cargoDescription = lclCargoDescription();
       const basisText = quoteText("common.detailBasis", { SUPPLIER: supplier.display, INCOTERM: incoterm });
       const volumeText = formatBluDecimal($("lclVolume").value);
       const stackable = $("lclStackable").value === "STACKABLE";
@@ -3073,7 +3162,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.1
+; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.2
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -3584,7 +3673,10 @@ RestoreClipboard(*) {
         $("lclQuotePaste").focus();
       });
       $("lclRefreshRates").addEventListener("click", fetchRates);
-      $("lclGenerateScript").addEventListener("click", generateLclScript);
+      $("lclGenerateScript").addEventListener("click", async () => {
+        if (await ensureRoeBeforeGenerate("lcl")) generateLclScript();
+        else alert("Could not load ROE automatically. Use Refresh ROE or enter the rates manually.");
+      });
       $("lclImportScript").addEventListener("click", () => $("lclImportScriptFile").click());
       $("lclImportScriptFile").addEventListener("change", async () => {
         const file = $("lclImportScriptFile").files?.[0];
@@ -3760,7 +3852,10 @@ RestoreClipboard(*) {
         }
       });
       $("refreshRates").addEventListener("click", fetchRates);
-      $("generateScript").addEventListener("click", generateScript);
+      $("generateScript").addEventListener("click", async () => {
+        if (await ensureRoeBeforeGenerate("fcl")) generateScript();
+        else alert("Could not load ROE automatically. Use Refresh ROE or enter the rates manually.");
+      });
       $("importScript").addEventListener("click", () => $("importScriptFile").click());
       $("importScriptFile").addEventListener("change", async () => {
         const file = $("importScriptFile").files?.[0];
@@ -3791,7 +3886,7 @@ RestoreClipboard(*) {
     }
 
     // ==============================
-    // v8.2.1 FCL route/detail overrides
+    // v8.2.2 FCL route/detail overrides
     // ==============================
 
     function makeStableId(prefix = "id") {
@@ -5007,7 +5102,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.2.1
+; Generated by BLU Auto Quote → AutoHotkey v8.2.2
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
 ; Selling currency: ${$("targetCurrency").value}
@@ -5544,7 +5639,10 @@ RestoreClipboard(*) {
         catch (error) { setLocStatus(error instanceof Error ? error.message : "Could not read LocCodes.xlsx", true); }
       });
       $("refreshRates").addEventListener("click", fetchRates);
-      $("generateScript").addEventListener("click", generateScript);
+      $("generateScript").addEventListener("click", async () => {
+        if (await ensureRoeBeforeGenerate("fcl")) generateScript();
+        else alert("Could not load ROE automatically. Use Refresh ROE or enter the rates manually.");
+      });
       $("importScript").addEventListener("click", () => $("importScriptFile").click());
       $("importScriptFile").addEventListener("change", async () => {
         const file = $("importScriptFile").files?.[0];
@@ -5574,7 +5672,7 @@ RestoreClipboard(*) {
     }
 
     // =====================================
-    // v8.2.1 Nordicon / LCL compatibility work
+    // v8.2.2 Nordicon / LCL compatibility work
     // =====================================
 
     function parseNordiconCharge(lines, pattern) {
@@ -5732,9 +5830,33 @@ RestoreClipboard(*) {
       return "";
     }
 
+    function workbookImoDescription(rows) {
+      for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+        const row = rows[rowIndex] || [];
+        const imoColumn = row.findIndex((value) => /^IMO$/i.test(String(value ?? "").trim()));
+        if (imoColumn < 0) continue;
+        const values = [];
+        for (let next = rowIndex + 1; next < Math.min(rows.length, rowIndex + 12); next += 1) {
+          const nextRow = rows[next] || [];
+          if (nextRow.some((value) => /No\. of packages|Total emissions|DESCRIPTION|UNITS|CURR\.|RATE|MIN\.|TOTAL/i.test(String(value ?? "")))) break;
+          const value = String(nextRow[imoColumn] ?? "").replace(/\s+/g, " ").trim();
+          if (value && /\b(?:CLASS|UN\s*\d{4}|PG\s*\d)\b/i.test(value) && !values.some((entry) => entry.toUpperCase() === value.toUpperCase())) values.push(value);
+        }
+        if (values.length) return values.join(" / ");
+      }
+      return "";
+    }
+
+    function lclCargoDescription() {
+      const base = quoteText("lcl.cargoDescription", { STACKABLE: $("lclStackable").value });
+      const imo = String(state.lcl.imoDescription || "").trim();
+      return imo ? base.replace(/GENERAL CARGO/i, imo) : base;
+    }
+
     async function parseNordiconWorkbook(arrayBuffer) {
       const rows = await parseWorkbookRows(arrayBuffer);
       const directNonStackRemark = rows.some((row) => (row || []).some((value) => /Based on DIRECT routing;\s*NON-STACK is accepted without extra charges\./i.test(String(value ?? ""))));
+      const imoDescription = workbookImoDescription(rows);
       const validCell = firstWorkbookCell(rows, /RATES VALID UNTIL:/i);
       const validTo = /RATES VALID UNTIL:\s*(\d{4}-\d{2}-\d{2})/i.exec(validCell)?.[1] || "";
       const pickupRaw = workbookValueBelow(rows, /^Pick up location$/i).replace(/,+\s*$/, "").trim();
@@ -5796,7 +5918,7 @@ RestoreClipboard(*) {
       if (known.war) costs.war = { ...costs.war, ...known.war };
       const extraCharges = parsedRows.filter((row) => !knownNordiconDescription(row.description)).map((row) => ({ name: row.description, total: row.total, currency: row.currency }));
       if (!pod || !pallets || !weight || !volume) throw new Error("The Nordicon workbook is missing route or cargo data.");
-      return { validTo, pod, collection, pallets, weight, volume, transitDays, costs, includeWar: Boolean(known.war), extraCharges, directNonStackRemark, source: "Nordicon workbook" };
+      return { validTo, pod, collection, pallets, weight, volume, transitDays, costs, includeWar: Boolean(known.war), extraCharges, directNonStackRemark, imoDescription, source: "Nordicon workbook" };
     }
 
     function renderLclExtraCosts() {
@@ -5837,6 +5959,7 @@ RestoreClipboard(*) {
       state.lcl.quoteLabel = parsed.source || "Nordicon quote";
       state.lcl.extraCharges = (parsed.extraCharges || []).map((charge) => ({ ...charge, name: translateNordiconChargeName(charge.name) }));
       state.lcl.directNonStackRemark = Boolean(parsed.directNonStackRemark);
+      state.lcl.imoDescription = String(parsed.imoDescription || "").trim();
       $("lclSupplier").value = "NORDICON";
       if (parsed.validTo) $("lclValidTo").value = parsed.validTo;
       $("lclPallets").value = parsed.pallets;
@@ -5860,7 +5983,7 @@ RestoreClipboard(*) {
       $("lclQuoteLoaded").classList.remove("hidden");
       $("lclQuoteLoadedTitle").textContent = parsed.source || "Nordicon quote";
       const collectionLabel = parsed.collection ? upper(parsed.collection) : "COLLECTION CITY REQUIRED";
-      $("lclQuoteLoadedInfo").textContent = `${collectionLabel} → ${upper(parsed.pod)} · ${parsed.pallets} pallets · ${parsed.weight} kg · ${parsed.volume} cbm`;
+      $("lclQuoteLoadedInfo").textContent = `${collectionLabel} → ${upper(parsed.pod)} · ${parsed.pallets} pallets · ${parsed.weight} kg · ${parsed.volume} cbm${state.lcl.imoDescription ? ` · IMO: ${state.lcl.imoDescription}` : ""}`;
       $("lclParseMessage").textContent = parsed.collection ? "Quote data extracted successfully." : "Quote loaded. The workbook only contained a postcode, so select the collection city manually.";
       $("lclParseMessage").classList.remove("status-error");
       updateLclCalculation();
@@ -5987,7 +6110,8 @@ RestoreClipboard(*) {
         transitDays: $("lclTransitDays").value, profitSek: $("lclProfitSek").value, sekUsd: $("lclSekUsd").value, sekEur: $("lclSekEur").value,
         roeDate: state.rates.date || "", includeWar: $("lclIncludeWar").checked, costs: readLclCosts(), quoteLoaded: state.lcl.quoteLoaded,
         extraCharges: (state.lcl.extraCharges || []).map((charge) => ({ ...charge, name: translateNordiconChargeName(charge.name) })),
-        directNonStackRemark: Boolean(state.lcl.directNonStackRemark)
+        directNonStackRemark: Boolean(state.lcl.directNonStackRemark),
+        imoDescription: String(state.lcl.imoDescription || "")
       };
     }
 
@@ -6014,6 +6138,7 @@ RestoreClipboard(*) {
       state.lcl.quoteLoaded = Boolean(data.quoteLoaded);
       state.lcl.extraCharges = Array.isArray(data.extraCharges) ? data.extraCharges.map((charge) => ({ ...charge, name: translateNordiconChargeName(charge.name) })) : [];
       state.lcl.directNonStackRemark = Boolean(data.directNonStackRemark);
+      state.lcl.imoDescription = String(data.imoDescription || "");
       renderLclExtraCosts();
       if (state.lcl.quoteLoaded) {
         $("lclPasteWrap").classList.add("hidden");
@@ -6077,7 +6202,10 @@ RestoreClipboard(*) {
         $("lclQuotePaste").focus();
       });
       $("lclRefreshRates").addEventListener("click", fetchRates);
-      $("lclGenerateScript").addEventListener("click", generateLclScript);
+      $("lclGenerateScript").addEventListener("click", async () => {
+        if (await ensureRoeBeforeGenerate("lcl")) generateLclScript();
+        else alert("Could not load ROE automatically. Use Refresh ROE or enter the rates manually.");
+      });
       $("lclImportScript").addEventListener("click", () => $("lclImportScriptFile").click());
       $("lclImportScriptFile").addEventListener("change", async () => {
         const file = $("lclImportScriptFile").files?.[0];
@@ -6119,6 +6247,7 @@ RestoreClipboard(*) {
     toggleIncotermFields(false);
     updateLclCalculation();
     activateMode("fcl");
+    loadCachedRoe();
     fetchRates();
     loadQuoteTexts();
     loadLocCodes();
