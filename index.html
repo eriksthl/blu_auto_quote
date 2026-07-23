@@ -1714,6 +1714,14 @@
       } catch (error) {
         errors.push(`v2: ${error.message}`);
       }
+      try {
+        const payload = await fetchJsonWithTimeout("https://api.frankfurter.app/latest?from=SEK&to=USD,EUR");
+        const rates = { USD: Number(payload?.rates?.USD), EUR: Number(payload?.rates?.EUR), date: payload?.date || "latest" };
+        if (!validRoePair(rates)) throw new Error("fallback response is missing USD or EUR");
+        return rates;
+      } catch (error) {
+        errors.push(`fallback: ${error.message}`);
+      }
       throw new Error(errors.join(" | "));
     }
 
@@ -5848,9 +5856,11 @@ RestoreClipboard(*) {
     }
 
     function lclCargoDescription() {
-      const base = quoteText("lcl.cargoDescription", { STACKABLE: $("lclStackable").value });
+      const stackable = $("lclStackable").value;
+      const base = quoteText("lcl.cargoDescription", { STACKABLE: stackable });
       const imo = String(state.lcl.imoDescription || "").trim();
-      return imo ? base.replace(/GENERAL CARGO/i, imo) : base;
+      if (!imo) return base;
+      return /GENERAL CARGO/i.test(base) ? base.replace(/GENERAL CARGO/i, imo) : `${imo} - ${stackable}`;
     }
 
     async function parseNordiconWorkbook(arrayBuffer) {
