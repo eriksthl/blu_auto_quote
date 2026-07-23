@@ -62,7 +62,7 @@
       "profitShare": "Our profit share is already INCLUDED in this quotation.",
       "loadingTime": "*) Inland haulage to shippers premises INCL 30 MINUTES FREE LOADING TIME.",
       "additionalHsCodes": "Additional HS codes to be charged at 4 USD per code.",
-      "directNonStack": "Based on DIRECT routing; NON-STACK is accepted without extra charges."
+      "directNonStackAccepted": "Based on DIRECT routing; NON-STACK is accepted without extra charges."
     },
     "charges": {
       "inlandHaulage": "INLAND HAULAGE ({{COLLECTION}})*",
@@ -72,7 +72,8 @@
       "customsCheckMrn": "CUSTOMS CHECK MRN"
     },
     "subjectFob": "LCL - GOTHENBURG - {{POD}} - {{STACKABLE}}",
-    "excludingFcaCustomExport": "CUSTOM EXPORT DECLARATION (OPTIONAL ADDL. AT 100 USD)",
-    "excludingFobOriginCharges": "ORIGIN CHARGES"
+    "fcaCustomExportExcluding": "CUSTOM EXPORT DECLARATION (OPTIONAL ADDL. AT 100 USD)",
+    "fobOriginChargesExcluding": "ORIGIN CHARGES",
+    "cargoDescriptionImo": "{{IMO}} - {{STACKABLE}}"
   }
 }
