@@ -1,6 +1,6 @@
 {
   "_instructions": "Editable quote wording for BLU Auto Quote. Keep this file in the same folder as index.html and LocCodes.xlsx. The file is JSON saved as plain text. Placeholders use {{UPPERCASE_NAME}} syntax and must not be renamed unless index.html is updated too.",
-  "version": "8.2.2",
+  "version": "8.2.0",
   "common": {
     "project": "949",
     "internalComment": "Agent Ocean Export",
@@ -61,8 +61,7 @@
       "carrier": "Rates based on shipment via {{SUPPLIER}}.",
       "profitShare": "Our profit share is already INCLUDED in this quotation.",
       "loadingTime": "*) Inland haulage to shippers premises INCL 30 MINUTES FREE LOADING TIME.",
-      "additionalHsCodes": "Additional HS codes to be charged at 4 USD per code.",
-      "directNonStack": "Based on DIRECT routing; NON-STACK is accepted without extra charges."
+      "additionalHsCodes": "Additional HS codes to be charged at 4 USD per code."
     },
     "charges": {
       "inlandHaulage": "INLAND HAULAGE ({{COLLECTION}})*",
@@ -70,9 +69,6 @@
       "fuelContingency": "FUEL CONTINGENCY SURCHARGE",
       "solasFee": "SOLAS FEE",
       "customsCheckMrn": "CUSTOMS CHECK MRN"
-    },
-    "subjectFob": "LCL - GOTHENBURG - {{POD}} - {{STACKABLE}}",
-    "excludingFcaCustomExport": "CUSTOM EXPORT DECLARATION (OPTIONAL ADDL. AT 100 USD)",
-    "excludingFobOriginCharges": "ORIGIN CHARGES"
+    }
   }
 }
