@@ -1,0 +1,74 @@
+{
+  "_instructions": "Editable quote wording for BLU Auto Quote. Keep this file in the same folder as index.html and LocCodes.xlsx. The file is JSON saved as plain text. Placeholders use {{UPPERCASE_NAME}} syntax and must not be renamed unless index.html is updated too.",
+  "version": "8.2.0",
+  "common": {
+    "project": "949",
+    "internalComment": "Agent Ocean Export",
+    "clientCode": "fhb",
+    "coverLetter": "Many thanks for your inquiry. We are pleased to offer the following",
+    "salutation": "Dear {{ATTENTION}},",
+    "detailBasis": "Based on {{SUPPLIER}} ({{INCOTERM}})",
+    "subjectTo": "Space/equipment and any charge imposed by the line VATOS.\n\nAny additional requirement not previously notified could derive into this quote being reviewed.\n\nShipping line approval of commodity.\n\nAll quotes & tenders are subject to our Middle East Conflict Disclaimer, available on our website.\n\nAny Emergency Conflict/War Risk Surcharges, additional premiums, Route Changes and/or End of Voyage costs, whether existing, increased or newly imposed prior to or during the transport/voyage.",
+    "grossWeight": "20000",
+    "transitTime": "{{DAYS}} DAYS // PORT-PORT",
+    "transitTimeTba": "TBA DAYS // PORT-PORT"
+  },
+  "fcl": {
+    "subject": "FCL {{EQUIPMENT}} - {{ROUTE}}",
+    "cargoDescription": "GENERAL CARGO - NON HAZARDOUS",
+    "freeDays": {
+      "standard": "Standard free days",
+      "custom": "{{FREE_DAYS}} free days {{FREE_DAYS_TYPE}}"
+    },
+    "including": {
+      "customFreeDays": "{{FREE_DAYS}} free days {{FREE_DAYS_TYPE}} at POD.",
+      "reeferMonitoring": "0 DAYS REEFER MONITORING, ADDL. TO BE CHARGED AT 80 USD/DAY"
+    },
+    "excluding": {
+      "destinationCharges": "DESTINATION CHARGES",
+      "fcaCustomExport": "CUSTOM EXPORT DECLARATION (OPTIONAL ADDL. AT 100 USD)",
+      "fobOriginCharges": "ORIGIN CHARGES",
+      "reeferGenset": "GENSET (OPTIONAL ADDL. AT 375 USD)"
+    },
+    "remarks": {
+      "roe": "Rate of Exchange is subject to fluctuations, quoted amounts will be adjusted to the rate of exchange at time of shipping.",
+      "carrierFreeDays": "Rates based on shipment via {{CARRIER}} who offer {{FREE_DAYS}} at POD.",
+      "profitShare": "Our profit share is already INCLUDED in this quotation.",
+      "waiting": "Additional waiting time in port of {{POL}} and/or at Shipper's site in {{COLLECTION}} to be charged as per tariff from Truckers. Approx. USD 50 per initiated 0,5h.",
+      "shipperStuff": "Quotation based on that shipper stuff & lash cargo into container(s).",
+      "additionalHsCodes": "Additional HS codes to be charged at 4 USD per code."
+    },
+    "charges": {
+      "waitingIncluded": "{{HOURS}}H WAITING TIME INCLUDED, ADDITIONAL TIME TO BE CHARGED AT COST - APPROX. USD 50 PER 0,5H.",
+      "waitingNotIncluded": "WAITING TIME NOT INCLUDED, TO BE CHARGED AT COST - APPROX. USD 50 PER 0,5H.",
+      "precarriage": "PRECARRIAGE ({{COLLECTION}}), CHASSIS INCL. FUEL (VATOS - MONTHLY UPDATE)\n\n{{WAITING_TEXT}}",
+      "precarriageByEquipment": "PRECARRIAGE ({{QUANTITY}}X{{EQUIPMENT}}) - {{COLLECTION}}, CHASSIS INCL. FUEL (VATOS - MONTHLY UPDATE)\n\n{{WAITING_TEXT}}",
+      "pickup": "PICKUP ({{COLLECTION}})",
+      "stuffing": "STUFF/LASH/SHUNT",
+      "oceanFreight": "OCEAN FREIGHT",
+      "oceanFreightByEquipment": "OCEAN FREIGHT ({{QUANTITY}}X{{EQUIPMENT}})",
+      "originCharges": "ORIGIN CHARGES",
+      "originChargesByEquipment": "ORIGIN CHARGES ({{QUANTITY}}X{{EQUIPMENT}})",
+      "exportCustom": "CUSTOM EXPORT DECLARATION INCL. 3 HS CODES",
+      "reeferMonitoring": "REEFER MONITORING COSTS AT PORT (USD 80/DAY PER CONTAINER)"
+    }
+  },
+  "lcl": {
+    "subject": "LCL - {{COLLECTION}} - GOTHENBURG - {{POD}} - {{STACKABLE}}",
+    "cargoDescription": "GENERAL CARGO - {{STACKABLE}}",
+    "excluding": "DESTINATION CHARGES",
+    "remarks": {
+      "carrier": "Rates based on shipment via {{SUPPLIER}}.",
+      "profitShare": "Our profit share is already INCLUDED in this quotation.",
+      "loadingTime": "*) Inland haulage to shippers premises INCL 30 MINUTES FREE LOADING TIME.",
+      "additionalHsCodes": "Additional HS codes to be charged at 4 USD per code."
+    },
+    "charges": {
+      "inlandHaulage": "INLAND HAULAGE ({{COLLECTION}})*",
+      "oceanFreight": "OCEAN FREIGHT",
+      "fuelContingency": "FUEL CONTINGENCY SURCHARGE",
+      "solasFee": "SOLAS FEE",
+      "customsCheckMrn": "CUSTOMS CHECK MRN"
+    }
+  }
+}
