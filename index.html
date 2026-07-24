@@ -284,7 +284,7 @@
     }
 
 
-    /* Version 8.2.3 split workspace */
+    /* Version 8.3.0 split workspace */
     main { width: min(1180px, calc(100% - 24px)); }
     .file-state { display: grid; gap: 4px; min-width: 285px; }
     .file-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 26px; }
@@ -363,7 +363,7 @@
     }
 
 
-    /* Version 8.2.3 compact LCL workspace */
+    /* Version 8.3.0 compact LCL workspace */
     :root { --line: #999; --muted: #666; }
     #lclPane { max-width: none; margin: 0; }
     .lcl-workspace { display: grid; grid-template-columns: 370px minmax(0, 1fr); gap: 12px; align-items: start; }
@@ -397,7 +397,7 @@
     <header>
       <div>
         <h1>BLU Auto Quote</h1>
-        <div class="app-version">AHK Script Gen // Version 8.2.3</div>
+        <div class="app-version">AHK Script Gen // Version 8.3.0</div>
       </div>
       <div class="file-state">
         <div class="file-line"><span id="locStatus">Loading LocCodes.xlsx...</span><button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button></div>
@@ -736,7 +736,7 @@
         </div>
 
         <div class="equipment-option-row">
-          <label class="waiting-check"><input class="eq-input origin-toggle" data-key="includeOriginCharges" type="checkbox"> Origin charges</label>
+          <label class="waiting-check origin-option"><input class="eq-input origin-toggle" data-key="includeOriginCharges" type="checkbox"> Origin charges</label>
           <label class="waiting-check stuffing-field"><input class="eq-input stuff-toggle" data-key="includeStuff" type="checkbox"> Stuff / lash / shunt</label>
         </div>
 
@@ -786,14 +786,18 @@
       get originChargesDescription() { return quoteText("fcl.charges.originCharges"); },
       get grossWeight() { return quoteText("common.grossWeight"); },
       get exportCustomDescription() { return quoteText("fcl.charges.exportCustom"); },
-      clickDelay: 80,
-      fieldDelay: 120,
+      clickDelay: 100,
+      fieldDelay: 180,
       menuKeyDelay: 180,
-      menuEnterDelay: 900,
-      supplierEnterDelay: 250,
-      menuAfterDelay: 250,
-      rowDelay: 1100,
-      tabDelay: 900
+      menuEnterDelay: 1100,
+      supplierEnterDelay: 1200,
+      supplierKeyDelay: 90,
+      menuAfterDelay: 450,
+      rowDelay: 1600,
+      tabDelay: 1100,
+      chargeTypeDelay: 900,
+      chargeFieldDelay: 250,
+      chargeCompleteDelay: 450
     });
 
     const CARRIER_CONFIG = Object.freeze({
@@ -858,26 +862,15 @@
       lcl: newLclState()
     };
 
-    function newEquipment(overrides = {}) {
-      return {
-        quantity: 1,
-        type: "20'DV",
-        freightAmount: "",
-        freightCurrency: "USD",
-        precarriageAmount: "",
-        precarriageCurrency: "SEK",
-        includeOriginCharges: false,
-        originAmount: "",
-        originCurrency: "SEK",
-        ...overrides
-      };
-    }
+    
+    /* Legacy duplicate newEquipment removed in v8.3.0. */
+
 
     const $ = (id) => document.getElementById(id);
     const textValue = (id) => $(id).value.trim();
     const upper = (value) => String(value || "").trim().toUpperCase();
     const numberValue = (value) => Number(String(value).replace(",", "."));
-    const isFiniteNumber = (value) => Number.isFinite(numberValue(value));
+    const isFiniteNumber = (value) => String(value ?? "").trim() !== "" && Number.isFinite(numberValue(value));
     const round5 = (value) => Math.round(value / 5) * 5;
 
 
@@ -1205,57 +1198,25 @@
       return options;
     }
 
-    function applyCollectionSelection() {
-      const code = collectionCombo.value;
-      $("collectionCode").value = code;
-      $("collectionName").value = code ? (state.locations.get(code) ?? "") : collectionCombo.input.value.trim();
-      updateAllPreviews();
-    }
+    
+    /* Legacy duplicate applyCollectionSelection removed in v8.3.0. */
 
-    function collectionCityValue() {
-      return textValue("collectionName") || textValue("collectionCity");
-    }
 
-    function applyLocationSelection(kind) {
-      const combo = locationCombos[kind];
-      const code = combo.value;
-      $(`${kind}Code`).value = code;
-      $(`${kind}Name`).value = state.locations.get(code) ?? "";
-      updateAllPreviews();
-    }
+    
+    /* Legacy duplicate collectionCityValue removed in v8.3.0. */
 
-    function updateLocationOptions(kind, preferredCode) {
-      if (!state.locations.size) return;
-      const countryCombo = locationCombos[`${kind}Country`];
-      const locationCombo = locationCombos[kind];
-      const country = countryCombo.value;
-      const codes = [...state.locations.keys()].filter((code) => !country || countryCode(code) === country);
-      const current = preferredCode ?? locationCombo.value;
-      let preferred = codes.includes(current) ? current : "";
-      if (kind === "pol" && !preferred && codes.includes("SEGOT")) preferred = "SEGOT";
-      locationCombo.setOptions(locationOptions(codes), preferred);
-      applyLocationSelection(kind);
-    }
 
-    function initialiseLocationSelectors() {
-      const countries = new Set([...state.locations.keys()].map(countryCode).filter(Boolean));
-      locationCombos.polCountry.setOptions(countryOptions(countries), "SE");
-      locationCombos.podCountry.setOptions(countryOptions(countries), "");
-      for (const combo of Object.values(locationCombos)) combo.setDisabled(false);
-      updateLocationOptions("pol", "SEGOT");
-      updateLocationOptions("pod", "");
-      const swedishCodes = [...state.locations.keys()].filter((code) => countryCode(code) === "SE");
-      collectionCombo.setOptions(locationOptions(swedishCodes, false), $("collectionCode").value);
-      collectionCombo.setDisabled(false);
-      applyCollectionSelection();
+    
+    /* Legacy duplicate applyLocationSelection removed in v8.3.0. */
 
-      lclCollectionCombo.setOptions(locationOptions(swedishCodes, false), $("lclCollectionCode").value);
-      lclCollectionCombo.setDisabled(false);
-      applyLclCollectionSelection();
-      lclPodCombo.setOptions(locationOptions([...state.locations.keys()]), $("lclPodCode").value);
-      lclPodCombo.setDisabled(false);
-      applyLclPodSelection();
-    }
+
+    
+    /* Legacy duplicate updateLocationOptions removed in v8.3.0. */
+
+
+    
+    /* Legacy duplicate initialiseLocationSelectors removed in v8.3.0. */
+
 
     function setLocStatus(text, error = false) {
       const status = $("locStatus");
@@ -1435,10 +1396,9 @@
       $("validTo").value = `${year}-${month}-${day}`;
     }
 
-    function equipmentSearchValue(type) {
-      if (type === "40'HC") return "40' high";
-      return type.toLowerCase();
-    }
+    
+    /* Legacy duplicate equipmentSearchValue removed in v8.3.0. */
+
 
     function formatMoney(value, currency, decimals = 0) {
       if (!Number.isFinite(value)) return "—";
@@ -1543,101 +1503,21 @@
       };
     }
 
-    function buildSubject() {
-      const collection = upper(collectionCityValue()) || "COLLECTION";
-      const pol = upper(textValue("polName")) || "POL";
-      const pod = upper(textValue("podName")) || "POD";
-      const equipment = state.equipment.map((eq) => `${eq.quantity || "?"}X${eq.type}`).join(" / ");
-      return `FCL ${equipment} - ${collection} - ${pol} - ${pod}`;
-    }
+    
+    /* Legacy duplicate buildSubject removed in v8.3.0. */
 
-    function renderEquipment() {
-      const list = $("equipmentList");
-      list.innerHTML = "";
 
-      state.equipment.forEach((eq, index) => {
-        const fragment = $("equipmentTemplate").content.cloneNode(true);
-        const card = fragment.querySelector(".equipment-card");
-        card.dataset.index = index;
-        card.querySelector(".equipment-title strong").textContent = `Equipment ${index + 1}`;
-        card.querySelector(".equipment-title span").textContent = `→ Detail ${index + 1} → ${eq.includeOriginCharges ? 7 : 6} charge-rader`;
+    
+    /* Legacy duplicate renderEquipment removed in v8.3.0. */
 
-        const originFields = card.querySelector(".origin-fields");
-        const syncOriginVisibility = () => originFields.classList.toggle("hidden", !state.equipment[index].includeOriginCharges);
 
-        card.querySelectorAll(".eq-input").forEach((input) => {
-          const key = input.dataset.key;
-          if (input.type === "checkbox") input.checked = Boolean(eq[key]);
-          else input.value = eq[key];
-          const sync = () => {
-            state.equipment[index][key] = input.type === "checkbox" ? input.checked : input.value;
-            if (key === "includeOriginCharges") {
-              syncOriginVisibility();
-              card.querySelector(".equipment-title span").textContent = `→ Detail ${index + 1} → ${input.checked ? 7 : 6} charge-rader`;
-            }
-            updateAllPreviews();
-          };
-          input.addEventListener("input", sync);
-          input.addEventListener("change", sync);
-        });
-        syncOriginVisibility();
+    
+    /* Legacy duplicate previewRows removed in v8.3.0. */
 
-        card.querySelector(".duplicate-equipment").addEventListener("click", () => {
-          state.equipment.splice(index + 1, 0, newEquipment({ ...state.equipment[index] }));
-          renderEquipment();
-          updateAllPreviews();
-        });
 
-        card.querySelector(".remove-equipment").addEventListener("click", () => {
-          if (state.equipment.length === 1) return;
-          state.equipment.splice(index, 1);
-          renderEquipment();
-          updateAllPreviews();
-        });
+    
+    /* Legacy duplicate updateAllPreviews removed in v8.3.0. */
 
-        card.querySelector(".remove-equipment").disabled = state.equipment.length === 1;
-        list.appendChild(fragment);
-      });
-      updateAllPreviews();
-    }
-
-    function previewRows(eq, calc) {
-      const target = calc.target;
-      const q = calc.quantity;
-      const rows = [
-        ["Precarriage", calc.precarriageCost * q, calc.precarriageSelling, q, (calc.precarriageSelling - calc.precarriageCost) * q],
-        ["Freight", calc.freightCost * q, calc.freightSelling, q, (calc.freightSelling - calc.freightCost) * q]
-      ];
-      if (eq.includeOriginCharges) {
-        rows.push(["Origin charges", calc.originCost * q, calc.originSelling, q, (calc.originSelling - calc.originCost) * q]);
-      }
-      rows.push(
-        ["Liner fee", calc.linerCost, 100, 1, 100 - calc.linerCost],
-        ["Custom export", calc.exportCustomCost, 100, 1, 100 - calc.exportCustomCost],
-        ["Forwarding fee", 0, 100, 1, 100],
-        ["Profit", 0, 50, q, 50 * q]
-      );
-      return `
-        <table>
-          <thead><tr><th>Charge</th><th>Buying total i ${target}</th><th>Selling / unit</th><th>Qty</th><th>Profit total</th></tr></thead>
-          <tbody>${rows.map((r) => `<tr><td>${r[0]}</td><td>${formatMoney(r[1], target, 2)}</td><td>${formatMoney(r[2], target)}</td><td>${r[3]}</td><td>${formatMoney(r[4], target, 2)}</td></tr>`).join("")}</tbody>
-        </table>
-        <div class="profit-line"><span>Beräknad profit för detail</span><span>${formatMoney(calc.actualProfit, target, 2)} <small>(${formatMoney(convert(calc.actualProfit, target, "SEK"), "SEK", 0)})</small></span></div>`;
-    }
-
-    function updateAllPreviews() {
-      document.querySelectorAll(".equipment-card").forEach((card) => {
-        const index = Number(card.dataset.index);
-        const calc = calculateDetail(state.equipment[index]);
-        const box = card.querySelector(".preview-box");
-        if (!calc) {
-          box.innerHTML = `<div class="small-note" style="padding:12px">Fyll i kostnaderna och invänta ROE för att se beräkningen.</div>`;
-        } else {
-          box.innerHTML = previewRows(state.equipment[index], calc);
-        }
-      });
-      updateSummary();
-    }
 
     function updateSummary() {
       const subject = state.quoteTexts ? buildSubject() : "FCL";
@@ -1816,77 +1696,21 @@
       return `${day}.${month}.${year.slice(-2)}`;
     }
 
-    function freeDaysText() {
-      if ($("freeDaysMode").value === "standard") return quoteText("fcl.freeDays.standard");
-      return quoteText("fcl.freeDays.custom", { FREE_DAYS: $("freeDays").value, FREE_DAYS_TYPE: $("freeDaysType").value });
-    }
+    
+    /* Legacy duplicate freeDaysText removed in v8.3.0. */
 
-    function includingText() {
-      if ($("freeDaysMode").value !== "custom") return "";
-      return quoteText("fcl.including.customFreeDays", { FREE_DAYS: $("freeDays").value, FREE_DAYS_TYPE: $("freeDaysType").value });
-    }
 
-    function remarksText() {
-      const carrier = upper(textValue("carrier"));
-      const pol = upper(textValue("polName"));
-      const collection = upper(collectionCityValue());
-      return [
-        quoteText("fcl.remarks.roe"),
-        quoteText("fcl.remarks.carrierFreeDays", { CARRIER: carrier, FREE_DAYS: freeDaysText() }),
-        quoteText("fcl.remarks.profitShare"),
-        quoteText("fcl.remarks.waiting", { POL: pol, COLLECTION: collection }),
-        quoteText("fcl.remarks.shipperStuff")
-      ].join("\n\n");
-    }
+    
+    /* Legacy duplicate includingText removed in v8.3.0. */
 
-    function validateForm() {
-      const errors = [];
-      const warnings = [];
-      document.querySelectorAll(".invalid").forEach((el) => el.classList.remove("invalid"));
 
-      document.querySelectorAll("[data-required]").forEach((input) => {
-        if (!String(input.value).trim()) {
-          input.classList.add("invalid");
-          errors.push(`${input.closest("label")?.querySelector("span")?.textContent.trim() || input.id} saknas.`);
-        }
-      });
+    
+    /* Legacy duplicate remarksText removed in v8.3.0. */
 
-      if (!(numberValue($("sekUsd").value) > 0)) { $("sekUsd").classList.add("invalid"); errors.push("ROE SEK→USD saknas eller är ogiltig."); }
-      if (!(numberValue($("sekEur").value) > 0)) { $("sekEur").classList.add("invalid"); errors.push("ROE SEK→EUR saknas eller är ogiltig."); }
-      if (!(numberValue($("profitSek").value) >= 0)) { $("profitSek").classList.add("invalid"); errors.push("Önskad profit måste vara 0 eller högre."); }
-      if ($("freeDaysMode").value === "custom" && !(numberValue($("freeDays").value) > 0)) {
-        $("freeDays").classList.add("invalid"); errors.push("Antal free days måste anges.");
-      }
-      if ($("includeWaitingTime").checked && !(numberValue($("waitingHours").value) > 0)) {
-        $("waitingHours").classList.add("invalid"); errors.push("Antal inkluderade väntetimmar måste anges.");
-      }
 
-      if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(textValue("polCode"))) {
-        locationCombos.pol.input.classList.add("invalid"); errors.push("Select a valid POL.");
-      }
-      if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(textValue("podCode"))) {
-        locationCombos.pod.input.classList.add("invalid"); errors.push("Select a valid POD.");
-      }
+    
+    /* Legacy duplicate validateForm removed in v8.3.0. */
 
-      state.equipment.forEach((eq, index) => {
-        const prefix = `Equipment ${index + 1}`;
-        if (!(numberValue(eq.quantity) >= 1) || !Number.isInteger(numberValue(eq.quantity))) errors.push(`${prefix}: quantity måste vara ett heltal minst 1.`);
-        [
-          ["freight buying", eq.freightAmount],
-          ["precarriage buying", eq.precarriageAmount],
-          ...(eq.includeOriginCharges ? [["origin charges buying", eq.originAmount]] : [])
-        ].forEach(([label, value]) => {
-          if (!isFiniteNumber(value) || numberValue(value) < 0) errors.push(`${prefix}: ${label} saknas eller är ogiltig.`);
-        });
-        const calc = calculateDetail(eq);
-        if (calc?.negativeSelling) warnings.push(`${prefix}: beräkningen ger negativ selling rate på freight eller precarriage.`);
-        if (calc && Math.abs(convert(calc.actualProfit, calc.target, "SEK") - numberValue($("profitSek").value)) > 250) {
-          warnings.push(`${prefix}: avrundningen till närmaste 5-tal ger mer än 250 SEK avvikelse från önskad profit.`);
-        }
-      });
-
-      return { errors: [...new Set(errors)], warnings: [...new Set(warnings)] };
-    }
 
     function ahkString(value) {
       return `"${String(value ?? "")
@@ -1899,106 +1723,13 @@
       return `Map(${entries.map(([key, value]) => `${ahkString(key)}, ${typeof value === "number" ? value : ahkString(value)}`).join(", ")})`;
     }
 
-    function createChargeMaps(eq, calc) {
-      const target = $("targetCurrency").value;
-      const collection = upper(collectionCityValue());
-      const waitingText = $("includeWaitingTime").checked
-        ? quoteText("fcl.charges.waitingIncluded", { HOURS: formatPlainNumber(numberValue($("waitingHours").value)) })
-        : quoteText("fcl.charges.waitingNotIncluded");
-      const precDescription = quoteText("fcl.charges.precarriage", { COLLECTION: collection, WAITING_TEXT: waitingText });
-      const q = calc.quantity;
-      const consignment = "CONSIGNMENT";
-      const carrier = carrierConfig();
-      const trucker = precarriageConfig();
-      const agent = agentConfig();
-      const carrierSupplier = agent ?? carrier;
-      const precarriageSupplier = agent ?? trucker;
-      const charges = [
-        {
-          type: "precarriage", description: precDescription,
-          buyRate: formatPlainNumber(numberValue(eq.precarriageAmount) * q), buyCurrency: eq.precarriageCurrency,
-          supplier: precarriageSupplier.supplier, supplierArrow: precarriageSupplier.supplierArrow,
-          sellingRate: formatPlainNumber(calc.precarriageSelling), sellingCurrency: target, quantity: String(q), quantityDescription: eq.type
-        },
-        {
-          type: "freight", description: FIXED.freightDescription,
-          buyRate: formatPlainNumber(numberValue(eq.freightAmount) * q), buyCurrency: eq.freightCurrency,
-          supplier: carrierSupplier.supplier, supplierArrow: carrierSupplier.supplierArrow,
-          sellingRate: formatPlainNumber(calc.freightSelling), sellingCurrency: target, quantity: String(q), quantityDescription: eq.type
-        }
-      ];
+    
+    /* Legacy duplicate createChargeMaps removed in v8.3.0. */
 
-      if (eq.includeOriginCharges) {
-        charges.push({
-          type: "freight", description: FIXED.originChargesDescription,
-          buyRate: formatPlainNumber(numberValue(eq.originAmount) * q), buyCurrency: eq.originCurrency,
-          supplier: carrierSupplier.supplier, supplierArrow: carrierSupplier.supplierArrow,
-          sellingRate: formatPlainNumber(calc.originSelling), sellingCurrency: target, quantity: String(q), quantityDescription: eq.type
-        });
-      }
 
-      charges.push(
-        {
-          type: "liner fee", description: "",
-          buyRate: formatPlainNumber(carrier.linerAmount), buyCurrency: carrier.linerCurrency,
-          supplier: carrierSupplier.supplier, supplierArrow: carrierSupplier.supplierArrow,
-          sellingRate: "100", sellingCurrency: target, quantity: "1", quantityDescription: consignment
-        },
-        {
-          type: "custom export", description: FIXED.exportCustomDescription,
-          buyRate: agent ? formatPlainNumber(agent.exportCustomAmount) : "",
-          buyCurrency: agent ? agent.exportCustomCurrency : "",
-          supplier: agent ? agent.supplier : "", supplierArrow: agent ? agent.supplierArrow : 0,
-          sellingRate: "100", sellingCurrency: target, quantity: "1", quantityDescription: consignment
-        },
-        {
-          type: "forwarding fee", description: "",
-          buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
-          sellingRate: "100", sellingCurrency: target, quantity: "1", quantityDescription: consignment
-        },
-        {
-          type: "profit", description: "",
-          buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
-          sellingRate: "50", sellingCurrency: target, quantity: String(q), quantityDescription: eq.type
-        }
-      );
-      return charges;
-    }
+    
+    /* Legacy duplicate exportFormData removed in v8.3.0. */
 
-    function exportFormData() {
-      return {
-        version: 1,
-        clientName: textValue("clientName"),
-        attentionTo: textValue("attentionTo"),
-        salesOperator: textValue("salesOperator"),
-        validTo: $("validTo").value,
-        paymentDays: $("paymentDays").value,
-        incoterm: $("incoterm").value,
-        carrier: $("carrier").value,
-        useAgent: $("useAgent").checked,
-        agent: $("agent").value,
-        collectionCity: $("collectionCity").value.trim(),
-        collectionName: textValue("collectionName"),
-        collectionCode: upper(textValue("collectionCode")),
-        precarriageSupplier: $("precarriageSupplier").value,
-        transitDays: $("transitDays").value,
-        includeWaitingTime: $("includeWaitingTime").checked,
-        waitingHours: $("waitingHours").value,
-        polName: textValue("polName"),
-        polCode: upper(textValue("polCode")),
-        podName: textValue("podName"),
-        podCode: upper(textValue("podCode")),
-        freeDaysMode: $("freeDaysMode").value,
-        freeDays: $("freeDays").value,
-        freeDaysType: $("freeDaysType").value,
-        targetCurrency: $("targetCurrency").value,
-        profitSek: $("profitSek").value,
-        sekUsd: $("sekUsd").value,
-        sekEur: $("sekEur").value,
-        roeDate: state.rates.date || "",
-        equipment: state.equipment.map((eq) => ({ ...eq }))
-      };
-    }
 
     function encodeBase64Utf8(value) {
       const bytes = new TextEncoder().encode(String(value));
@@ -2021,41 +1752,9 @@
       return `; BLUQUOTE_DATA_V1_BEGIN\n${chunks.map((chunk) => `; BLUQUOTE_DATA: ${chunk}`).join("\n")}\n; BLUQUOTE_DATA_V1_END`;
     }
 
-    function applyImportedLocations(data) {
-      if (!state.locations.size) {
-        state.pendingImport = data;
-        $("collectionCity").value = data.collectionCity || data.collectionName || "";
-        $("collectionName").value = data.collectionName || data.collectionCity || "";
-        $("collectionCode").value = data.collectionCode || "";
-        $("polName").value = data.polName || "";
-        $("polCode").value = data.polCode || "";
-        $("podName").value = data.podName || "";
-        $("podCode").value = data.podCode || "";
-        return;
-      }
+    
+    /* Legacy duplicate applyImportedLocations removed in v8.3.0. */
 
-      const countries = new Set([...state.locations.keys()].map(countryCode).filter(Boolean));
-      const polCode = upper(data.polCode);
-      const podCode = upper(data.podCode);
-
-      locationCombos.polCountry.setOptions(countryOptions(countries), countryCode(polCode));
-      updateLocationOptions("pol", polCode);
-      locationCombos.podCountry.setOptions(countryOptions(countries), countryCode(podCode));
-      updateLocationOptions("pod", podCode);
-
-      const swedishCodes = [...state.locations.keys()].filter((code) => countryCode(code) === "SE");
-      const collectionCode = upper(data.collectionCode);
-      collectionCombo.setOptions(locationOptions(swedishCodes, false), collectionCode);
-      if (collectionCode && collectionCombo.selectedOption()) {
-        applyCollectionSelection();
-      } else {
-        collectionCombo.value = "";
-        collectionCombo.input.value = data.collectionCity || data.collectionName || "";
-        $("collectionName").value = data.collectionName || data.collectionCity || "";
-        $("collectionCode").value = "";
-      }
-      state.pendingImport = null;
-    }
 
     function setSelectValue(id, value, fallback) {
       const select = $(id);
@@ -2063,48 +1762,9 @@
       select.value = [...select.options].some((option) => option.value === wanted) ? wanted : fallback;
     }
 
-    function applyImportedData(data) {
-      if (!data || Number(data.version) !== 1) throw new Error("Unsupported BLU quote data version.");
+    
+    /* Legacy duplicate applyImportedData removed in v8.3.0. */
 
-      $("clientName").value = data.clientName || "";
-      $("attentionTo").value = data.attentionTo || "";
-      $("salesOperator").value = data.salesOperator || "Erik Stahl";
-      $("validTo").value = data.validTo || "";
-      $("paymentDays").value = data.paymentDays || "30";
-      setSelectValue("incoterm", data.incoterm, "EXW");
-      setSelectValue("carrier", data.carrier, "MSC");
-      $("useAgent").checked = Boolean(data.useAgent);
-      setSelectValue("agent", data.agent, "CHS");
-      setSelectValue("precarriageSupplier", data.precarriageSupplier, "DANIA");
-      $("transitDays").value = data.transitDays || "";
-      $("includeWaitingTime").checked = Boolean(data.includeWaitingTime);
-      $("waitingHours").value = data.waitingHours || "1";
-      setSelectValue("freeDaysMode", data.freeDaysMode, "standard");
-      $("freeDays").value = data.freeDays || "7";
-      setSelectValue("freeDaysType", data.freeDaysType, "detention");
-      setSelectValue("targetCurrency", data.targetCurrency, "USD");
-      $("profitSek").value = data.profitSek || "8000";
-      if (data.sekUsd) $("sekUsd").value = data.sekUsd;
-      if (data.sekEur) $("sekEur").value = data.sekEur;
-      if (data.roeDate) state.rates.date = data.roeDate;
-
-      state.equipment = Array.isArray(data.equipment) && data.equipment.length
-        ? data.equipment.map((eq) => newEquipment(eq))
-        : [newEquipment()];
-
-      applyImportedLocations(data);
-      state.generatedScript = "";
-      $("scriptOutput").value = "";
-      $("scriptSection").open = false;
-      $("copyScript").disabled = true;
-      $("downloadScript").disabled = true;
-      toggleFreeDays();
-      toggleWaitingTime();
-      toggleAgent();
-      renderEquipment();
-      updateAllPreviews();
-      showMessages({ errors: [], warnings: [] });
-    }
 
     async function importAhkFile(file) {
       const text = await file.text();
@@ -2118,441 +1778,9 @@
       else { activateMode("fcl"); applyImportedData(data); }
     }
 
-    function generateAhk() {
-      const calculations = state.equipment.map(calculateDetail);
-      const subject = buildSubject();
-      const collection = upper(collectionCityValue());
-      const polName = upper(textValue("polName"));
-      const podName = upper(textValue("podName"));
-      const client = textValue("clientName");
-      const attention = textValue("attentionTo");
-      const carrier = upper(textValue("carrier"));
-      const incoterm = upper($("incoterm").value);
-      const roeDate = state.rates.date || "manuell kurs";
-      const importDataBlock = metadataBlock(exportFormData());
+    
+    /* Legacy duplicate generateAhk removed in v8.3.0. */
 
-      const details = state.equipment.map((eq, index) => {
-        const calc = calculations[index];
-        const subtitle = `FCL ${calc.quantity}X${eq.type} - ${collection} - ${polName} - ${podName}`;
-        const charges = createChargeMaps(eq, calc).map((charge) => ahkMap(Object.entries(charge))).join(",\n            ");
-        return `Map(\n          "quantity", ${calc.quantity},\n          "type", ${ahkString(eq.type)},\n          "equipmentSearch", ${ahkString(equipmentSearchValue(eq.type))},\n          "subtitle", ${ahkString(subtitle)},\n          "charges", [\n            ${charges}\n          ]\n        )`;
-      }).join(",\n        ");
-
-      return `#Requires AutoHotkey v2.0
-#SingleInstance Force
-#Warn
-
-; Generated by BLU Auto Quote → AutoHotkey v8.2.3
-; ROE date/source: ${roeDate} / Frankfurter (or manual override)
-; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
-; Selling currency: ${$("targetCurrency").value}
-; Desired profit: ${$("profitSek").value} SEK per detail
-${importDataBlock}
-
-SetTitleMatchMode 2
-CoordMode "Mouse", "Screen"
-SendMode "Event"
-SetKeyDelay 25, 20
-SetMouseDelay 40
-
-BLU_WINDOW := "BLU ahk_exe wfica32.exe"
-CLICK_DELAY := ${FIXED.clickDelay}
-FIELD_DELAY := ${FIXED.fieldDelay}
-MENU_KEY_DELAY := ${FIXED.menuKeyDelay}
-MENU_ENTER_DELAY := ${FIXED.menuEnterDelay}
-SUPPLIER_ENTER_DELAY := ${FIXED.supplierEnterDelay}
-MENU_AFTER_DELAY := ${FIXED.menuAfterDelay}
-ROW_DELAY := ${FIXED.rowDelay}
-TAB_DELAY := ${FIXED.tabDelay}
-
-Running := false
-SavedClipboard := ""
-
-C := Map(
-  "Project", [383, 231],
-  "Internal comment", [383, 255],
-  "client", [382, 313],
-  "address", [385, 346],
-  "Attention to", [376, 602],
-  "Subject", [384, 649],
-  "Salution", [385, 671],
-  "Cover letter", [396, 698],
-  "Display costs", [374, 738],
-  "YearMonth", [364, 763],
-  "Sales operator", [365, 789],
-  "inquiry type", [839, 741],
-  "target currency", [1026, 743],
-  "events target currency", [1117, 818],
-  "Valid to date", [1019, 288],
-  "cargo tab", [293, 204],
-  "add equipment", [982, 235],
-  "equipment quantity", [365, 365],
-  "kind of equipment", [364, 392],
-  "gross weight", [380, 510],
-  "details tab", [338, 202],
-  "description of goods", [380, 664],
-  "create new detail", [969, 235],
-  "detail subtitle", [367, 356],
-  "detail short description", [368, 385],
-  "plor loc code", [490, 491],
-  "polout loc code", [488, 507],
-  "podin loc code", [495, 525],
-  "plod loc code", [497, 545],
-  "plor mot", [817, 488],
-  "polout/podin mot", [790, 504],
-  "transit time", [367, 758],
-  "including", [1281, 466],
-  "excluding", [1275, 549],
-  "subject to", [1281, 632],
-  "terms of payment days", [1286, 707],
-  "service type", [1296, 758],
-  "incoterm", [1296, 783],
-  "incoterm location", [1294, 807],
-  "scroll point1", [1905, 393],
-  "scroll point2", [1903, 686],
-  "add new charge", [966, 250],
-  "charge type", [430, 446],
-  "charge description", [431, 469],
-  "charge buying rate", [776, 594],
-  "buying rate currency", [890, 593],
-  "supplier", [1009, 593],
-  "charge selling rate", [723, 517],
-  "selling rate currency", [892, 444],
-  "charge per", [737, 542],
-  "charge quantity", [888, 543],
-  "charge quantity description", [943, 543],
-  "delete route point", [983, 517],
-  "charges remarks", [880, 690]
-)
-
-quote := Map(
-  "clientName", ${ahkString(client)},
-  "attentionTo", ${ahkString(attention)},
-  "salesOperator", ${ahkString(textValue("salesOperator"))},
-  "subject", ${ahkString(subject)},
-  "validTo", ${ahkString(formattedValidTo())},
-  "targetCurrency", ${ahkString($("targetCurrency").value.toLowerCase())},
-  "paymentDays", ${ahkString($("paymentDays").value)},
-  "incoterm", ${ahkString(incoterm.toLowerCase())},
-  "collection", ${ahkString(collection)},
-  "collectionCode", ${ahkString(upper(textValue("collectionCode")))},
-  "polCode", ${ahkString(upper(textValue("polCode")))},
-  "podCode", ${ahkString(upper(textValue("podCode")))},
-  "transitTime", ${ahkString(transitTimeText($("transitDays").value))},
-  "carrier", ${ahkString(carrier)},
-  "including", ${ahkString(includingText())},
-  "remarks", ${ahkString(remarksText())},
-  "details", [
-        ${details}
-  ]
-)
-
-OnExit RestoreClipboard
-
-F8:: {
-  global Running
-  if Running
-    return
-  Running := true
-  try RunQuote()
-  catch Error as err
-    MsgBox "Automation stopped with an error:\`n\`n" err.Message, "BLU Quote Automation", "Iconx"
-  finally {
-    ToolTip
-    RestoreClipboard()
-    Running := false
-  }
-}
-
-F9::Pause -1
-Esc::ExitApp
-
-RunQuote() {
-  global SavedClipboard, quote, FIELD_DELAY, MENU_ENTER_DELAY
-
-  startTick := A_TickCount
-  CheckEnvironment()
-  ActivateBlu()
-  SavedClipboard := ClipboardAll()
-
-  ToolTip "BLU automation: main quote fields"
-  TypeField("Project", "949", true)
-  TypeField("Internal comment", "Agent Ocean Export")
-  TypeField("client", "fhb", true)
-  TypeField("address", StrUpper(quote["clientName"]), false, true)
-  TypeField("Attention to", quote["attentionTo"])
-  TypeField("Subject", quote["subject"])
-  TypeField("Salution", "Dear " quote["attentionTo"] ",")
-  TypeField("Cover letter", ${ahkString(FIXED.coverLetter)})
-
-  ClickField("Display costs")
-  SendText "c"
-  Sleep 180
-  SendText "c"
-  Sleep 180
-  Send "{Enter}"
-  Sleep FIELD_DELAY
-
-  TypeField("YearMonth", FormatTime(, "yyMM"))
-  TypeField("Sales operator", quote["salesOperator"])
-  SelectField("inquiry type", "f")
-  SelectField("target currency", quote["targetCurrency"])
-  ClickField("events target currency")
-  TypeField("Valid to date", quote["validTo"], true)
-
-  ToolTip "BLU automation: equipment"
-  ClickField("cargo tab", TAB_DELAY)
-  for detail in quote["details"] {
-    ClickField("add equipment", ROW_DELAY)
-    TypeField("equipment quantity", detail["quantity"], false, true)
-    SelectField("kind of equipment", detail["equipmentSearch"])
-    TypeField("gross weight", "20000")
-    TypeField("description of goods", ${ahkString(FIXED.goodsDescription)}, false, true)
-  }
-
-  ToolTip "BLU automation: details and charges"
-  ClickField("details tab", TAB_DELAY)
-  for index, detail in quote["details"] {
-    if index > 1
-      ScrollDetailUp()
-
-    ClickField("create new detail", ROW_DELAY)
-
-    TypeField("detail subtitle", detail["subtitle"])
-    TypeDetailDescription(quote["clientName"], quote["carrier"], quote["incoterm"])
-    if quote["collectionCode"] != ""
-      SelectField("plor loc code", quote["collectionCode"])
-    SelectField("polout loc code", quote["polCode"])
-    SelectField("podin loc code", quote["podCode"])
-
-    ClickField("plod loc code")
-    ClickField("delete route point", MENU_ENTER_DELAY)
-    DoubleSelectField("plor mot", "t")
-    DoubleSelectField("polout/podin mot", "v")
-
-    TypeField("transit time", quote["transitTime"])
-    if quote["including"] != ""
-      PasteField("including", quote["including"], true)
-    TypeField("excluding", ${ahkString(FIXED.excluding)})
-    PasteField("subject to", ${ahkString(FIXED.subjectTo)})
-    TypeField("terms of payment days", quote["paymentDays"])
-    SelectField("service type", "f")
-    SelectField("incoterm", quote["incoterm"])
-    TypeField("incoterm location", quote["incotermLocation"])
-
-    ScrollDetailDown()
-
-    ; Each charge is completed fully before the next row is added.
-    for charge in detail["charges"]
-      FillCharge(charge)
-
-    PasteRemarksField(quote["remarks"])
-  }
-
-  ToolTip
-  RestoreClipboard()
-  elapsed := FormatElapsed(A_TickCount - startTick)
-  MsgBox "The BLU quote has been entered.\`n\`nTime: " elapsed "\`n\`nReview the quote before saving or sending it.", "BLU Quote Automation", "Iconi"
-}
-
-FormatElapsed(milliseconds) {
-  totalSeconds := Floor(milliseconds / 1000)
-  minutes := Floor(totalSeconds / 60)
-  seconds := Mod(totalSeconds, 60)
-  return minutes > 0 ? minutes " min " seconds " sec" : seconds " sec"
-}
-
-CheckEnvironment() {
-  if A_ScreenWidth != 1920 || A_ScreenHeight != 1080
-    throw Error("This script requires 1920 x 1080. Current resolution: " A_ScreenWidth " x " A_ScreenHeight)
-  if A_ScreenDPI != 96
-    throw Error("This script requires Windows scaling 100% (96 DPI). Current DPI: " A_ScreenDPI)
-}
-
-ActivateBlu() {
-  global BLU_WINDOW
-  if !WinExist(BLU_WINDOW)
-    throw Error("Could not find the BLU Citrix window (wfica32.exe).")
-  WinActivate BLU_WINDOW
-  WinMaximize BLU_WINDOW
-  if !WinWaitActive(BLU_WINDOW, , 6)
-    throw Error("BLU could not be activated.")
-  Sleep 600
-}
-
-ClickField(name, wait := 0) {
-  global C, CLICK_DELAY
-  xy := C[name]
-  Click xy[1], xy[2]
-  Sleep wait > 0 ? wait : CLICK_DELAY
-}
-
-SlowType(value) {
-  global MENU_KEY_DELAY
-  for character in StrSplit(String(value)) {
-    SendText character
-    Sleep MENU_KEY_DELAY
-  }
-}
-
-TypeField(name, value, pressEnter := false, clearFirst := false) {
-  global FIELD_DELAY, MENU_ENTER_DELAY, MENU_AFTER_DELAY
-  ClickField(name)
-  if clearFirst {
-    Send "^a"
-    Sleep 80
-  }
-
-  if pressEnter {
-    SlowType(value)
-    Sleep MENU_ENTER_DELAY
-    Send "{Enter}"
-    Sleep MENU_AFTER_DELAY
-  } else {
-    SendText String(value)
-    Sleep FIELD_DELAY
-  }
-}
-
-PasteField(name, value, clearFirst := false) {
-  global FIELD_DELAY
-  ClickField(name)
-  if clearFirst {
-    Send "^a"
-    Sleep 100
-    Send "{Backspace}"
-    Sleep 80
-  }
-  A_Clipboard := value
-  if !ClipWait(1)
-    throw Error("Clipboard did not become ready for field: " name)
-  Send "^v"
-  Sleep FIELD_DELAY + 180
-}
-
-PasteRemarksField(value) {
-  global FIELD_DELAY
-  ClickField("charges remarks", 350)
-  ClickField("charges remarks", 180)
-  Send "^a"
-  Sleep 120
-  Send "{Backspace}"
-  Sleep 120
-  A_Clipboard := value
-  if !ClipWait(1)
-    throw Error("Clipboard did not become ready for charges remarks.")
-  Send "^v"
-  Sleep FIELD_DELAY + 350
-  Send "{Tab}"
-  Sleep 200
-}
-
-SelectField(name, value, arrowOffset := 0) {
-  global MENU_ENTER_DELAY, MENU_AFTER_DELAY
-  ClickField(name)
-  SlowType(value)
-  Sleep MENU_ENTER_DELAY
-  if arrowOffset != 0 {
-    key := arrowOffset > 0 ? "{Down}" : "{Up}"
-    Loop Abs(arrowOffset) {
-      Send key
-      Sleep 350
-    }
-  }
-  Send "{Enter}"
-  Sleep MENU_AFTER_DELAY
-}
-
-SelectSupplierField(value, arrowOffset := 0) {
-  global SUPPLIER_ENTER_DELAY, MENU_AFTER_DELAY
-  ClickField("supplier")
-  SendText String(value)
-  Sleep SUPPLIER_ENTER_DELAY
-  if arrowOffset != 0 {
-    key := arrowOffset > 0 ? "{Down}" : "{Up}"
-    Loop Abs(arrowOffset) {
-      Send key
-      Sleep 200
-    }
-  }
-  Send "{Enter}"
-  Sleep MENU_AFTER_DELAY
-}
-
-TypePriceField(name, value) {
-  TypeField(name, StrReplace(String(value), ".", ","))
-}
-
-DoubleSelectField(name, value) {
-  global C, MENU_ENTER_DELAY, MENU_AFTER_DELAY
-  xy := C[name]
-  Click xy[1], xy[2]
-  Sleep 90
-  Click xy[1], xy[2]
-  Sleep 220
-  SlowType(value)
-  Sleep MENU_ENTER_DELAY
-  Send "{Enter}"
-  Sleep MENU_AFTER_DELAY
-}
-
-TypeDetailDescription(clientName, carrier, incoterm) {
-  global FIELD_DELAY
-  ClickField("detail short description")
-  SendText StrUpper(clientName)
-  Sleep 80
-  Send "{Enter}"
-  Sleep 120
-  SendText "Based on " carrier " (" StrUpper(incoterm) ")"
-  Sleep FIELD_DELAY
-}
-
-ScrollDetailDown() {
-  global C, TAB_DELAY
-  a := C["scroll point1"], b := C["scroll point2"]
-  MouseClickDrag "Left", a[1], a[2], b[1], b[2], 8
-  Sleep TAB_DELAY
-}
-
-ScrollDetailUp() {
-  global C, TAB_DELAY
-  a := C["scroll point1"], b := C["scroll point2"]
-  MouseClickDrag "Left", b[1], b[2], a[1], a[2], 8
-  Sleep TAB_DELAY
-}
-
-FillCharge(charge) {
-  global ROW_DELAY
-
-  ClickField("add new charge", ROW_DELAY)
-  SelectField("charge type", charge["type"])
-
-  if charge["description"] != ""
-    PasteField("charge description", charge["description"], true)
-
-  if charge["buyRate"] != ""
-    TypePriceField("charge buying rate", charge["buyRate"])
-  if charge["buyCurrency"] != ""
-    SelectField("buying rate currency", StrLower(charge["buyCurrency"]))
-  if charge["supplier"] != ""
-    SelectSupplierField(charge["supplier"], charge.Has("supplierArrow") ? charge["supplierArrow"] : 0)
-
-  TypePriceField("charge selling rate", charge["sellingRate"])
-  SelectField("selling rate currency", StrLower(charge["sellingCurrency"]))
-  SelectField("charge per", "q")
-  TypeField("charge quantity", charge["quantity"])
-  TypeField("charge quantity description", charge["quantityDescription"])
-}
-
-RestoreClipboard(*) {
-  global SavedClipboard
-  if IsObject(SavedClipboard) {
-    A_Clipboard := SavedClipboard
-    SavedClipboard := ""
-  }
-}
-`;
-    }
 
 
     function cloneLclCosts(source = LCL_COST_DEFAULTS) {
@@ -2731,23 +1959,9 @@ RestoreClipboard(*) {
       return match ? String(match[1] ?? "").trim() : "";
     }
 
-    function parseNordiconCharge(lines, pattern) {
-      const line = lines.find((item) => pattern.test(item));
-      if (!line) return null;
-      const totalMatch = /([\d.,]+)\s*(USD|EUR|SEK)\s*$/i.exec(line);
-      if (!totalMatch) return null;
-      const total = decimalNumber(totalMatch[1]);
-      const currency = totalMatch[2].toUpperCase();
-      const beforeTotal = line.slice(0, totalMatch.index);
-      const numbers = [...beforeTotal.matchAll(/\d+(?:[.,]\d+)?/g)].map((match) => decimalNumber(match[0]));
-      const rate = numbers.length >= 2 ? numbers[numbers.length - 2] : NaN;
-      return {
-        total: Number.isFinite(total) ? formatPlainNumber(total) : "",
-        currency,
-        rate: Number.isFinite(rate) ? formatPlainNumber(rate) : "",
-        sourceLine: line
-      };
-    }
+    
+    /* Legacy duplicate parseNordiconCharge removed in v8.3.0. */
+
 
     function combineNordiconCharges(first, second) {
       if (!first && !second) return null;
@@ -2761,51 +1975,9 @@ RestoreClipboard(*) {
       };
     }
 
-    function parseNordiconQuote(text) {
-      const cleanText = String(text ?? "").replace(/\r/g, "");
-      if (!/Nordicon/i.test(cleanText) || !/OCEAN\s+FREIGHT/i.test(cleanText)) {
-        throw new Error("The pasted text does not look like a Nordicon LCL quote.");
-      }
-      const lines = cleanText.split("\n").map((line) => line.trim()).filter(Boolean);
-      const validity = /Validity\s*:?[\s\n]*(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})/i.exec(cleanText);
-      const result = {
-        validTo: validity?.[2] ?? "",
-        pod: firstTextMatch(cleanText, /Ship to\s*[\n ]+([^\n]+)/i),
-        collection: firstTextMatch(cleanText, /Inland pickup in Sweden\s*[\n ]+([^\n]+)/i),
-        pallets: firstTextMatch(cleanText, /No of pcs\s*[\n ]+(\d+)/i),
-        weight: firstTextMatch(cleanText, /Weight\s*[\n ]+([\d.,]+)/i),
-        volume: firstTextMatch(cleanText, /Volume\s*[\n ]+([\d.,]+)/i),
-        transitDays: firstTextMatch(cleanText, /TRANSIT TIME\s*[\n ]+(\d+)\s*DAYS/i),
-        costs: cloneLclCosts()
-      };
+    
+    /* Legacy duplicate parseNordiconQuote removed in v8.3.0. */
 
-      const rows = {
-        ocean: parseNordiconCharge(lines, /^OCEAN FREIGHT\b/i),
-        fuel: parseNordiconCharge(lines, /^FUEL CONTINGENCY SURCHARGE\b/i),
-        eu: parseNordiconCharge(lines, /^ETS SURCHARGE(?:\s+USD)?\b/i),
-        war: parseNordiconCharge(lines, /^WAR RISK SURCHARGE\b/i),
-        terminal: parseNordiconCharge(lines, /^TERMINAL HANDLING\b/i),
-        port: parseNordiconCharge(lines, /^PORT DUES\b/i),
-        handling: parseNordiconCharge(lines, /^HANDLING FEE\b/i),
-        isps: parseNordiconCharge(lines, /^ISPS SURCHARGE\b/i),
-        customs: parseNordiconCharge(lines, /^CUSTOMS CHECK MRN\b/i),
-        inland: parseNordiconCharge(lines, /^INLAND HAULAGE\b/i),
-        inlandFuel: parseNordiconCharge(lines, /^FUEL SURCHARGE INLAND\b/i)
-      };
-      rows.trucking = combineNordiconCharges(rows.inland, rows.inlandFuel);
-
-      for (const key of ["trucking", "ocean", "fuel", "eu", "terminal", "port", "handling", "isps", "customs"]) {
-        if (!rows[key]) throw new Error(`Could not find ${key} in the Nordicon charge table.`);
-        result.costs[key] = { ...result.costs[key], ...rows[key] };
-      }
-      if (rows.war) result.costs.war = { ...result.costs.war, ...rows.war };
-      result.includeWar = Boolean(rows.war);
-
-      if (!result.pod || !result.collection || !result.pallets || !result.weight || !result.volume) {
-        throw new Error("The Nordicon quote is missing route or cargo data.");
-      }
-      return result;
-    }
 
     function setLclCosts(costs) {
       state.lcl.costs = cloneLclCosts({ ...LCL_COST_DEFAULTS, ...costs });
@@ -2826,28 +1998,9 @@ RestoreClipboard(*) {
       return costs;
     }
 
-    function applyParsedNordiconQuote(parsed) {
-      state.lcl.quoteLoaded = true;
-      state.lcl.quoteLabel = "Nordicon quote";
-      $("lclSupplier").value = "NORDICON";
-      if (parsed.validTo) $("lclValidTo").value = parsed.validTo;
-      $("lclPallets").value = parsed.pallets;
-      $("lclWeight").value = String(parsed.weight).replace(",", ".");
-      $("lclVolume").value = String(parsed.volume).replace(",", ".");
-      $("lclTransitDays").value = parsed.transitDays;
-      $("lclIncludeWar").checked = parsed.includeWar;
-      setLclCollectionFromText(parsed.collection);
-      setLclPodFromText(parsed.pod);
-      setLclCosts(parsed.costs);
-      $("lclQuotePaste").value = "";
-      $("lclPasteWrap").classList.add("hidden");
-      $("lclQuoteLoaded").classList.remove("hidden");
-      $("lclQuoteLoadedTitle").textContent = "Nordicon quote";
-      $("lclQuoteLoadedInfo").textContent = `${upper(parsed.collection)} → ${upper(parsed.pod)} · ${parsed.pallets} pallets · ${parsed.weight} kg · ${parsed.volume} cbm`;
-      $("lclParseMessage").textContent = "Quote data extracted successfully.";
-      $("lclParseMessage").classList.remove("status-error");
-      updateLclCalculation();
-    }
+    
+    /* Legacy duplicate applyParsedNordiconQuote removed in v8.3.0. */
+
 
     function readNordiconPaste() {
       try {
@@ -2958,11 +2111,9 @@ RestoreClipboard(*) {
       };
     }
 
-    function lclSubject() {
-      const collection = upper(lclCollectionValue()) || "COLLECTION";
-      const pod = upper(textValue("lclPodName")) || "POD";
-      return quoteText("lcl.subject", { COLLECTION: collection, POD: pod, STACKABLE: $("lclStackable").value });
-    }
+    
+    /* Legacy duplicate lclSubject removed in v8.3.0. */
+
 
     function lclFormattedValidTo() {
       const value = $("lclValidTo").value;
@@ -2977,40 +2128,13 @@ RestoreClipboard(*) {
       return String(Number(number.toFixed(3))).replace(".", ",");
     }
 
-    function lclRemarksText() {
-      const supplier = lclSupplierConfig().display.toUpperCase();
-      return [
-        quoteText("lcl.remarks.carrier", { SUPPLIER: supplier }),
-        quoteText("lcl.remarks.profitShare"),
-        quoteText("lcl.remarks.loadingTime")
-      ].join("\n\n");
-    }
+    
+    /* Legacy duplicate lclRemarksText removed in v8.3.0. */
 
-    function updateLclCalculation() {
-      const calc = calculateLcl();
-      const box = $("lclCalculation");
-      if (!box) return;
-      if (!calc) {
-        box.innerHTML = `<div class="small-note" style="padding:12px">Paste a Nordicon quote or enter the buying costs manually.</div>`;
-        return;
-      }
-      const rows = [
-        ["Trucking", calc.truckingCost, calc.truckingSelling, calc.truckingSelling - calc.truckingCost],
-        ["Ocean freight", calc.oceanCost, calc.oceanSelling, (calc.volumeBased ? calc.oceanSelling * calc.volume : calc.oceanSelling) - calc.oceanCost],
-        ["Fuel", calc.fuelCost, calc.fuelSelling, (calc.volumeBased ? calc.fuelSelling * calc.volume : calc.fuelSelling) - calc.fuelCost],
-        ["EU ETS", calc.euCost, calc.euSelling, (calc.volumeBased ? calc.euSelling * calc.volume : calc.euSelling) - calc.euCost],
-        ...( $("lclIncludeWar").checked ? [["War risk", calc.warCost, calc.warSelling, (calc.volumeBased ? calc.warSelling * calc.volume : calc.warSelling) - calc.warCost]] : [] ),
-        ["Terminal", calc.terminalCost, calc.terminalSelling, (calc.weightBased ? calc.terminalSelling * calc.weightTon : calc.terminalSelling) - calc.terminalCost],
-        ["Port", calc.portCost, calc.portSelling, (calc.weightBased ? calc.portSelling * calc.weightTon : calc.portSelling) - calc.portCost],
-        ["Handling", calc.handlingCost, calc.handlingSelling, calc.handlingSelling - calc.handlingCost],
-        ["ISPS", calc.ispsCost, calc.ispsSelling, calc.ispsSelling - calc.ispsCost],
-        ["Forwarding fee", 0, 100, 100],
-        ["SOLAS fee", 0, 10, 10],
-        ["Customs check MRN", calc.customsCost, 5, 5 - calc.customsCost],
-        ["Profit", 0, 50, 50]
-      ];
-      box.innerHTML = `<table><thead><tr><th>Charge</th><th>Buying total USD</th><th>Selling rate USD</th><th>Profit total USD</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${row[0]}</td><td>${formatMoney(row[1], "USD", 2)}</td><td>${formatMoney(row[2], "USD", 2)}</td><td>${formatMoney(row[3], "USD", 2)}</td></tr>`).join("")}</tbody></table><div class="profit-line"><span>Calculated profit</span><span>${formatMoney(calc.actualProfit, "USD", 2)} <small>(${formatMoney(lclConvert(calc.actualProfit, "USD", "SEK"), "SEK", 0)})</small></span></div>`;
-    }
+
+    
+    /* Legacy duplicate updateLclCalculation removed in v8.3.0. */
+
 
     function validateLcl() {
       const errors = [];
@@ -3034,6 +2158,8 @@ RestoreClipboard(*) {
       if (!(decimalNumber($("lclVolume").value) > 0)) errors.push("Volume must be greater than 0.");
       if (String($("lclTransitDays").value).trim() && (!(numberValue($("lclTransitDays").value) >= 1) || !Number.isInteger(numberValue($("lclTransitDays").value)))) errors.push("Transit time must be a whole number of at least 1, or left blank for TBA.");
       if (!(numberValue($("lclSekUsd").value) > 0) || !(numberValue($("lclSekEur").value) > 0)) errors.push("Valid ROE for USD and EUR is required.");
+      if (!(decimalNumber($("lclProfitSek").value) >= 0)) errors.push("Profit must be entered and be 0 or higher.");
+      if (!isFiniteNumber($("lclPaymentDays").value) || numberValue($("lclPaymentDays").value) < 0 || !Number.isInteger(numberValue($("lclPaymentDays").value))) errors.push("Payment term days must be a whole number of 0 or higher.");
       const costs = readLclCosts();
       const requiredCosts = ["ocean", "fuel", "eu", "handling", "isps", "customs"];
       if (includeOriginCosts) requiredCosts.unshift("trucking", "terminal", "port");
@@ -3060,51 +2186,13 @@ RestoreClipboard(*) {
       } else { warningBox.classList.remove("show"); warningBox.innerHTML = ""; }
     }
 
-    function lclCreateCharges(calc) {
-      const supplier = lclSupplierConfig();
-      const costs = calc.costs;
-      const collection = upper(lclCollectionValue());
-      const source = (key) => ({
-        buyRate: formatPlainNumber(decimalNumber(costs[key].total)),
-        buyCurrency: costs[key].currency,
-        supplier: supplier.supplier,
-        supplierArrow: supplier.supplierArrow
-      });
-      const volumePer = calc.volumeBased ? "v" : "";
-      const weightPer = calc.weightBased ? "w" : "";
-      const charges = [
-        { type: "trucking", description: quoteText("lcl.charges.inlandHaulage", { COLLECTION: collection }), ...source("trucking"), sellingRate: formatPlainNumber(calc.truckingSelling), sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "freight", description: quoteText("lcl.charges.oceanFreight"), ...source("ocean"), sellingRate: formatPlainNumber(calc.oceanSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
-        { type: "fuel", description: quoteText("lcl.charges.fuelContingency"), ...source("fuel"), sellingRate: formatPlainNumber(calc.fuelSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
-        { type: "eu", description: "", ...source("eu"), sellingRate: formatPlainNumber(calc.euSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" }
-      ];
-      if ($("lclIncludeWar").checked) charges.push({ type: "war", description: "", ...source("war"), sellingRate: formatPlainNumber(calc.warSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" });
-      charges.push(
-        { type: "terminal", description: "", ...source("terminal"), sellingRate: "40", sellingCurrency: "USD", per: weightPer, weightUnit: weightPer ? "t" : "" },
-        { type: "port", description: "", ...source("port"), sellingRate: "4", sellingCurrency: "USD", per: weightPer, weightUnit: weightPer ? "t" : "" },
-        { type: "forwarding fee", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "100", sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "handling", description: "", ...source("handling"), sellingRate: "45", sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "isps", description: "", ...source("isps"), sellingRate: "4", sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "other", description: quoteText("lcl.charges.solasFee"), buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "10", sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "other", description: quoteText("lcl.charges.customsCheckMrn"), ...source("customs"), sellingRate: "5", sellingCurrency: "USD", per: "", weightUnit: "" },
-        { type: "profit", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "50", sellingCurrency: "USD", per: "", weightUnit: "" }
-      );
-      return charges;
-    }
+    
+    /* Legacy duplicate lclCreateCharges removed in v8.3.0. */
 
-    function exportLclData() {
-      return {
-        version: 2,
-        mode: "LCL",
-        clientName: textValue("lclClientName"), attentionTo: textValue("lclAttentionTo"), salesOperator: textValue("lclSalesOperator"),
-        validTo: $("lclValidTo").value, paymentDays: $("lclPaymentDays").value, incoterm: $("lclIncoterm").value,
-        supplier: $("lclSupplier").value, collectionCity: $("lclCollectionCity").value.trim(), collectionName: textValue("lclCollectionName"), collectionCode: upper(textValue("lclCollectionCode")),
-        podName: textValue("lclPodName"), podCode: upper(textValue("lclPodCode")), pallets: $("lclPallets").value,
-        weight: $("lclWeight").value, volume: $("lclVolume").value, stackable: $("lclStackable").value,
-        transitDays: $("lclTransitDays").value, profitSek: $("lclProfitSek").value, sekUsd: $("lclSekUsd").value, sekEur: $("lclSekEur").value,
-        roeDate: state.rates.date || "", includeWar: $("lclIncludeWar").checked, costs: readLclCosts(), quoteLoaded: state.lcl.quoteLoaded
-      };
-    }
+
+    
+    /* Legacy duplicate exportLclData removed in v8.3.0. */
+
 
     function applyImportedLclLocations(data) {
       if (!state.locations.size) {
@@ -3128,45 +2216,9 @@ RestoreClipboard(*) {
       state.pendingLclImport = null;
     }
 
-    function applyImportedLclData(data) {
-      if (!data || Number(data.version) !== 2 || data.mode !== "LCL") throw new Error("Unsupported LCL quote data version.");
-      activateMode("lcl");
-      $("lclClientName").value = data.clientName || "";
-      $("lclAttentionTo").value = data.attentionTo || "";
-      $("lclSalesOperator").value = data.salesOperator || "Erik Stahl";
-      $("lclValidTo").value = data.validTo || "";
-      $("lclPaymentDays").value = data.paymentDays || "30";
-      setSelectValue("lclIncoterm", data.incoterm, "EXW");
-      setSelectValue("lclSupplier", data.supplier, "NORDICON");
-      $("lclPallets").value = data.pallets || "";
-      $("lclWeight").value = data.weight || "";
-      $("lclVolume").value = data.volume || "";
-      setSelectValue("lclStackable", data.stackable, "STACKABLE");
-      $("lclTransitDays").value = data.transitDays || "";
-      $("lclProfitSek").value = data.profitSek || "7500";
-      if (data.sekUsd) $("lclSekUsd").value = data.sekUsd;
-      if (data.sekEur) $("lclSekEur").value = data.sekEur;
-      $("lclIncludeWar").checked = Boolean(data.includeWar);
-      setLclCosts(data.costs || cloneLclCosts());
-      state.lcl.quoteLoaded = Boolean(data.quoteLoaded);
-      if (state.lcl.quoteLoaded) {
-        $("lclPasteWrap").classList.add("hidden");
-        $("lclQuoteLoaded").classList.remove("hidden");
-        $("lclQuoteLoadedTitle").textContent = `${lclSupplierConfig().display} quote`;
-        $("lclQuoteLoadedInfo").textContent = `${upper(data.collectionName || data.collectionCity)} → ${upper(data.podName)} · ${data.pallets} pallets · ${data.weight} kg · ${data.volume} cbm`;
-      } else {
-        $("lclPasteWrap").classList.remove("hidden");
-        $("lclQuoteLoaded").classList.add("hidden");
-      }
-      applyImportedLclLocations(data);
-      state.lcl.generatedScript = "";
-      $("lclScriptOutput").value = "";
-      $("lclScriptSection").open = false;
-      $("lclCopyScript").disabled = true;
-      $("lclDownloadScript").disabled = true;
-      showLclMessages({ errors: [], warnings: [] });
-      updateLclCalculation();
-    }
+    
+    /* Legacy duplicate applyImportedLclData removed in v8.3.0. */
+
 
     function lclCargoDescription() {
       const stackable = $("lclStackable").value;
@@ -3199,7 +2251,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.3
+; Generated by BLU Auto Quote - LCL AutoHotkey v8.3.0
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -3217,9 +2269,13 @@ FIELD_DELAY := ${FIXED.fieldDelay}
 MENU_KEY_DELAY := ${FIXED.menuKeyDelay}
 MENU_ENTER_DELAY := ${FIXED.menuEnterDelay}
 SUPPLIER_ENTER_DELAY := ${FIXED.supplierEnterDelay}
+SUPPLIER_KEY_DELAY := ${FIXED.supplierKeyDelay}
 MENU_AFTER_DELAY := ${FIXED.menuAfterDelay}
 ROW_DELAY := ${FIXED.rowDelay}
 TAB_DELAY := ${FIXED.tabDelay}
+CHARGE_TYPE_DELAY := ${FIXED.chargeTypeDelay}
+CHARGE_FIELD_DELAY := ${FIXED.chargeFieldDelay}
+CHARGE_COMPLETE_DELAY := ${FIXED.chargeCompleteDelay}
 
 Running := false
 SavedClipboard := ""
@@ -3342,19 +2398,20 @@ Esc::ExitApp
 RunQuote() {
   global SavedClipboard, quote, FIELD_DELAY
   startTick := A_TickCount
+  ValidateQuoteData()
   CheckEnvironment()
   ActivateBlu()
   SavedClipboard := ClipboardAll()
 
   ToolTip "BLU automation: main quote fields"
-  TypeField("Project", quote["project"], true)
-  TypeField("Internal comment", quote["internalComment"])
-  TypeField("client", quote["clientCode"], true)
+  TypeField("Project", quote["project"], true, true)
+  TypeField("Internal comment", quote["internalComment"], false, true)
+  TypeField("client", quote["clientCode"], true, true)
   TypeField("address", StrUpper(quote["clientName"]), false, true)
-  TypeField("Attention to", quote["attentionTo"])
-  TypeField("Subject", quote["subject"])
-  TypeField("Salution", quote["salutation"])
-  TypeField("Cover letter", quote["coverLetter"])
+  TypeField("Attention to", quote["attentionTo"], false, true)
+  TypeField("Subject", quote["subject"], false, true)
+  TypeField("Salution", quote["salutation"], false, true)
+  TypeField("Cover letter", quote["coverLetter"], false, true)
 
   ClickField("Display costs")
   SendText "c"
@@ -3364,12 +2421,12 @@ RunQuote() {
   Send "{Enter}"
   Sleep FIELD_DELAY
 
-  TypeField("YearMonth", FormatTime(, "yyMM"))
-  TypeField("Sales operator", quote["salesOperator"])
+  TypeField("YearMonth", FormatTime(, "yyMM"), false, true)
+  TypeField("Sales operator", quote["salesOperator"], false, true)
   SelectField("inquiry type", "f")
   SelectField("target currency", "usd")
   ClickField("events target currency")
-  TypeField("Valid to date", quote["validTo"], true)
+  TypeField("Valid to date", quote["validTo"], true, true)
 
   ToolTip "BLU automation: LCL cargo"
   ClickField("cargo tab", TAB_DELAY)
@@ -3387,7 +2444,7 @@ RunQuote() {
   ToolTip "BLU automation: LCL detail and charges"
   ClickField("details tab", TAB_DELAY)
   ClickField("create new detail", ROW_DELAY)
-  TypeField("detail subtitle", quote["subtitle"])
+  TypeField("detail subtitle", quote["subtitle"], false, true)
   TypeLclDetailDescription(quote["clientName"], quote["basisText"])
   if !quote["removePlor"] && quote["collectionCode"] != ""
     SelectField("plor loc code", quote["collectionCode"])
@@ -3402,17 +2459,20 @@ RunQuote() {
     ClickField("plor loc code")
     ClickField("delete route point", MENU_ENTER_DELAY)
   }
-  TypeField("transit time", quote["transitTime"])
-  TypeField("excluding", quote["excluding"])
-  PasteField("subject to", quote["subjectTo"])
-  TypeField("terms of payment days", quote["paymentDays"])
+  TypeField("transit time", quote["transitTime"], false, true)
+  PasteField("excluding", quote["excluding"], true)
+  PasteField("subject to", quote["subjectTo"], true)
+  TypeField("terms of payment days", quote["paymentDays"], false, true)
   SelectField("service type", "lcl/lcl")
   SelectField("incoterm", quote["incoterm"])
-  TypeField("incoterm location", quote["incotermLocation"])
+  TypeField("incoterm location", quote["incotermLocation"], false, true)
   ScrollDetailDown()
 
-  for charge in quote["charges"]
+  for chargeIndex, charge in quote["charges"] {
+    label := charge.Has("debugLabel") ? charge["debugLabel"] : charge["type"]
+    ToolTip "BLU automation: LCL charge " chargeIndex "/" quote["charges"].Length " · " label
     FillLclCharge(charge)
+  }
   PasteRemarksField(quote["remarks"])
 
   ToolTip
@@ -3426,6 +2486,22 @@ FormatElapsed(milliseconds) {
   minutes := Floor(totalSeconds / 60)
   seconds := Mod(totalSeconds, 60)
   return minutes > 0 ? minutes " min " seconds " sec" : seconds " sec"
+}
+
+ValidateQuoteData() {
+  global quote
+  requiredQuote := ["clientName", "subject", "charges"]
+  for key in requiredQuote {
+    if !quote.Has(key)
+      throw Error("Generated quote is missing field: " key)
+  }
+  if quote["charges"].Length = 0
+    throw Error("Generated LCL quote has no charges.")
+  for charge in quote["charges"] {
+    ValidateChargeData(charge)
+    if !charge.Has("per") || !charge.Has("weightUnit")
+      throw Error("LCL charge is missing per/weight data: " charge["type"])
+  }
 }
 
 CheckEnvironment() {
@@ -3448,6 +2524,8 @@ ActivateBlu() {
 
 ClickField(name, wait := 0) {
   global C, CLICK_DELAY
+  if !C.Has(name)
+    throw Error("Unknown BLU coordinate: " name)
   xy := C[name]
   Click xy[1], xy[2]
   Sleep wait > 0 ? wait : CLICK_DELAY
@@ -3529,23 +2607,106 @@ SelectField(name, value, arrowOffset := 0) {
 }
 
 SelectSupplierField(value, arrowOffset := 0) {
-  global SUPPLIER_ENTER_DELAY, MENU_AFTER_DELAY
+  global SUPPLIER_ENTER_DELAY, SUPPLIER_KEY_DELAY, MENU_AFTER_DELAY
   ClickField("supplier")
-  SendText String(value)
+  Send "^a"
+  Sleep 100
+  Send "{Backspace}"
+  Sleep 120
+  for character in StrSplit(String(value)) {
+    SendText character
+    Sleep SUPPLIER_KEY_DELAY
+  }
   Sleep SUPPLIER_ENTER_DELAY
   if arrowOffset != 0 {
     key := arrowOffset > 0 ? "{Down}" : "{Up}"
     Loop Abs(arrowOffset) {
       Send key
-      Sleep 200
+      Sleep 300
+    }
+  }
+  Send "{Enter}"
+  Sleep MENU_AFTER_DELAY + 250
+  Send "{Tab}"
+  Sleep 180
+}
+
+ClearChargeField(name) {
+  global CHARGE_FIELD_DELAY
+  ClickField(name)
+  Send "^a"
+  Sleep 100
+  Send "{Backspace}"
+  Sleep CHARGE_FIELD_DELAY
+}
+
+SetChargeTextField(name, value) {
+  global FIELD_DELAY, CHARGE_FIELD_DELAY
+  ClickField(name)
+  Send "^a"
+  Sleep 100
+  Send "{Backspace}"
+  Sleep 100
+  SendText String(value)
+  Sleep FIELD_DELAY
+  Send "{Tab}"
+  Sleep CHARGE_FIELD_DELAY
+}
+
+SetChargePriceField(name, value) {
+  SetChargeTextField(name, StrReplace(String(value), ".", ","))
+}
+
+SelectChargeField(name, value, arrowOffset := 0) {
+  global MENU_ENTER_DELAY, MENU_AFTER_DELAY
+  ClickField(name)
+  Send "^a"
+  Sleep 100
+  Send "{Backspace}"
+  Sleep 120
+  SlowType(value)
+  Sleep MENU_ENTER_DELAY
+  if arrowOffset != 0 {
+    key := arrowOffset > 0 ? "{Down}" : "{Up}"
+    Loop Abs(arrowOffset) {
+      Send key
+      Sleep 300
     }
   }
   Send "{Enter}"
   Sleep MENU_AFTER_DELAY
 }
 
-TypePriceField(name, value) {
-  TypeField(name, StrReplace(String(value), ".", ","))
+SetChargeDescription(value) {
+  if value = "" {
+    ClearChargeField("charge description")
+    return
+  }
+  PasteField("charge description", value, true)
+  Send "{Tab}"
+  Sleep 250
+}
+
+ValidateChargeData(charge) {
+  required := ["type", "description", "buyRate", "buyCurrency", "supplier", "supplierArrow", "sellingRate", "sellingCurrency"]
+  for key in required {
+    if !charge.Has(key)
+      throw Error("Generated charge is missing field: " key)
+  }
+  if charge["type"] = ""
+    throw Error("Generated charge has no charge type.")
+  if charge["sellingRate"] = "" || charge["sellingCurrency"] = ""
+    throw Error("Generated charge is missing selling rate/currency: " charge["type"])
+  if !IsNumber(charge["sellingRate"])
+    throw Error("Generated charge has a non-numeric selling rate: " charge["type"])
+  if (charge["buyRate"] = "") != (charge["buyCurrency"] = "")
+    throw Error("Generated charge has an incomplete buying rate/currency pair: " charge["type"])
+  if charge["buyRate"] != "" && !IsNumber(charge["buyRate"])
+    throw Error("Generated charge has a non-numeric buying rate: " charge["type"])
+  if charge["supplier"] != "" && charge["buyRate"] = ""
+    throw Error("Generated charge has a supplier but no buying rate: " charge["type"])
+  if charge["buyRate"] != "" && charge["supplier"] = ""
+    throw Error("Generated charge has a buying rate but no supplier: " charge["type"])
 }
 
 DoubleSelectField(name, value) {
@@ -3585,28 +2746,40 @@ ScrollDetailDown() {
 }
 
 FillLclCharge(charge) {
-  global ROW_DELAY, FIELD_DELAY
+  global ROW_DELAY, CHARGE_TYPE_DELAY, CHARGE_COMPLETE_DELAY
+  ValidateChargeData(charge)
   ClickField("add new charge", ROW_DELAY)
-  SelectField("charge type", charge["type"])
-  if charge["description"] != ""
-    PasteField("charge description", charge["description"], true)
-  if charge["buyRate"] != ""
-    TypePriceField("charge buying rate", charge["buyRate"])
+  SelectChargeField("charge type", charge["type"])
+  Sleep CHARGE_TYPE_DELAY
+  SetChargeDescription(charge["description"])
+
   if charge["buyCurrency"] != ""
-    SelectField("buying rate currency", StrLower(charge["buyCurrency"]))
+    SelectChargeField("buying rate currency", StrLower(charge["buyCurrency"]))
+  else
+    ClearChargeField("buying rate currency")
+  if charge["buyRate"] != ""
+    SetChargePriceField("charge buying rate", charge["buyRate"])
+  else
+    ClearChargeField("charge buying rate")
+
   if charge["supplier"] != ""
-    SelectSupplierField(charge["supplier"], charge["supplierArrow"])
-  TypePriceField("charge selling rate", charge["sellingRate"])
-  SelectField("selling rate currency", "usd")
+    SelectSupplierField(charge["supplier"], charge.Has("supplierArrow") ? charge["supplierArrow"] : 0)
+  else
+    ClearChargeField("supplier")
+
+  SelectChargeField("selling rate currency", StrLower(charge["sellingCurrency"]))
+  SetChargePriceField("charge selling rate", charge["sellingRate"])
   if charge["per"] != "" {
-    SelectField("charge per", charge["per"])
-    if charge["per"] = "w" {
-      Send "{Tab}"
-      Sleep 150
-      SelectField("weight unit", "t")
-    }
+    SelectChargeField("charge per", charge["per"])
+    if charge["per"] = "w"
+      SelectChargeField("weight unit", charge["weightUnit"] != "" ? charge["weightUnit"] : "t")
+    else
+      ClearChargeField("weight unit")
+  } else {
+    ClearChargeField("charge per")
+    ClearChargeField("weight unit")
   }
-  Sleep FIELD_DELAY
+  Sleep CHARGE_COMPLETE_DELAY
 }
 
 RestoreClipboard(*) {
@@ -3672,64 +2845,13 @@ RestoreClipboard(*) {
       $("lclValidTo").value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     }
 
-    function resetLclForm(confirmReset = true) {
-      if (confirmReset && !confirm("Reset all LCL inputs?")) return;
-      $("lclPane").querySelectorAll("input").forEach((input) => {
-        if (["lclSalesOperator", "lclPaymentDays", "lclProfitSek", "lclSekUsd", "lclSekEur"].includes(input.id)) return;
-        if (input.type === "checkbox") input.checked = false;
-        else input.value = "";
-      });
-      $("lclSalesOperator").value = "Erik Stahl";
-      $("lclPaymentDays").value = "30";
-      $("lclProfitSek").value = "7500";
-      $("lclIncoterm").value = "EXW";
-      $("lclSupplier").value = "NORDICON";
-      $("lclStackable").value = "STACKABLE";
-      state.lcl = newLclState();
-      setLclCosts(state.lcl.costs);
-      setDefaultLclValidity();
-      if (state.locations.size) initialiseLocationSelectors();
-      $("lclPasteWrap").classList.remove("hidden");
-      $("lclQuoteLoaded").classList.add("hidden");
-      $("lclParseMessage").textContent = "";
-      $("lclScriptOutput").value = "";
-      $("lclScriptSection").open = false;
-      $("lclCopyScript").disabled = true;
-      $("lclDownloadScript").disabled = true;
-      showLclMessages({ errors: [], warnings: [] });
-      updateLclCalculation();
-    }
+    
+    /* Legacy duplicate resetLclForm removed in v8.3.0. */
 
-    function bindLclEvents() {
-      document.querySelectorAll(".mode-tab").forEach((button) => button.addEventListener("click", () => activateMode(button.dataset.mode)));
-      $("lclParseQuote").addEventListener("click", readNordiconPaste);
-      $("lclQuotePaste").addEventListener("paste", () => setTimeout(readNordiconPaste, 0));
-      $("lclReplaceQuote").addEventListener("click", () => {
-        state.lcl.quoteLoaded = false;
-        $("lclQuoteLoaded").classList.add("hidden");
-        $("lclPasteWrap").classList.remove("hidden");
-        $("lclQuotePaste").focus();
-      });
-      $("lclRefreshRates").addEventListener("click", () => fetchRates());
-      $("lclGenerateScript").addEventListener("click", generateLclScript);
-      $("lclImportScript").addEventListener("click", () => $("lclImportScriptFile").click());
-      $("lclImportScriptFile").addEventListener("change", async () => {
-        const file = $("lclImportScriptFile").files?.[0];
-        if (!file) return;
-        try { await importAhkFile(file); alert("Quote data imported from the AHK file."); }
-        catch (error) { alert(error instanceof Error ? error.message : "Could not import the AHK file."); }
-        finally { $("lclImportScriptFile").value = ""; }
-      });
-      $("lclCopyScript").addEventListener("click", copyLclScript);
-      $("lclDownloadScript").addEventListener("click", downloadLclScript);
-      $("lclResetForm").addEventListener("click", () => resetLclForm(true));
-      $("lclCollectionCity").addEventListener("input", applyLclCollectionSelection);
-      $("lclCollectionCity").addEventListener("change", applyLclCollectionSelection);
-      $("lclPane").querySelectorAll("input, select").forEach((input) => {
-        input.addEventListener("input", updateLclCalculation);
-        input.addEventListener("change", updateLclCalculation);
-      });
-    }
+
+    
+    /* Legacy duplicate bindLclEvents removed in v8.3.0. */
+
 
 
     function showMessages(validation) {
@@ -3821,105 +2943,28 @@ RestoreClipboard(*) {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    function resetForm() {
-      if (!confirm("Återställa samtliga inmatningar?")) return;
-      $("fclPane").querySelectorAll("input").forEach((input) => {
-        if (["salesOperator", "paymentDays", "profitSek", "sekUsd", "sekEur"].includes(input.id)) return;
-        input.value = "";
-      });
-      $("salesOperator").value = "Erik Stahl";
-      $("paymentDays").value = "30";
-      $("profitSek").value = "8000";
-      $("incoterm").value = "EXW";
-      $("carrier").value = "MSC";
-      $("useAgent").checked = false;
-      $("agent").value = "CHS";
-      $("precarriageSupplier").value = "DANIA";
-      $("includeWaitingTime").checked = false;
-      $("waitingHours").value = "1";
-      $("targetCurrency").value = "USD";
-      $("freeDaysMode").value = "standard";
-      state.equipment = [newEquipment()];
-      state.generatedScript = "";
-      state.pendingImport = null;
-      $("scriptOutput").value = "";
-      $("scriptSection").open = false;
-      $("copyScript").disabled = true;
-      $("downloadScript").disabled = true;
-      setDefaultValidity();
-      if (state.locations.size) initialiseLocationSelectors();
-      toggleFreeDays();
-      toggleWaitingTime();
-      toggleAgent();
-      renderEquipment();
-      fetchRates();
-      showMessages({ errors: [], warnings: [] });
-    }
+    
+    /* Legacy duplicate resetForm removed in v8.3.0. */
 
-    function toggleFreeDays() {
-      const custom = $("freeDaysMode").value === "custom";
-      document.querySelectorAll(".custom-free").forEach((el) => el.classList.toggle("hidden", !custom));
-      updateAllPreviews();
-    }
 
-    function toggleWaitingTime() {
-      $("waitingHoursField").classList.toggle("hidden", !$("includeWaitingTime").checked);
-      updateAllPreviews();
-    }
+    
+    /* Legacy duplicate toggleFreeDays removed in v8.3.0. */
 
-    function toggleAgent() {
-      $("agentField").classList.toggle("hidden", !$("useAgent").checked);
-      updateAllPreviews();
-    }
 
-    function bindEvents() {
-      $("addEquipment").addEventListener("click", () => {
-        state.equipment.push(newEquipment());
-        renderEquipment();
-      });
-      $("openLocFile").addEventListener("click", () => $("locFileInput").click());
-      $("locFileInput").addEventListener("change", async () => {
-        const file = $("locFileInput").files?.[0];
-        if (!file) return;
-        try {
-          await useLocCodes(await file.arrayBuffer(), file.name);
-        } catch (error) {
-          setLocStatus(error instanceof Error ? error.message : "Could not read LocCodes.xlsx", true);
-        }
-      });
-      $("refreshRates").addEventListener("click", () => fetchRates());
-      $("generateScript").addEventListener("click", generateScript);
-      $("importScript").addEventListener("click", () => $("importScriptFile").click());
-      $("importScriptFile").addEventListener("change", async () => {
-        const file = $("importScriptFile").files?.[0];
-        if (!file) return;
-        try {
-          await importAhkFile(file);
-          alert("Quote data imported from the AHK file.");
-        } catch (error) {
-          alert(error instanceof Error ? error.message : "Could not import the AHK file.");
-        } finally {
-          $("importScriptFile").value = "";
-        }
-      });
-      $("copyScript").addEventListener("click", copyScript);
-      $("downloadScript").addEventListener("click", downloadScript);
-      $("resetForm").addEventListener("click", resetForm);
-      $("freeDaysMode").addEventListener("change", toggleFreeDays);
-      $("includeWaitingTime").addEventListener("change", toggleWaitingTime);
-      $("useAgent").addEventListener("change", toggleAgent);
-      $("collectionCity").addEventListener("input", applyCollectionSelection);
-      $("collectionCity").addEventListener("change", applyCollectionSelection);
+    
+    /* Legacy duplicate toggleWaitingTime removed in v8.3.0. */
 
-      $("fclPane").querySelectorAll("input, select").forEach((input) => {
-        input.addEventListener("input", updateAllPreviews);
-        input.addEventListener("change", updateAllPreviews);
-      });
 
-    }
+    
+    /* Legacy duplicate toggleAgent removed in v8.3.0. */
+
+
+    
+    /* Legacy duplicate bindEvents removed in v8.3.0. */
+
 
     // ==============================
-    // v8.2.3 FCL route/detail overrides
+    // v8.3.0 FCL route/detail overrides
     // ==============================
 
     function makeStableId(prefix = "id") {
@@ -4248,7 +3293,7 @@ RestoreClipboard(*) {
       if (!source || !target || source === target) return;
       const used = new Set();
       target.equipment.forEach((targetEquipment) => {
-        let sourceEquipment = source.equipment.find((item) => item.syncKey === targetEquipment.syncKey && !used.has(item.id));
+        let sourceEquipment = source.equipment.find((item) => item.syncKey === targetEquipment.syncKey && item.type === targetEquipment.type && !used.has(item.id));
         if (!sourceEquipment) {
           sourceEquipment = source.equipment.find((item) => item.type === targetEquipment.type && !used.has(item.id));
         }
@@ -4277,7 +3322,7 @@ RestoreClipboard(*) {
       const currencyKey = kind === "freight" ? "freightCurrency" : "precarriageCurrency";
       state.routes.forEach((route) => {
         route.equipment.forEach((candidate) => {
-          if (candidate.syncKey !== equipment.syncKey || !candidate[enabledKey]) return;
+          if (candidate.syncKey !== equipment.syncKey || candidate.type !== equipment.type || !candidate[enabledKey]) return;
           candidate[amountKey] = equipment[amountKey];
           candidate[currencyKey] = equipment[currencyKey];
         });
@@ -4291,7 +3336,7 @@ RestoreClipboard(*) {
       const matches = [];
       state.routes.forEach((route, routeIndex) => {
         route.equipment.forEach((candidate) => {
-          if (candidate.syncKey === equipment.syncKey) matches.push({ route, routeIndex, equipment: candidate });
+          if (candidate.syncKey === equipment.syncKey && candidate.type === equipment.type) matches.push({ route, routeIndex, equipment: candidate });
         });
       });
       if (matches.length < 2) {
@@ -4545,11 +3590,15 @@ RestoreClipboard(*) {
     }
 
     function syncCarrierControlsWithinDetail(route, detailRow, carrier) {
+      const canonical = upper(carrier) || "MSC";
+      route.equipment.forEach((item, index) => {
+        if (detailRowNumber(item, index + 1) === detailRow) item.carrier = canonical;
+      });
       document.querySelectorAll("#equipmentList .equipment-card[data-index]").forEach((card) => {
         const item = route.equipment[Number(card.dataset.index)];
         if (!item || detailRowNumber(item, 1) !== detailRow) return;
         const select = card.querySelector('[data-key="carrier"]');
-        if (select) select.value = carrier;
+        if (select && select.value !== canonical) select.value = canonical;
       });
     }
 
@@ -4607,6 +3656,15 @@ RestoreClipboard(*) {
             if (key === "carrier") {
               syncCarrierWithinDetail(route, equipment, false);
               syncCarrierControlsWithinDetail(route, detailRowNumber(equipment, index + 1), equipment.carrier);
+            }
+            if (key === "type" && eventType === "change") {
+              const linked = state.routes.flatMap((candidateRoute) => candidateRoute.equipment.filter((candidate) => candidate.syncKey === equipment.syncKey));
+              if (linked.some((candidate) => candidate.type !== equipment.type)) {
+                linked.forEach((candidate) => { candidate.syncFreight = false; candidate.syncPrecarriage = false; });
+              }
+              renderEquipment();
+              updateAllPreviews();
+              return;
             }
             if (key === "includeOriginCharges") syncOriginVisibility();
             if (key === "includeStuff") {
@@ -4687,12 +3745,13 @@ RestoreClipboard(*) {
         const quantity = Math.max(1, Math.trunc(numberValue(item.quantity) || 0));
         const freightCost = convert(item.freightAmount, item.freightCurrency, target);
         const precarriageCost = includePrecarriage ? convert(item.precarriageAmount, item.precarriageCurrency, target) : 0;
-        const originCost = item.includeOriginCharges ? convert(item.originAmount, item.originCurrency, target) : 0;
-        const originSelling = item.includeOriginCharges ? round5(originCost) : 0;
+        const includeOriginCharges = incoterm !== "FOB" && Boolean(item.includeOriginCharges);
+        const originCost = includeOriginCharges ? convert(item.originAmount, item.originCurrency, target) : 0;
+        const originSelling = includeOriginCharges ? round5(originCost) : 0;
         const includeStuff = includePrecarriage && Boolean(item.includeStuff);
         const stuffCost = includeStuff ? convert(item.stuffAmount, item.stuffCurrency, target) : 0;
         const stuffSelling = includeStuff ? round5(stuffCost) : 0;
-        return { equipment: item, quantity, freightCost, precarriageCost, originCost, originSelling, includeStuff, stuffCost, stuffSelling };
+        return { equipment: item, quantity, freightCost, precarriageCost, includeOriginCharges, originCost, originSelling, includeStuff, stuffCost, stuffSelling };
       });
       const values = [desiredProfitTarget, linerCost, exportCustomCost, customSellingTotal, ...rows.flatMap((row) => [row.freightCost, row.precarriageCost, row.originCost, row.stuffCost])];
       if (!values.every(Number.isFinite)) return null;
@@ -4760,7 +3819,7 @@ RestoreClipboard(*) {
         (row.stuffSelling - row.stuffCost) * row.quantity
       ]));
       calc.rows.forEach((row) => rows.push([`Ocean freight (${row.quantity}X${row.equipment.type})`, row.freightCost * row.quantity, row.freightSelling, row.quantity, (row.freightSelling - row.freightCost) * row.quantity]));
-      calc.rows.filter((row) => row.equipment.includeOriginCharges).forEach((row) => rows.push([`Origin charges (${row.quantity}X${row.equipment.type})`, row.originCost * row.quantity, row.originSelling, row.quantity, (row.originSelling - row.originCost) * row.quantity]));
+      calc.rows.filter((row) => row.includeOriginCharges).forEach((row) => rows.push([`Origin charges (${row.quantity}X${row.equipment.type})`, row.originCost * row.quantity, row.originSelling, row.quantity, (row.originSelling - row.originCost) * row.quantity]));
       rows.push(["Liner fee", calc.linerCost, 100, 1, 100 - calc.linerCost]);
       if (calc.includeCustomExport) rows.push(["Custom export", calc.exportCustomCost, 100, 1, 100 - calc.exportCustomCost]);
       rows.push(["Forwarding fee", 0, 100, 1, 100]);
@@ -4829,6 +3888,34 @@ RestoreClipboard(*) {
       return lines.filter(Boolean).join("\n\n");
     }
 
+    function validateGeneratedChargeList(charges, context, mode = "FCL") {
+      if (!Array.isArray(charges) || !charges.length) throw new Error(`${context}: no charges were generated.`);
+      const required = mode === "LCL"
+        ? ["type", "description", "buyRate", "buyCurrency", "supplier", "supplierArrow", "sellingRate", "sellingCurrency", "per", "weightUnit"]
+        : ["type", "description", "buyRate", "buyCurrency", "supplier", "supplierArrow", "sellingRate", "sellingCurrency", "quantity", "quantityDescription"];
+      return charges.map((charge, index) => {
+        required.forEach((key) => {
+          if (!Object.prototype.hasOwnProperty.call(charge, key)) throw new Error(`${context}, charge ${index + 1}: missing ${key}.`);
+        });
+        if (!String(charge.type || "").trim()) throw new Error(`${context}, charge ${index + 1}: charge type is blank.`);
+        if (String(charge.sellingRate ?? "").trim() === "" || !isFiniteNumber(charge.sellingRate) || numberValue(charge.sellingRate) < 0) throw new Error(`${context}, charge ${index + 1}: invalid selling rate.`);
+        if (!String(charge.sellingCurrency || "").trim()) throw new Error(`${context}, charge ${index + 1}: selling currency is blank.`);
+        const hasBuying = String(charge.buyRate ?? "").trim() !== "";
+        if (hasBuying && (!isFiniteNumber(charge.buyRate) || numberValue(charge.buyRate) < 0)) throw new Error(`${context}, charge ${index + 1}: invalid buying rate.`);
+        if (hasBuying !== Boolean(String(charge.buyCurrency || "").trim())) throw new Error(`${context}, charge ${index + 1}: buying rate and currency must either both be set or both be blank.`);
+        if (String(charge.supplier || "").trim() && !hasBuying) throw new Error(`${context}, charge ${index + 1}: supplier is set without a buying rate.`);
+        if (hasBuying && !String(charge.supplier || "").trim()) throw new Error(`${context}, charge ${index + 1}: buying rate is set without a supplier.`);
+        if (mode === "FCL") {
+          if (!(numberValue(charge.quantity) >= 1)) throw new Error(`${context}, charge ${index + 1}: invalid quantity.`);
+          if (!String(charge.quantityDescription || "").trim()) throw new Error(`${context}, charge ${index + 1}: quantity description is blank.`);
+        }
+        return {
+          ...charge,
+          debugLabel: `${context} · ${index + 1}/${charges.length} · ${String(charge.description || charge.type).replace(/\s+/g, " ").trim()}`
+        };
+      });
+    }
+
     function createChargeMaps(route, equipment, calc) {
       const target = calc.target;
       const collection = routeCollection(route);
@@ -4892,7 +3979,7 @@ RestoreClipboard(*) {
         quantity: String(row.quantity), quantityDescription: row.equipment.type
       }));
 
-      calc.rows.filter((row) => row.equipment.includeOriginCharges).forEach((row) => charges.push({
+      calc.rows.filter((row) => row.includeOriginCharges).forEach((row) => charges.push({
         type: "freight",
         description: calc.rows.length > 1
           ? quoteText("fcl.charges.originChargesByEquipment", { QUANTITY: row.quantity, EQUIPMENT: row.equipment.type })
@@ -4941,7 +4028,7 @@ RestoreClipboard(*) {
         sellingRate: "50", sellingCurrency: target,
         quantity: String(calc.totalQuantity), quantityDescription: profitQuantityDescription
       });
-      return charges;
+      return validateGeneratedChargeList(charges, `FCL ${routePath(route)} · detail ${calc.detailRow}`, "FCL");
     }
 
     function validateForm() {
@@ -4960,7 +4047,8 @@ RestoreClipboard(*) {
       });
       if (!(numberValue($("sekUsd").value) > 0)) { $("sekUsd").classList.add("invalid"); errors.push("ROE SEK→USD is missing or invalid."); }
       if (!(numberValue($("sekEur").value) > 0)) { $("sekEur").classList.add("invalid"); errors.push("ROE SEK→EUR is missing or invalid."); }
-      if (!(numberValue($("profitSek").value) >= 0)) { $("profitSek").classList.add("invalid"); errors.push("Profit must be 0 or higher."); }
+      if (!isFiniteNumber($("profitSek").value) || numberValue($("profitSek").value) < 0) { $("profitSek").classList.add("invalid"); errors.push("Profit must be entered and be 0 or higher."); }
+      if (!isFiniteNumber($("paymentDays").value) || numberValue($("paymentDays").value) < 0 || !Number.isInteger(numberValue($("paymentDays").value))) { $("paymentDays").classList.add("invalid"); errors.push("Payment term days must be a whole number of 0 or higher."); }
 
       state.routes.forEach((route, routeIndex) => {
         const prefix = `Route ${routeIndex + 1}`;
@@ -4978,7 +4066,7 @@ RestoreClipboard(*) {
           if (!fob && !PRE_CARRIAGE_CONFIG[upper(equipment.precarriageSupplier)]) errors.push(`${eqPrefix}: select a valid precarriage supplier.`);
           const requiredCosts = [["freight buying", equipment.freightAmount]];
           if (!fob) requiredCosts.push(["precarriage buying", equipment.precarriageAmount]);
-          if (equipment.includeOriginCharges) requiredCosts.push(["origin charges buying", equipment.originAmount]);
+          if (!fob && equipment.includeOriginCharges) requiredCosts.push(["origin charges buying", equipment.originAmount]);
           if (!fob && equipment.includeStuff) {
             requiredCosts.push(["stuffing buying", equipment.stuffAmount]);
             if (!stuffingSupplierConfig(equipment.stuffSupplier)) errors.push(`${eqPrefix}: select a valid stuffing supplier.`);
@@ -5096,15 +4184,21 @@ RestoreClipboard(*) {
     }
 
     function cargoEquipmentForQuote() {
-      const byType = new Map();
-      state.routes.forEach((route) => route.equipment.forEach((equipment) => {
-        const quantity = Math.max(1, Math.trunc(numberValue(equipment.quantity) || 1));
-        const type = equipment.type;
-        const existing = byType.get(type);
-        if (!existing) byType.set(type, { quantity, type, equipmentSearch: equipmentSearchValue(type) });
-        else existing.quantity = Math.max(existing.quantity, quantity);
+      const maximumByType = new Map();
+      state.routes.forEach((route) => {
+        const routeTotals = new Map();
+        route.equipment.forEach((equipment) => {
+          const quantity = Math.max(1, Math.trunc(numberValue(equipment.quantity) || 1));
+          const type = String(equipment.type || "");
+          routeTotals.set(type, (routeTotals.get(type) || 0) + quantity);
+        });
+        routeTotals.forEach((quantity, type) => {
+          maximumByType.set(type, Math.max(maximumByType.get(type) || 0, quantity));
+        });
+      });
+      return [...maximumByType.entries()].map(([type, quantity]) => ({
+        quantity, type, equipmentSearch: equipmentSearchValue(type)
       }));
-      return [...byType.values()];
     }
 
     function generateAhk() {
@@ -5136,7 +4230,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.2.3
+; Generated by BLU Auto Quote → AutoHotkey v8.3.0
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
 ; Selling currency: ${$("targetCurrency").value}
@@ -5155,9 +4249,13 @@ FIELD_DELAY := ${FIXED.fieldDelay}
 MENU_KEY_DELAY := ${FIXED.menuKeyDelay}
 MENU_ENTER_DELAY := ${FIXED.menuEnterDelay}
 SUPPLIER_ENTER_DELAY := ${FIXED.supplierEnterDelay}
+SUPPLIER_KEY_DELAY := ${FIXED.supplierKeyDelay}
 MENU_AFTER_DELAY := ${FIXED.menuAfterDelay}
 ROW_DELAY := ${FIXED.rowDelay}
 TAB_DELAY := ${FIXED.tabDelay}
+CHARGE_TYPE_DELAY := ${FIXED.chargeTypeDelay}
+CHARGE_FIELD_DELAY := ${FIXED.chargeFieldDelay}
+CHARGE_COMPLETE_DELAY := ${FIXED.chargeCompleteDelay}
 
 Running := false
 SavedClipboard := ""
@@ -5268,19 +4366,20 @@ Esc::ExitApp
 RunQuote() {
   global SavedClipboard, quote, FIELD_DELAY, MENU_ENTER_DELAY
   startTick := A_TickCount
+  ValidateQuoteData()
   CheckEnvironment()
   ActivateBlu()
   SavedClipboard := ClipboardAll()
 
   ToolTip "BLU automation: main quote fields"
-  TypeField("Project", quote["project"], true)
-  TypeField("Internal comment", quote["internalComment"])
-  TypeField("client", quote["clientCode"], true)
+  TypeField("Project", quote["project"], true, true)
+  TypeField("Internal comment", quote["internalComment"], false, true)
+  TypeField("client", quote["clientCode"], true, true)
   TypeField("address", StrUpper(quote["clientName"]), false, true)
-  TypeField("Attention to", quote["attentionTo"])
-  TypeField("Subject", quote["subject"])
-  TypeField("Salution", quote["salutation"])
-  TypeField("Cover letter", quote["coverLetter"])
+  TypeField("Attention to", quote["attentionTo"], false, true)
+  TypeField("Subject", quote["subject"], false, true)
+  TypeField("Salution", quote["salutation"], false, true)
+  TypeField("Cover letter", quote["coverLetter"], false, true)
 
   ClickField("Display costs")
   SendText "c"
@@ -5290,12 +4389,12 @@ RunQuote() {
   Send "{Enter}"
   Sleep FIELD_DELAY
 
-  TypeField("YearMonth", FormatTime(, "yyMM"))
-  TypeField("Sales operator", quote["salesOperator"])
+  TypeField("YearMonth", FormatTime(, "yyMM"), false, true)
+  TypeField("Sales operator", quote["salesOperator"], false, true)
   SelectField("inquiry type", "f")
   SelectField("target currency", quote["targetCurrency"])
   ClickField("events target currency")
-  TypeField("Valid to date", quote["validTo"], true)
+  TypeField("Valid to date", quote["validTo"], true, true)
 
   ToolTip "BLU automation: equipment"
   ClickField("cargo tab", TAB_DELAY)
@@ -5303,7 +4402,7 @@ RunQuote() {
     ClickField("add equipment", ROW_DELAY)
     TypeField("equipment quantity", equipment["quantity"], false, true)
     SelectField("kind of equipment", equipment["equipmentSearch"])
-    TypeField("gross weight", quote["grossWeight"])
+    TypeField("gross weight", quote["grossWeight"], false, true)
     TypeField("description of goods", quote["cargoDescription"], false, true)
   }
 
@@ -5313,8 +4412,8 @@ RunQuote() {
     if index > 1
       ScrollDetailUp()
     ClickField("create new detail", ROW_DELAY)
-    TypeField("detail subtitle", detail["subtitle"])
-    detailBasis := detail.Has("basisText") ? detail["basisText"] : Format("Based on {} ({})", detail["carrier"], StrUpper(quote["incoterm"]))
+    TypeField("detail subtitle", detail["subtitle"], false, true)
+    detailBasis := detail.Has("basisText") ? detail["basisText"] : "Based on " detail["carrier"] " (" StrUpper(quote["incoterm"]) ")"
     TypeDetailDescription(quote["clientName"], detailBasis)
     if !detail["removePlor"] && detail["collectionCode"] != ""
       SelectField("plor loc code", detail["collectionCode"])
@@ -5329,18 +4428,23 @@ RunQuote() {
       ClickField("plor loc code")
       ClickField("delete route point", MENU_ENTER_DELAY)
     }
-    TypeField("transit time", detail["transitTime"])
+    TypeField("transit time", detail["transitTime"], false, true)
     if detail["including"] != ""
       PasteField("including", detail["including"], true)
+    else
+      ClearChargeField("including")
     PasteField("excluding", detail["excluding"], true)
-    PasteField("subject to", quote["subjectTo"])
-    TypeField("terms of payment days", quote["paymentDays"])
+    PasteField("subject to", quote["subjectTo"], true)
+    TypeField("terms of payment days", quote["paymentDays"], false, true)
     SelectField("service type", "f")
     SelectField("incoterm", quote["incoterm"])
-    TypeField("incoterm location", detail["incotermLocation"])
+    TypeField("incoterm location", detail["incotermLocation"], false, true)
     ScrollDetailDown()
-    for charge in detail["charges"]
+    for chargeIndex, charge in detail["charges"] {
+      label := charge.Has("debugLabel") ? charge["debugLabel"] : charge["type"]
+      ToolTip "BLU automation: detail " index "/" quote["details"].Length " · charge " chargeIndex "/" detail["charges"].Length " · " label
       FillCharge(charge)
+    }
     PasteRemarksField(detail["remarks"])
   }
 
@@ -5359,6 +4463,26 @@ FormatElapsed(milliseconds) {
   minutes := Floor(totalSeconds / 60)
   seconds := Mod(totalSeconds, 60)
   return minutes > 0 ? minutes " min " seconds " sec" : seconds " sec"
+}
+
+ValidateQuoteData() {
+  global quote
+  requiredQuote := ["clientName", "subject", "targetCurrency", "details", "cargoEquipment"]
+  for key in requiredQuote {
+    if !quote.Has(key)
+      throw Error("Generated quote is missing field: " key)
+  }
+  if quote["details"].Length = 0
+    throw Error("Generated quote has no details rows.")
+  for detailIndex, detail in quote["details"] {
+    if !detail.Has("charges") || detail["charges"].Length = 0
+      throw Error("Detail " detailIndex " has no charges.")
+    for charge in detail["charges"] {
+      ValidateChargeData(charge)
+      if !charge.Has("quantity") || !charge.Has("quantityDescription")
+        throw Error("FCL charge is missing quantity data: " charge["type"])
+    }
+  }
 }
 
 CheckEnvironment() {
@@ -5381,6 +4505,8 @@ ActivateBlu() {
 
 ClickField(name, wait := 0) {
   global C, CLICK_DELAY
+  if !C.Has(name)
+    throw Error("Unknown BLU coordinate: " name)
   xy := C[name]
   Click xy[1], xy[2]
   Sleep wait > 0 ? wait : CLICK_DELAY
@@ -5464,23 +4590,106 @@ SelectField(name, value, arrowOffset := 0) {
 }
 
 SelectSupplierField(value, arrowOffset := 0) {
-  global SUPPLIER_ENTER_DELAY, MENU_AFTER_DELAY
+  global SUPPLIER_ENTER_DELAY, SUPPLIER_KEY_DELAY, MENU_AFTER_DELAY
   ClickField("supplier")
-  SendText String(value)
+  Send "^a"
+  Sleep 100
+  Send "{Backspace}"
+  Sleep 120
+  for character in StrSplit(String(value)) {
+    SendText character
+    Sleep SUPPLIER_KEY_DELAY
+  }
   Sleep SUPPLIER_ENTER_DELAY
   if arrowOffset != 0 {
     key := arrowOffset > 0 ? "{Down}" : "{Up}"
     Loop Abs(arrowOffset) {
       Send key
-      Sleep 200
+      Sleep 300
+    }
+  }
+  Send "{Enter}"
+  Sleep MENU_AFTER_DELAY + 250
+  Send "{Tab}"
+  Sleep 180
+}
+
+ClearChargeField(name) {
+  global CHARGE_FIELD_DELAY
+  ClickField(name)
+  Send "^a"
+  Sleep 100
+  Send "{Backspace}"
+  Sleep CHARGE_FIELD_DELAY
+}
+
+SetChargeTextField(name, value) {
+  global FIELD_DELAY, CHARGE_FIELD_DELAY
+  ClickField(name)
+  Send "^a"
+  Sleep 100
+  Send "{Backspace}"
+  Sleep 100
+  SendText String(value)
+  Sleep FIELD_DELAY
+  Send "{Tab}"
+  Sleep CHARGE_FIELD_DELAY
+}
+
+SetChargePriceField(name, value) {
+  SetChargeTextField(name, StrReplace(String(value), ".", ","))
+}
+
+SelectChargeField(name, value, arrowOffset := 0) {
+  global MENU_ENTER_DELAY, MENU_AFTER_DELAY
+  ClickField(name)
+  Send "^a"
+  Sleep 100
+  Send "{Backspace}"
+  Sleep 120
+  SlowType(value)
+  Sleep MENU_ENTER_DELAY
+  if arrowOffset != 0 {
+    key := arrowOffset > 0 ? "{Down}" : "{Up}"
+    Loop Abs(arrowOffset) {
+      Send key
+      Sleep 300
     }
   }
   Send "{Enter}"
   Sleep MENU_AFTER_DELAY
 }
 
-TypePriceField(name, value) {
-  TypeField(name, StrReplace(String(value), ".", ","))
+SetChargeDescription(value) {
+  if value = "" {
+    ClearChargeField("charge description")
+    return
+  }
+  PasteField("charge description", value, true)
+  Send "{Tab}"
+  Sleep 250
+}
+
+ValidateChargeData(charge) {
+  required := ["type", "description", "buyRate", "buyCurrency", "supplier", "supplierArrow", "sellingRate", "sellingCurrency"]
+  for key in required {
+    if !charge.Has(key)
+      throw Error("Generated charge is missing field: " key)
+  }
+  if charge["type"] = ""
+    throw Error("Generated charge has no charge type.")
+  if charge["sellingRate"] = "" || charge["sellingCurrency"] = ""
+    throw Error("Generated charge is missing selling rate/currency: " charge["type"])
+  if !IsNumber(charge["sellingRate"])
+    throw Error("Generated charge has a non-numeric selling rate: " charge["type"])
+  if (charge["buyRate"] = "") != (charge["buyCurrency"] = "")
+    throw Error("Generated charge has an incomplete buying rate/currency pair: " charge["type"])
+  if charge["buyRate"] != "" && !IsNumber(charge["buyRate"])
+    throw Error("Generated charge has a non-numeric buying rate: " charge["type"])
+  if charge["supplier"] != "" && charge["buyRate"] = ""
+    throw Error("Generated charge has a supplier but no buying rate: " charge["type"])
+  if charge["buyRate"] != "" && charge["supplier"] = ""
+    throw Error("Generated charge has a buying rate but no supplier: " charge["type"])
 }
 
 DoubleSelectField(name, value) {
@@ -5527,22 +4736,33 @@ ScrollDetailUp() {
 }
 
 FillCharge(charge) {
-  global ROW_DELAY
+  global ROW_DELAY, CHARGE_TYPE_DELAY, CHARGE_COMPLETE_DELAY
+  ValidateChargeData(charge)
   ClickField("add new charge", ROW_DELAY)
-  SelectField("charge type", charge["type"])
-  if charge["description"] != ""
-    PasteField("charge description", charge["description"], true)
-  if charge["buyRate"] != ""
-    TypePriceField("charge buying rate", charge["buyRate"])
+  SelectChargeField("charge type", charge["type"])
+  Sleep CHARGE_TYPE_DELAY
+  SetChargeDescription(charge["description"])
+
   if charge["buyCurrency"] != ""
-    SelectField("buying rate currency", StrLower(charge["buyCurrency"]))
+    SelectChargeField("buying rate currency", StrLower(charge["buyCurrency"]))
+  else
+    ClearChargeField("buying rate currency")
+  if charge["buyRate"] != ""
+    SetChargePriceField("charge buying rate", charge["buyRate"])
+  else
+    ClearChargeField("charge buying rate")
+
   if charge["supplier"] != ""
     SelectSupplierField(charge["supplier"], charge.Has("supplierArrow") ? charge["supplierArrow"] : 0)
-  TypePriceField("charge selling rate", charge["sellingRate"])
-  SelectField("selling rate currency", StrLower(charge["sellingCurrency"]))
-  SelectField("charge per", "q")
-  TypeField("charge quantity", charge["quantity"])
-  TypeField("charge quantity description", charge["quantityDescription"])
+  else
+    ClearChargeField("supplier")
+
+  SelectChargeField("selling rate currency", StrLower(charge["sellingCurrency"]))
+  SetChargePriceField("charge selling rate", charge["sellingRate"])
+  SelectChargeField("charge per", "q")
+  SetChargeTextField("charge quantity", charge["quantity"])
+  SetChargeTextField("charge quantity description", charge["quantityDescription"])
+  Sleep CHARGE_COMPLETE_DELAY
 }
 
 ClickInWindow(title, x, y, wait := 250) {
@@ -5589,12 +4809,16 @@ RestoreClipboard(*) {
       document.querySelectorAll("#equipmentList .precarriage-field, #equipmentList .stuffing-field").forEach((element) => element.classList.toggle("hidden", fob));
       document.querySelectorAll("#equipmentList .equipment-card").forEach((card) => {
         const equipment = activeRoute()?.equipment?.[Number(card.dataset.index)];
-        const fields = card.querySelector(".stuffing-fields");
-        if (fields) fields.classList.toggle("hidden", fob || !equipment?.includeStuff);
+        const stuffingFields = card.querySelector(".stuffing-fields");
+        const originOption = card.querySelector(".origin-option");
+        const originFields = card.querySelector(".origin-fields");
+        if (stuffingFields) stuffingFields.classList.toggle("hidden", fob || !equipment?.includeStuff);
+        if (originOption) originOption.classList.toggle("hidden", fob);
+        if (originFields) originFields.classList.toggle("hidden", fob || !equipment?.includeOriginCharges);
       });
       if (fob) {
         $("collectionCity")?.classList.remove("invalid");
-        document.querySelectorAll('#equipmentList [data-key="precarriageAmount"], #equipmentList [data-key="precarriageCurrency"], #equipmentList [data-key="precarriageSupplier"], #equipmentList [data-key="stuffAmount"], #equipmentList [data-key="stuffCurrency"], #equipmentList [data-key="stuffSupplier"]').forEach((element) => element.classList.remove("invalid"));
+        document.querySelectorAll('#equipmentList [data-key="precarriageAmount"], #equipmentList [data-key="precarriageCurrency"], #equipmentList [data-key="precarriageSupplier"], #equipmentList [data-key="originAmount"], #equipmentList [data-key="originCurrency"], #equipmentList [data-key="stuffAmount"], #equipmentList [data-key="stuffCurrency"], #equipmentList [data-key="stuffSupplier"]').forEach((element) => element.classList.remove("invalid"));
       }
       if (refresh) updateAllPreviews();
     }
@@ -5704,7 +4928,7 @@ RestoreClipboard(*) {
     }
 
     // =====================================
-    // v8.2.3 Nordicon / LCL compatibility work
+    // v8.3.0 Nordicon / LCL compatibility work
     // =====================================
 
     function parseNordiconCharge(lines, pattern) {
@@ -5864,7 +5088,7 @@ RestoreClipboard(*) {
     }
 
     function normaliseImoDescription(values) {
-      const ignored = /^(?:NO|NONE|N\/A|NOT APPLICABLE|NON[- ]?IMO|GENERAL CARGO)$/i;
+      const ignored = /^(?:NO|NONE|N\/A|NOT APPLICABLE|NON[- ]?IMO|GENERAL CARGO|TOTAL EMISSIONS|NO\. OF PACKAGES|WEIGHT|VOLUME|DIMENSIONS|CARGO DETAILS)$/i;
       const lines = [];
       for (const value of values || []) {
         for (const part of String(value ?? "").replace(/\r/g, "").split(/\n+/)) {
@@ -5885,15 +5109,15 @@ RestoreClipboard(*) {
           let blankRowsAfterValue = 0;
           for (let index = rowIndex + 1; index < Math.min(rows.length, rowIndex + 20); index += 1) {
             const nextRow = rows[index] || [];
-            if (nextRow.some((value) => /^(?:No\. of packages|Description|Conditions|Rate of exchange)$/i.test(String(value ?? "").trim()))) break;
             const value = String(nextRow[column] ?? "").trim();
             if (value) {
               values.push(value);
               blankRowsAfterValue = 0;
             } else if (values.length) {
               blankRowsAfterValue += 1;
-              if (blankRowsAfterValue >= 2) break;
             }
+            const startsNextSection = nextRow.some((cell) => /^(?:No\. of packages|Description|Conditions|Rate of exchange)$/i.test(String(cell ?? "").trim()));
+            if (startsNextSection || blankRowsAfterValue >= 2) break;
           }
           const description = normaliseImoDescription(values);
           if (description) return description;
@@ -6110,7 +5334,7 @@ RestoreClipboard(*) {
         sellingRate: formatPlainNumber(lclConvert(charge.total, charge.currency, "USD")), sellingCurrency: "USD", per: "", weightUnit: ""
       }));
       charges.push({ type: "profit", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: formatPlainNumber(calc.profitSelling), sellingCurrency: "USD", per: "", weightUnit: "" });
-      return charges;
+      return validateGeneratedChargeList(charges, `LCL ${lclSubject()}`, "LCL");
     }
 
     function updateLclCalculation() {
@@ -6301,4 +5525,3 @@ RestoreClipboard(*) {
   </script>
 </body>
 </html>
-
