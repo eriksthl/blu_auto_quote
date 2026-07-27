@@ -284,7 +284,7 @@
     }
 
 
-    /* Version 8.2.1 split workspace */
+    /* Version 8.2.2 split workspace */
     main { width: min(1180px, calc(100% - 24px)); }
     .file-state { display: grid; gap: 4px; min-width: 285px; }
     .file-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 26px; }
@@ -322,7 +322,7 @@
     .equipment-title strong { font-size: 13px; }
     .equipment-title span { display: inline-flex; padding: 2px 6px; border: 1px solid #aaa; background: #fff; color: #444; font-size: 10px; font-weight: 700; }
     .equipment-body { padding: 8px; }
-    .equipment-core-grid { display: grid; grid-template-columns: 58px minmax(105px, .7fr) 64px minmax(155px, 1.2fr); gap: 7px; align-items: end; }
+    .equipment-core-grid { display: grid; grid-template-columns: 58px minmax(125px, 1fr) 64px; gap: 7px; align-items: end; }
     .compact-number-field input { text-align: center; font-weight: 700; }
     .equipment-cost-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.25fr); gap: 8px; margin-top: 8px; }
     .cost-block { padding: 8px; border: 1px solid #bbb; background: #fafafa; }
@@ -341,7 +341,7 @@
     #lclPane { max-width: 960px; margin: 0 auto; }
     @media (max-width: 1000px) {
       .fcl-workspace { grid-template-columns: 350px minmax(0, 1fr); }
-      .equipment-core-grid { grid-template-columns: 58px minmax(100px, 1fr) 64px minmax(140px, 1fr); }
+      .equipment-core-grid { grid-template-columns: 58px minmax(110px, 1fr) 64px; }
       .supplier-pair { grid-template-columns: minmax(90px, 1fr) 82px; }
       .supplier-pair .supplier-field { grid-column: 1 / -1; }
       .profit-layout { grid-template-columns: 1fr; }
@@ -349,7 +349,7 @@
     @media (max-width: 850px) {
       .fcl-workspace { grid-template-columns: 1fr; }
       .sticky-summary { position: static; }
-      .equipment-core-grid { grid-template-columns: 64px minmax(0, 1fr) 70px minmax(0, 1fr); }
+      .equipment-core-grid { grid-template-columns: 64px minmax(0, 1fr) 70px; }
       .file-line { justify-content: flex-start; }
       .file-state { min-width: 0; text-align: left; }
     }
@@ -362,7 +362,7 @@
       .location-title { grid-column: 1; }
     }
 
-    /* Version 8.2.1 compact LCL workspace */
+    /* Version 8.2.2 compact LCL workspace */
     #lclPane { max-width: none; margin: 0; }
     .lcl-workspace { display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 12px; align-items: start; }
     .lcl-left-stack, .lcl-right-stack { display: grid; gap: 12px; align-content: start; }
@@ -406,7 +406,7 @@
     <header>
       <div>
         <h1>BLU Auto Quote</h1>
-        <div class="app-version">AHK Script Gen // Version 8.2.1</div>
+        <div class="app-version">AHK Script Gen // Version 8.2.2</div>
       </div>
       <div class="file-state">
         <div class="file-line"><span id="locStatus">Loading LocCodes.xlsx...</span><button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button></div>
@@ -664,8 +664,8 @@
             </div>
           </section>
 
-          <details class="section lcl-data-section" id="lclCostsSection" open>
-            <summary class="section-head"><h2>Buying costs</h2></summary>
+          <details class="section lcl-data-section" id="lclCostsSection">
+            <summary class="section-head"><h2>Buying costs</h2><span class="small-note">Show / hide</span></summary>
             <div class="section-body cost-scroll">
               <table class="lcl-cost-table">
                 <thead><tr><th>Charge</th><th>Buying total</th><th class="currency-column">Currency</th><th class="rate-column">Quoted unit rate</th></tr></thead>
@@ -686,8 +686,8 @@
             </div>
           </details>
 
-          <details class="section lcl-data-section" id="lclCalculationSection" open>
-            <summary class="section-head"><h2>Calculation</h2></summary>
+          <details class="section lcl-data-section" id="lclCalculationSection">
+            <summary class="section-head"><h2>Calculation</h2><span class="small-note">Show / hide</span></summary>
             <div class="section-body"><div id="lclCalculation" class="preview-box"></div></div>
           </details>
         </div>
@@ -721,15 +721,15 @@
           <label class="field compact-number-field">Qty<input class="eq-input" data-key="quantity" type="number" min="1" step="1"></label>
           <label class="field">Equipment type<select class="eq-input" data-key="type"><option value="20'DV">20'DV</option><option value="40'DV">40'DV</option><option value="40'HC">40'HC</option><option value="20'RE">20'RE</option><option value="40'RE">40'RE</option></select></label>
           <label class="field compact-number-field">Detail<input class="eq-input" data-key="detailRow" type="number" min="1" step="1"></label>
-          <label class="field carrier-field">Carrier <span class="hint">synced within detail</span><select class="eq-input" data-key="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
         </div>
 
         <div class="equipment-cost-grid">
           <div class="cost-block">
             <div class="cost-block-title">Ocean freight</div>
-            <div class="money-pair">
+            <div class="money-pair supplier-pair">
               <label class="field">Buying<input class="eq-input" data-key="freightAmount" type="number" min="0" step="0.01"></label>
               <label class="field currency-field">Currency<select class="eq-input" data-key="freightCurrency"><option>USD</option><option>EUR</option><option>SEK</option></select></label>
+              <label class="field supplier-field carrier-field">Carrier <span class="hint">synced within detail</span><select class="eq-input" data-key="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
             </div>
           </div>
           <div class="cost-block precarriage-field">
@@ -797,7 +797,7 @@
       fieldDelay: 120,
       menuKeyDelay: 180,
       menuEnterDelay: 900,
-      supplierEnterDelay: 250,
+      supplierEnterDelay: 700,
       menuAfterDelay: 250,
       rowDelay: 1100,
       tabDelay: 900
@@ -2034,7 +2034,7 @@
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.2.1
+; Generated by BLU Auto Quote → AutoHotkey v8.2.2
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
 ; Selling currency: ${$("targetCurrency").value}
@@ -3008,7 +3008,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.1
+; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.2
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -3724,7 +3724,7 @@ RestoreClipboard(*) {
     }
 
     // ==============================
-    // v8.2.1 FCL route/detail overrides
+    // v8.2.2 FCL route/detail overrides
     // ==============================
 
     function makeStableId(prefix = "id") {
@@ -4410,6 +4410,11 @@ RestoreClipboard(*) {
             if (key === "carrier") {
               syncCarrierWithinDetail(route, equipment, false);
               reflectCarrierWithinDetail(route, equipment);
+              if (eventType === "change") {
+                renderEquipment();
+                updateAllPreviews();
+                return;
+              }
             }
             if (key === "includeOriginCharges") syncOriginVisibility();
             if (key === "includeStuff") {
@@ -4552,12 +4557,26 @@ RestoreClipboard(*) {
       const rows = [];
       if (calc.includePrecarriage && calc.commonPrecarriage) {
         const row = calc.rows[0];
-        const label = row.includeStuff ? "Pickup (all containers)" : "Precarriage (all containers)";
-        rows.push([label, row.precarriageCost * calc.totalQuantity, row.precarriageSelling, calc.totalQuantity, (row.precarriageSelling - row.precarriageCost) * calc.totalQuantity]);
+        const pickupLumpSum = row.includeStuff;
+        const label = pickupLumpSum ? "Pickup (lump sum / consignment)" : "Precarriage (all containers)";
+        rows.push([
+          label,
+          row.precarriageCost * calc.totalQuantity,
+          pickupLumpSum ? row.precarriageSelling * calc.totalQuantity : row.precarriageSelling,
+          pickupLumpSum ? 1 : calc.totalQuantity,
+          (row.precarriageSelling - row.precarriageCost) * calc.totalQuantity
+        ]);
       } else if (calc.includePrecarriage) {
         calc.rows.forEach((row) => {
-          const label = row.includeStuff ? `Pickup (${row.quantity}X${row.equipment.type})` : `Precarriage (${row.quantity}X${row.equipment.type})`;
-          rows.push([label, row.precarriageCost * row.quantity, row.precarriageSelling, row.quantity, (row.precarriageSelling - row.precarriageCost) * row.quantity]);
+          const pickupLumpSum = row.includeStuff;
+          const label = pickupLumpSum ? `Pickup (${row.quantity}X${row.equipment.type}, lump sum)` : `Precarriage (${row.quantity}X${row.equipment.type})`;
+          rows.push([
+            label,
+            row.precarriageCost * row.quantity,
+            pickupLumpSum ? row.precarriageSelling * row.quantity : row.precarriageSelling,
+            pickupLumpSum ? 1 : row.quantity,
+            (row.precarriageSelling - row.precarriageCost) * row.quantity
+          ]);
         });
       }
       calc.rows.filter((row) => row.includeStuff).forEach((row) => rows.push([
@@ -4651,21 +4670,25 @@ RestoreClipboard(*) {
 
       if (calc.includePrecarriage && calc.commonPrecarriage) {
         const row = calc.rows[0];
+        const pickupLumpSum = row.includeStuff;
         const trucker = PRE_CARRIAGE_CONFIG[upper(row.equipment.precarriageSupplier)] ?? PRE_CARRIAGE_CONFIG.DANIA;
-        const precarriageSupplier = row.includeStuff ? trucker : (agent ?? trucker);
+        const precarriageSupplier = pickupLumpSum ? trucker : (agent ?? trucker);
+        const commonUnit = calc.hasMultipleTypes ? "CONTAINER" : row.equipment.type;
         charges.push({
           type: "precarriage",
-          description: row.includeStuff ? quoteText("fcl.charges.pickup", { COLLECTION: collection }) : basePrecDescription,
+          description: pickupLumpSum ? quoteText("fcl.charges.pickup", { COLLECTION: collection }) : basePrecDescription,
           buyRate: formatPlainNumber(numberValue(row.equipment.precarriageAmount) * calc.totalQuantity), buyCurrency: row.equipment.precarriageCurrency,
           supplier: precarriageSupplier.supplier, supplierArrow: precarriageSupplier.supplierArrow,
-          sellingRate: formatPlainNumber(row.precarriageSelling), sellingCurrency: target,
-          quantity: String(calc.totalQuantity), quantityDescription: "CONTAINER"
+          sellingRate: formatPlainNumber(pickupLumpSum ? row.precarriageSelling * calc.totalQuantity : row.precarriageSelling), sellingCurrency: target,
+          quantity: pickupLumpSum ? "1" : String(calc.totalQuantity),
+          quantityDescription: pickupLumpSum ? "CONSIGNMENT" : commonUnit
         });
       } else if (calc.includePrecarriage) {
         calc.rows.forEach((row) => {
+          const pickupLumpSum = row.includeStuff;
           const trucker = PRE_CARRIAGE_CONFIG[upper(row.equipment.precarriageSupplier)] ?? PRE_CARRIAGE_CONFIG.DANIA;
-          const precarriageSupplier = row.includeStuff ? trucker : (agent ?? trucker);
-          const description = row.includeStuff
+          const precarriageSupplier = pickupLumpSum ? trucker : (agent ?? trucker);
+          const description = pickupLumpSum
             ? quoteText("fcl.charges.pickup", { COLLECTION: collection })
             : quoteText("fcl.charges.precarriageByEquipment", {
                 QUANTITY: row.quantity, EQUIPMENT: row.equipment.type, COLLECTION: collection, WAITING_TEXT: waitingText
@@ -4674,8 +4697,9 @@ RestoreClipboard(*) {
             type: "precarriage", description,
             buyRate: formatPlainNumber(numberValue(row.equipment.precarriageAmount) * row.quantity), buyCurrency: row.equipment.precarriageCurrency,
             supplier: precarriageSupplier.supplier, supplierArrow: precarriageSupplier.supplierArrow,
-            sellingRate: formatPlainNumber(row.precarriageSelling), sellingCurrency: target,
-            quantity: String(row.quantity), quantityDescription: row.equipment.type
+            sellingRate: formatPlainNumber(pickupLumpSum ? row.precarriageSelling * row.quantity : row.precarriageSelling), sellingCurrency: target,
+            quantity: pickupLumpSum ? "1" : String(row.quantity),
+            quantityDescription: pickupLumpSum ? "CONSIGNMENT" : row.equipment.type
           });
         });
       }
@@ -4944,7 +4968,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.2.1
+; Generated by BLU Auto Quote → AutoHotkey v8.2.2
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
 ; Selling currency: ${$("targetCurrency").value}
@@ -5511,7 +5535,7 @@ RestoreClipboard(*) {
     }
 
     // =====================================
-    // v8.2.1 Nordicon / LCL compatibility work
+    // v8.2.2 Nordicon / LCL compatibility work
     // =====================================
 
     function parseNordiconCharge(lines, pattern) {
@@ -5984,7 +6008,7 @@ RestoreClipboard(*) {
 
 
     // =====================================
-    // v8.2.1 effective LCL / Nordicon overrides
+    // v8.2.2 effective LCL / Nordicon overrides
     // =====================================
 
     function newLclState(overrides = {}) {
