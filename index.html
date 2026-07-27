@@ -284,7 +284,7 @@
     }
 
 
-    /* Version 8.2.2 split workspace */
+    /* Version 8.2.3 split workspace */
     main { width: min(1180px, calc(100% - 24px)); }
     .file-state { display: grid; gap: 4px; min-width: 285px; }
     .file-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 26px; }
@@ -324,12 +324,15 @@
     .equipment-body { padding: 8px; }
     .equipment-core-grid { display: grid; grid-template-columns: 58px minmax(125px, 1fr) 64px; gap: 7px; align-items: end; }
     .compact-number-field input { text-align: center; font-weight: 700; }
-    .equipment-cost-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.25fr); gap: 8px; margin-top: 8px; }
-    .cost-block { padding: 8px; border: 1px solid #bbb; background: #fafafa; }
+    .equipment-cost-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+    .cost-block { min-width: 0; padding: 8px; border: 1px solid #bbb; background: #fafafa; }
     .cost-block-title { margin-bottom: 5px; color: #555; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
     .money-pair { display: grid; grid-template-columns: minmax(90px, 1fr) 82px; gap: 6px; align-items: end; }
-    .supplier-pair { grid-template-columns: minmax(90px, 1fr) 82px minmax(120px, 1.1fr); }
-    .currency-field select { min-width: 0; }
+    .supplier-pair { grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1.05fr); }
+    .supplier-pair > .field, .supplier-field, .carrier-field { min-width: 0; }
+    .supplier-field select, .carrier-field select, .currency-field select { min-width: 0; max-width: 100%; }
+    .agent-manual-fields { margin-top: 9px; padding-top: 9px; border-top: 1px solid #ccc; }
+    .agent-manual-fields .small-note { align-self: end; padding-bottom: 7px; }
     .equipment-option-row { margin-top: 7px; padding: 6px 8px; border: 1px solid #ccc; background: #fff; }
     .equipment-advanced { margin-top: 7px; }
     .equipment-advanced .sync-grid { margin: 0; }
@@ -362,7 +365,7 @@
       .location-title { grid-column: 1; }
     }
 
-    /* Version 8.2.2 compact LCL workspace */
+    /* Version 8.2.3 compact LCL workspace */
     #lclPane { max-width: none; margin: 0; }
     .lcl-workspace { display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 12px; align-items: start; }
     .lcl-left-stack, .lcl-right-stack { display: grid; gap: 12px; align-content: start; }
@@ -406,7 +409,7 @@
     <header>
       <div>
         <h1>BLU Auto Quote</h1>
-        <div class="app-version">AHK Script Gen // Version 8.2.2</div>
+        <div class="app-version">AHK Script Gen // Version 8.2.3</div>
       </div>
       <div class="file-state">
         <div class="file-line"><span id="locStatus">Loading LocCodes.xlsx...</span><button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button></div>
@@ -442,8 +445,13 @@
                   </div>
                   <div class="option-row">
                     <label class="waiting-check"><input id="useAgent" type="checkbox"> AGENT</label>
-                    <label class="field hidden compact-select" id="agentField">Agent<select id="agent"><option>CHS</option></select></label>
+                    <label class="field hidden compact-select" id="agentField">Agent<select id="agent"><option>CHS</option><option>SR GROUP</option><option>N.A. NISSEN</option></select></label>
                     <label class="waiting-check"><input id="exportQuote" type="checkbox"> Export quote</label>
+                  </div>
+                  <div id="agentManualFields" class="grid two agent-manual-fields hidden">
+                    <label class="field"><span id="agentHandlingLabel">Handling buying</span><input id="agentHandlingAmount" type="number" min="0" step="0.01"></label>
+                    <label class="field"><span id="agentCustomExportLabel">Custom export buying</span><input id="agentCustomExportAmount" type="number" min="0" step="0.01"></label>
+                    <div id="agentCostNote" class="small-note span-two"></div>
                   </div>
                 </div>
               </details>
@@ -553,6 +561,8 @@
                   <div class="grid two">
                     <label class="field">1 SEK = USD<input id="sekUsd" type="number" min="0" step="0.000001"></label>
                     <label class="field">1 SEK = EUR<input id="sekEur" type="number" min="0" step="0.000001"></label>
+                    <label class="field">1 SEK = NOK<input id="sekNok" type="number" min="0" step="0.000001"></label>
+                    <label class="field">1 SEK = DKK<input id="sekDkk" type="number" min="0" step="0.000001"></label>
                   </div>
                   <div class="roe-actions"><button type="button" class="btn small" id="refreshRates">Refresh ROE</button></div>
                 </div>
@@ -724,20 +734,20 @@
         </div>
 
         <div class="equipment-cost-grid">
-          <div class="cost-block">
-            <div class="cost-block-title">Ocean freight</div>
-            <div class="money-pair supplier-pair">
-              <label class="field">Buying<input class="eq-input" data-key="freightAmount" type="number" min="0" step="0.01"></label>
-              <label class="field currency-field">Currency<select class="eq-input" data-key="freightCurrency"><option>USD</option><option>EUR</option><option>SEK</option></select></label>
-              <label class="field supplier-field carrier-field">Carrier <span class="hint">synced within detail</span><select class="eq-input" data-key="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
-            </div>
-          </div>
           <div class="cost-block precarriage-field">
             <div class="cost-block-title">Precarriage</div>
             <div class="money-pair supplier-pair">
               <label class="field">Buying<input class="eq-input" data-key="precarriageAmount" type="number" min="0" step="0.01"></label>
               <label class="field currency-field">Currency<select class="eq-input" data-key="precarriageCurrency"><option>SEK</option><option>USD</option><option>EUR</option></select></label>
               <label class="field supplier-field">Supplier<select class="eq-input" data-key="precarriageSupplier"><option>DANIA</option><option>SKARASLÄTTEN</option><option>PGF</option></select></label>
+            </div>
+          </div>
+          <div class="cost-block">
+            <div class="cost-block-title">Ocean freight</div>
+            <div class="money-pair supplier-pair">
+              <label class="field">Buying<input class="eq-input" data-key="freightAmount" type="number" min="0" step="0.01"></label>
+              <label class="field currency-field">Currency<select class="eq-input" data-key="freightCurrency"><option>USD</option><option>EUR</option><option>SEK</option></select></label>
+              <label class="field supplier-field carrier-field">Carrier<select class="eq-input" data-key="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
             </div>
           </div>
         </div>
@@ -829,7 +839,19 @@
     });
 
     const AGENT_CONFIG = Object.freeze({
-      "CHS": { supplier: "chs", supplierArrow: 0, exportCustomAmount: 65, exportCustomCurrency: "EUR" }
+      "CHS": {
+        supplier: "chs", supplierArrow: 0,
+        exportCustomAmount: 65, exportCustomCurrency: "EUR",
+        forwardingFeeAmount: "", forwardingFeeCurrency: "", manualCosts: false
+      },
+      "SR GROUP": {
+        supplier: "sr group", supplierArrow: 0,
+        costCurrency: "NOK", manualCosts: true
+      },
+      "N.A. NISSEN": {
+        supplier: "n.a.", supplierArrow: 0,
+        costCurrency: "DKK", manualCosts: true
+      }
     });
 
 
@@ -852,7 +874,7 @@
     });
 
     const state = {
-      rates: { USD: null, EUR: null, date: null },
+      rates: { USD: null, EUR: null, NOK: null, DKK: null, date: null },
       locations: new Map(),
       equipment: [newEquipment()],
       generatedScript: "",
@@ -1467,25 +1489,39 @@
     }
 
     function agentConfig() {
-      if (!$("useAgent").checked) return null;
-      return AGENT_CONFIG[upper($("agent").value)] ?? AGENT_CONFIG.CHS;
+      if (!$('useAgent').checked) return null;
+      const key = upper($('agent').value) || 'CHS';
+      const base = AGENT_CONFIG[key] ?? AGENT_CONFIG.CHS;
+      if (!base.manualCosts) return { ...base, code: key };
+      return {
+        ...base,
+        code: key,
+        forwardingFeeAmount: $('agentHandlingAmount').value,
+        forwardingFeeCurrency: base.costCurrency,
+        exportCustomAmount: $('agentCustomExportAmount').value,
+        exportCustomCurrency: base.costCurrency
+      };
     }
 
     function getRatesFromInputs() {
       return {
         USD: numberValue($("sekUsd").value),
-        EUR: numberValue($("sekEur").value)
+        EUR: numberValue($("sekEur").value),
+        NOK: numberValue($("sekNok").value),
+        DKK: numberValue($("sekDkk").value)
       };
     }
 
     function convert(amount, from, to) {
       amount = numberValue(amount);
+      from = upper(from);
+      to = upper(to);
       if (!Number.isFinite(amount)) return NaN;
       if (from === to) return amount;
       const rates = getRatesFromInputs();
-      if (!(rates.USD > 0) || !(rates.EUR > 0)) return NaN;
-      const amountSek = from === "SEK" ? amount : amount / rates[from];
-      return to === "SEK" ? amountSek : amountSek * rates[to];
+      const amountSek = from === "SEK" ? amount : (rates[from] > 0 ? amount / rates[from] : NaN);
+      if (!Number.isFinite(amountSek)) return NaN;
+      return to === "SEK" ? amountSek : (rates[to] > 0 ? amountSek * rates[to] : NaN);
     }
 
     function calculateDetail(eq) {
@@ -1524,7 +1560,7 @@
         (originSelling - originCost) * quantity +
         (100 - exportCustomCost) +
         (100 - linerCost) +
-        100 +
+        (100 - forwardingFeeCost) +
         50 * quantity;
 
       return {
@@ -1668,7 +1704,7 @@
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
       try {
-        const response = await fetch("https://api.frankfurter.dev/v2/rates?base=SEK&quotes=USD,EUR", {
+        const response = await fetch("https://api.frankfurter.dev/v2/rates?base=SEK&quotes=USD,EUR,NOK,DKK", {
           cache: "no-store",
           signal: controller.signal
         });
@@ -1676,11 +1712,13 @@
         const rows = await response.json();
         const rates = Object.fromEntries(rows.map((row) => [row.quote, Number(row.rate)]));
         const date = rows[0]?.date || "okänt datum";
-        if (!(rates.USD > 0) || !(rates.EUR > 0)) throw new Error("Kurssvaret saknar USD eller EUR");
+        if (!(rates.USD > 0) || !(rates.EUR > 0) || !(rates.NOK > 0) || !(rates.DKK > 0)) throw new Error("Kurssvaret saknar USD, EUR, NOK eller DKK");
 
-        state.rates = { USD: rates.USD, EUR: rates.EUR, date };
+        state.rates = { USD: rates.USD, EUR: rates.EUR, NOK: rates.NOK, DKK: rates.DKK, date };
         $("sekUsd").value = rates.USD.toFixed(6);
         $("sekEur").value = rates.EUR.toFixed(6);
+        $("sekNok").value = rates.NOK.toFixed(6);
+        $("sekDkk").value = rates.DKK.toFixed(6);
         $("lclSekUsd").value = rates.USD.toFixed(6);
         $("lclSekEur").value = rates.EUR.toFixed(6);
         $("lclRoeStatus").textContent = `Current rates loaded (${date}).`;
@@ -1978,6 +2016,8 @@
       $("profitSek").value = data.profitSek || "8000";
       if (data.sekUsd) $("sekUsd").value = data.sekUsd;
       if (data.sekEur) $("sekEur").value = data.sekEur;
+      if (data.sekNok) $("sekNok").value = data.sekNok;
+      if (data.sekDkk) $("sekDkk").value = data.sekDkk;
       if (data.roeDate) state.rates.date = data.roeDate;
 
       state.equipment = Array.isArray(data.equipment) && data.equipment.length
@@ -2034,9 +2074,9 @@
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.2.2
+; Generated by BLU Auto Quote → AutoHotkey v8.2.3
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
-; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
+; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR | 1 SEK = ${$("sekNok").value} NOK | 1 SEK = ${$("sekDkk").value} DKK
 ; Selling currency: ${$("targetCurrency").value}
 ; Desired profit: ${$("profitSek").value} SEK per detail
 ${importDataBlock}
@@ -3008,7 +3048,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.2
+; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.3
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -3724,7 +3764,7 @@ RestoreClipboard(*) {
     }
 
     // ==============================
-    // v8.2.2 FCL route/detail overrides
+    // v8.2.3 FCL route/detail overrides
     // ==============================
 
     function makeStableId(prefix = "id") {
@@ -4335,26 +4375,29 @@ RestoreClipboard(*) {
 
     function configurePrecarriageSupplierSelect(select, equipment) {
       if (!select || !equipment) return;
-      const current = upper(equipment.precarriageSupplier) || "DANIA";
-      const choices = equipment.includeStuff ? [current] : Object.keys(PRE_CARRIAGE_CONFIG);
-      select.replaceChildren(...choices.map((value) => {
+      const current = PRE_CARRIAGE_CONFIG[upper(equipment.precarriageSupplier)]
+        ? upper(equipment.precarriageSupplier)
+        : "DANIA";
+      select.replaceChildren(...Object.keys(PRE_CARRIAGE_CONFIG).map((value) => {
         const option = document.createElement("option");
         option.value = value;
         option.textContent = value;
         return option;
       }));
       select.value = current;
+      equipment.precarriageSupplier = current;
     }
 
     function reflectCarrierWithinDetail(route, sourceEquipment) {
       if (!route || !sourceEquipment) return;
       const row = detailRowNumber(sourceEquipment, 1);
-      const carrier = upper(sourceEquipment.carrier) || "MSC";
+      const carrier = CARRIER_CONFIG[upper(sourceEquipment.carrier)] ? upper(sourceEquipment.carrier) : "MSC";
       route.equipment.forEach((equipment, index) => {
         if (detailRowNumber(equipment, index + 1) !== row) return;
         equipment.carrier = carrier;
-        const peerSelect = document.querySelector(`.equipment-card[data-index="${index}"] [data-key="carrier"]`);
-        if (peerSelect) peerSelect.value = carrier;
+        const card = document.querySelector(`.equipment-card[data-index="${index}"]`);
+        const peerSelect = card?.querySelector('[data-key="carrier"]');
+        if (peerSelect && peerSelect.value !== carrier) peerSelect.value = carrier;
       });
     }
 
@@ -4408,13 +4451,10 @@ RestoreClipboard(*) {
               }
             }
             if (key === "carrier") {
+              equipment.carrier = upper(input.value) || "MSC";
               syncCarrierWithinDetail(route, equipment, false);
               reflectCarrierWithinDetail(route, equipment);
-              if (eventType === "change") {
-                renderEquipment();
-                updateAllPreviews();
-                return;
-              }
+              input.value = equipment.carrier;
             }
             if (key === "includeOriginCharges") syncOriginVisibility();
             if (key === "includeStuff") {
@@ -4486,6 +4526,7 @@ RestoreClipboard(*) {
       const liner = CARRIER_CONFIG[carrierCode] ?? CARRIER_CONFIG.MSC;
       const linerCost = convert(liner.linerAmount, liner.linerCurrency, target);
       const agent = agentConfig();
+      const forwardingFeeCost = agent?.manualCosts ? convert(agent.forwardingFeeAmount, agent.forwardingFeeCurrency, target) : 0;
       const exportCustomCost = includeCustomExport && agent ? convert(agent.exportCustomAmount, agent.exportCustomCurrency, target) : 0;
       const detailRow = detailRowNumber(equipment[0], 1);
       const customCharges = customChargesForDetail(route, detailRow);
@@ -4502,14 +4543,14 @@ RestoreClipboard(*) {
         const stuffSelling = includeStuff ? stuffCost : 0;
         return { equipment: item, quantity, freightCost, precarriageCost, originCost, originSelling, includeStuff, stuffCost, stuffSelling };
       });
-      const values = [desiredProfitTarget, linerCost, exportCustomCost, customSellingTotal, ...rows.flatMap((row) => [row.freightCost, row.precarriageCost, row.originCost, row.stuffCost])];
+      const values = [desiredProfitTarget, linerCost, forwardingFeeCost, exportCustomCost, customSellingTotal, ...rows.flatMap((row) => [row.freightCost, row.precarriageCost, row.originCost, row.stuffCost])];
       if (!values.every(Number.isFinite)) return null;
       const totalQuantity = rows.reduce((sum, row) => sum + row.quantity, 0);
       const originProfit = rows.reduce((sum, row) => sum + (row.originSelling - row.originCost) * row.quantity, 0);
       const stuffProfit = rows.reduce((sum, row) => sum + (row.stuffSelling - row.stuffCost) * row.quantity, 0);
       const fixedProfit =
         (100 - linerCost) +
-        100 +
+        (100 - forwardingFeeCost) +
         (50 * totalQuantity) +
         originProfit +
         stuffProfit +
@@ -4540,13 +4581,13 @@ RestoreClipboard(*) {
         + (includePrecarriage ? (row.precarriageSelling - row.precarriageCost) * row.quantity : 0)
         + (row.originSelling - row.originCost) * row.quantity
         + (row.stuffSelling - row.stuffCost) * row.quantity, 0)
-        + (100 - linerCost) + 100 + (50 * totalQuantity) + customSellingTotal
+        + (100 - linerCost) + (100 - forwardingFeeCost) + (50 * totalQuantity) + customSellingTotal
         + (includeCustomExport ? (100 - exportCustomCost) : 0);
       const reeferQuantity = rows.filter((row) => isReeferEquipment(row.equipment)).reduce((sum, row) => sum + row.quantity, 0);
       const hasMultipleTypes = new Set(rows.map((row) => row.equipment.type)).size > 1;
       return {
         target, incoterm, includePrecarriage, includeCustomExport, desiredProfitTarget,
-        carrierCode, liner, linerCost, exportCustomCost, rows, totalQuantity,
+        carrierCode, liner, linerCost, forwardingFeeCost, exportCustomCost, rows, totalQuantity,
         commonPrecarriage, actualProfit, remainingProfit, reeferQuantity,
         detailRow, customCharges, customSellingTotal, hasMultipleTypes,
         negativeSelling: rows.some((row) => row.freightSelling < 0 || (includePrecarriage && row.precarriageSelling < 0) || row.originSelling < 0 || row.stuffSelling < 0)
@@ -4590,7 +4631,7 @@ RestoreClipboard(*) {
       calc.rows.filter((row) => row.equipment.includeOriginCharges).forEach((row) => rows.push([`Origin charges (${row.quantity}X${row.equipment.type})`, row.originCost * row.quantity, row.originSelling, row.quantity, (row.originSelling - row.originCost) * row.quantity]));
       rows.push(["Liner fee", calc.linerCost, 100, 1, 100 - calc.linerCost]);
       if (calc.includeCustomExport) rows.push(["Custom export", calc.exportCustomCost, 100, 1, 100 - calc.exportCustomCost]);
-      rows.push(["Forwarding fee", 0, 100, 1, 100]);
+      rows.push(["Forwarding fee", calc.forwardingFeeCost, 100, 1, 100 - calc.forwardingFeeCost]);
       if (calc.reeferQuantity) rows.push(["Reefer monitoring costs at port", 0, 0, calc.reeferQuantity, 0]);
       calc.customCharges.forEach((charge) => rows.push([charge.name || "Custom Other charge", 0, numberValue(charge.sellingRate), 1, numberValue(charge.sellingRate)]));
       const profitUnit = calc.hasMultipleTypes ? "CONTAINER" : calc.rows[0].equipment.type;
@@ -4750,7 +4791,11 @@ RestoreClipboard(*) {
         });
       }
       charges.push({
-        type: "forwarding fee", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
+        type: "forwarding fee", description: "",
+        buyRate: agent?.manualCosts ? formatPlainNumber(agent.forwardingFeeAmount) : "",
+        buyCurrency: agent?.manualCosts ? agent.forwardingFeeCurrency : "",
+        supplier: agent?.manualCosts ? agent.supplier : "",
+        supplierArrow: agent?.manualCosts ? agent.supplierArrow : 0,
         sellingRate: "100", sellingCurrency: target, quantity: "1", quantityDescription: "CONSIGNMENT"
       });
       if (calc.reeferQuantity > 0) {
@@ -4792,6 +4837,19 @@ RestoreClipboard(*) {
       });
       if (!(numberValue($("sekUsd").value) > 0)) { $("sekUsd").classList.add("invalid"); errors.push("ROE SEK→USD is missing or invalid."); }
       if (!(numberValue($("sekEur").value) > 0)) { $("sekEur").classList.add("invalid"); errors.push("ROE SEK→EUR is missing or invalid."); }
+      const selectedAgent = agentConfig();
+      if (selectedAgent?.manualCosts) {
+        const rateId = selectedAgent.costCurrency === "NOK" ? "sekNok" : "sekDkk";
+        if (!(numberValue($(rateId).value) > 0)) { $(rateId).classList.add("invalid"); errors.push(`ROE SEK→${selectedAgent.costCurrency} is missing or invalid.`); }
+        if (!String($("agentHandlingAmount").value).trim() || !isFiniteNumber($("agentHandlingAmount").value) || numberValue($("agentHandlingAmount").value) < 0) {
+          $("agentHandlingAmount").classList.add("invalid");
+          errors.push(`${selectedAgent.code}: handling buying is missing or invalid.`);
+        }
+        if (incoterm === "EXW" && (!String($("agentCustomExportAmount").value).trim() || !isFiniteNumber($("agentCustomExportAmount").value) || numberValue($("agentCustomExportAmount").value) < 0)) {
+          $("agentCustomExportAmount").classList.add("invalid");
+          errors.push(`${selectedAgent.code}: custom export buying is missing or invalid.`);
+        }
+      }
       if (!(numberValue($("profitSek").value) >= 0)) { $("profitSek").classList.add("invalid"); errors.push("Profit must be 0 or higher."); }
 
       state.routes.forEach((route, routeIndex) => {
@@ -4841,14 +4899,15 @@ RestoreClipboard(*) {
     function exportFormData() {
       syncActiveRouteFromForm();
       return {
-        version: 5,
+        version: 6,
         mode: "FCL",
         clientName: textValue("clientName"), attentionTo: textValue("attentionTo"), salesOperator: textValue("salesOperator"),
         validTo: $("validTo").value, paymentDays: $("paymentDays").value, incoterm: $("incoterm").value,
         carrier: state.routes[0]?.equipment[0]?.carrier || "MSC",
         useAgent: $("useAgent").checked, agent: $("agent").value,
+        agentHandlingAmount: $("agentHandlingAmount").value, agentCustomExportAmount: $("agentCustomExportAmount").value,
         targetCurrency: $("targetCurrency").value, profitSek: $("profitSek").value,
-        sekUsd: $("sekUsd").value, sekEur: $("sekEur").value, roeDate: state.rates.date || "",
+        sekUsd: $("sekUsd").value, sekEur: $("sekEur").value, sekNok: $("sekNok").value, sekDkk: $("sekDkk").value, roeDate: state.rates.date || "",
         exportQuote: $("exportQuote").checked,
         routes: state.routes.map((route) => ({ ...route, equipment: route.equipment.map((equipment) => ({ ...equipment })) }))
       };
@@ -4865,7 +4924,7 @@ RestoreClipboard(*) {
 
     function applyImportedData(data) {
       const version = Number(data?.version);
-      if (!data || ![1, 3, 4, 5].includes(version)) throw new Error("Unsupported BLU quote data version.");
+      if (!data || ![1, 3, 4, 5, 6].includes(version)) throw new Error("Unsupported BLU quote data version.");
       activateMode("fcl");
       $("clientName").value = data.clientName || "";
       $("attentionTo").value = data.attentionTo || "";
@@ -4876,6 +4935,8 @@ RestoreClipboard(*) {
       setSelectValue("carrier", data.carrier, "MSC");
       $("useAgent").checked = Boolean(data.useAgent);
       setSelectValue("agent", data.agent, "CHS");
+      $("agentHandlingAmount").value = data.agentHandlingAmount ?? "";
+      $("agentCustomExportAmount").value = data.agentCustomExportAmount ?? "";
       setSelectValue("targetCurrency", data.targetCurrency, "USD");
       $("profitSek").value = data.profitSek || "8000";
       $("exportQuote").checked = Boolean(data.exportQuote);
@@ -4901,7 +4962,7 @@ RestoreClipboard(*) {
         });
       };
 
-      if ([3, 4, 5].includes(version) && Array.isArray(data.routes) && data.routes.length) {
+      if ([3, 4, 5, 6].includes(version) && Array.isArray(data.routes) && data.routes.length) {
         state.routes = data.routes.map(hydrateRoute);
       } else {
         state.routes = [hydrateRoute({
@@ -4968,9 +5029,9 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.2.2
+; Generated by BLU Auto Quote → AutoHotkey v8.2.3
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
-; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
+; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR | 1 SEK = ${$("sekNok").value} NOK | 1 SEK = ${$("sekDkk").value} DKK
 ; Selling currency: ${$("targetCurrency").value}
 ; Desired profit: ${$("profitSek").value} SEK per detail
 ${importDataBlock}
@@ -5441,6 +5502,8 @@ RestoreClipboard(*) {
       $("carrier").value = "MSC";
       $("useAgent").checked = false;
       $("agent").value = "CHS";
+      $("agentHandlingAmount").value = "";
+      $("agentCustomExportAmount").value = "";
       $("targetCurrency").value = "USD";
       $("exportQuote").checked = false;
       state.routes = [newRoute()];
@@ -5481,7 +5544,21 @@ RestoreClipboard(*) {
     }
 
     function toggleAgent() {
-      $("agentField").classList.toggle("hidden", !$("useAgent").checked);
+      const enabled = $("useAgent").checked;
+      $("agentField").classList.toggle("hidden", !enabled);
+      const key = upper($("agent").value) || "CHS";
+      const config = AGENT_CONFIG[key] ?? AGENT_CONFIG.CHS;
+      const showManual = enabled && Boolean(config.manualCosts);
+      $("agentManualFields").classList.toggle("hidden", !showManual);
+      if (showManual) {
+        $("agentHandlingLabel").textContent = `Handling buying (${config.costCurrency})`;
+        $("agentCustomExportLabel").textContent = `Custom export buying (${config.costCurrency})`;
+        $("agentCostNote").textContent = `Supplier search: ${config.supplier} + Enter. Handling is used as forwarding fee buying; custom export is used for EXW.`;
+      } else {
+        $("agentHandlingAmount").classList.remove("invalid");
+        $("agentCustomExportAmount").classList.remove("invalid");
+        $("agentCostNote").textContent = "";
+      }
       updateAllPreviews();
     }
 
@@ -5523,19 +5600,20 @@ RestoreClipboard(*) {
       $("includeWaitingTime").addEventListener("change", toggleWaitingTime);
       $("waitingHours").addEventListener("input", () => { activeRoute().waitingHours = $("waitingHours").value; updateAllPreviews(); });
       $("useAgent").addEventListener("change", toggleAgent);
-      $("incoterm").addEventListener("change", () => toggleIncotermFields(true));
+      $("agent").addEventListener("change", toggleAgent);
+      $("incoterm").addEventListener("change", () => { toggleIncotermFields(true); toggleAgent(); });
       $("collectionCity").addEventListener("input", applyCollectionSelection);
       $("collectionCity").addEventListener("change", applyCollectionSelection);
       $("precarriageSupplier").addEventListener("change", () => { activeRoute().precarriageSupplier = $("precarriageSupplier").value; updateAllPreviews(); });
       $("transitDays").addEventListener("input", () => { activeRoute().transitDays = $("transitDays").value; renderRouteTabs(); });
-      ["targetCurrency", "profitSek", "sekUsd", "sekEur", "carrier", "agent"].forEach((id) => {
+      ["targetCurrency", "profitSek", "sekUsd", "sekEur", "sekNok", "sekDkk", "carrier", "agentHandlingAmount", "agentCustomExportAmount"].forEach((id) => {
         $(id).addEventListener("input", updateAllPreviews);
         $(id).addEventListener("change", updateAllPreviews);
       });
     }
 
     // =====================================
-    // v8.2.2 Nordicon / LCL compatibility work
+    // v8.2.3 Nordicon / LCL compatibility work
     // =====================================
 
     function parseNordiconCharge(lines, pattern) {
@@ -6008,7 +6086,7 @@ RestoreClipboard(*) {
 
 
     // =====================================
-    // v8.2.2 effective LCL / Nordicon overrides
+    // v8.2.3 effective LCL / Nordicon overrides
     // =====================================
 
     function newLclState(overrides = {}) {
