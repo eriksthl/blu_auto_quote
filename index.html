@@ -4930,11 +4930,12 @@ RestoreClipboard(*) {
           const calc = calculateDetailGroup(route, group.equipment);
           const hasReefer = calc.reeferQuantity > 0;
           const subtitle = quoteText("fcl.subject", { EQUIPMENT: equipmentGroupSummary(group.equipment), ROUTE: routePath(route) });
+          const basisText = quoteText("common.detailBasis", { SUPPLIER: calc.carrierCode, INCOTERM: incoterm });
           const charges = createChargeMaps(route, group.equipment, calc).map((charge) => ahkMap(Object.entries(charge))).join(",\n            ");
           const removePlor = incoterm === "FOB";
           const incotermLocation = removePlor ? routePol(route) : routeCollection(route);
           const hasIncludedStuff = calc.rows.some((row) => row.includeStuff);
-          detailMaps.push(`Map(\n          "subtitle", ${ahkString(subtitle)},\n          "carrier", ${ahkString(calc.carrierCode)},\n          "collection", ${ahkString(routeCollection(route))},\n          "collectionCode", ${ahkString(route.collectionCode)},\n          "polCode", ${ahkString(route.polCode)},\n          "podCode", ${ahkString(route.podCode)},\n          "removePlor", ${removePlor ? "true" : "false"},\n          "incotermLocation", ${ahkString(incotermLocation)},\n          "transitTime", ${ahkString(transitTimeText(route.transitDays))},\n          "including", ${ahkString(includingText(route, hasReefer))},\n          "excluding", ${ahkString(excludingText(hasReefer, incoterm))},\n          "remarks", ${ahkString(remarksText(route, calc.carrierCode, hasIncludedStuff))},\n          "charges", [\n            ${charges}\n          ]\n        )`);
+          detailMaps.push(`Map(\n          "subtitle", ${ahkString(subtitle)},\n          "basisText", ${ahkString(basisText)},\n          "carrier", ${ahkString(calc.carrierCode)},\n          "collection", ${ahkString(routeCollection(route))},\n          "collectionCode", ${ahkString(route.collectionCode)},\n          "polCode", ${ahkString(route.polCode)},\n          "podCode", ${ahkString(route.podCode)},\n          "removePlor", ${removePlor ? "true" : "false"},\n          "incotermLocation", ${ahkString(incotermLocation)},\n          "transitTime", ${ahkString(transitTimeText(route.transitDays))},\n          "including", ${ahkString(includingText(route, hasReefer))},\n          "excluding", ${ahkString(excludingText(hasReefer, incoterm))},\n          "remarks", ${ahkString(remarksText(route, calc.carrierCode, hasIncludedStuff))},\n          "charges", [\n            ${charges}\n          ]\n        )`);
         });
       });
       const details = detailMaps.join(",\n        ");
