@@ -284,7 +284,7 @@
     }
 
 
-    /* Version 8.2.0 split workspace */
+    /* Version 8.2.1 split workspace */
     main { width: min(1180px, calc(100% - 24px)); }
     .file-state { display: grid; gap: 4px; min-width: 285px; }
     .file-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 26px; }
@@ -361,6 +361,43 @@
       .compact-route-grid .location-box { grid-template-columns: 1fr; }
       .location-title { grid-column: 1; }
     }
+
+    /* Version 8.2.1 compact LCL workspace */
+    #lclPane { max-width: none; margin: 0; }
+    .lcl-workspace { display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 12px; align-items: start; }
+    .lcl-left-stack, .lcl-right-stack { display: grid; gap: 12px; align-content: start; }
+    .lcl-workspace .section { margin-top: 0; }
+    .lcl-subsection-title { margin: 12px 0 7px; padding-bottom: 4px; border-bottom: 1px solid #ccc; color: #555; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .lcl-commercial-grid { grid-template-columns: .8fr 1fr .8fr; }
+    .lcl-route-grid { grid-template-columns: 1fr 1fr; }
+    .lcl-cargo-grid { display: grid; grid-template-columns: 62px 1fr 1fr 1.1fr; gap: 7px; align-items: end; }
+    .lcl-imo-field { margin-top: 8px; }
+    .lcl-imo-field textarea { min-height: 58px; resize: vertical; }
+    .lcl-incoterm-note { min-height: 28px; margin-top: 8px; padding: 6px 8px; border: 1px solid #ccc; background: #fafafa; color: #555; font-size: 11px; }
+    .lcl-profit-row { display: grid; grid-template-columns: minmax(0, 1fr) 125px; gap: 8px; align-items: end; }
+    .lcl-fixed-summary { min-height: 51px; padding: 7px 8px; border: 1px solid #bbb; background: #fafafa; }
+    .lcl-fixed-summary span { display: block; color: #666; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .lcl-fixed-summary strong { display: block; margin-top: 3px; font-size: 15px; }
+    .lcl-roe-details { margin-top: 8px; }
+    .lcl-primary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+    .lcl-primary-actions .primary { grid-column: 1 / -1; }
+    .lcl-import-panel textarea { min-height: 106px; }
+    .lcl-data-section { margin-top: 0; }
+    .lcl-data-section > summary.section-head { cursor: pointer; list-style-position: inside; }
+    .lcl-data-section > summary.section-head h2 { display: inline; margin-left: 4px; }
+    .lcl-cost-table td:first-child { min-width: 170px; }
+    .lcl-cost-table tr.origin-excluded { display: none; }
+    .lcl-extra-row.origin-excluded { display: none; }
+    .table-check { display: flex; align-items: center; gap: 6px; font-weight: normal; }
+    .table-check input { width: auto; min-height: 0; margin: 0; }
+    @media (max-width: 900px) {
+      .lcl-workspace { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 620px) {
+      .lcl-commercial-grid, .lcl-route-grid, .lcl-cargo-grid, .lcl-profit-row, .lcl-primary-actions { grid-template-columns: 1fr; }
+      .lcl-primary-actions .primary { grid-column: auto; }
+    }
+
 </style>
 </head>
 <body>
@@ -369,7 +406,7 @@
     <header>
       <div>
         <h1>BLU Auto Quote</h1>
-        <div class="app-version">AHK Script Gen // Version 8.2.0</div>
+        <div class="app-version">AHK Script Gen // Version 8.2.1</div>
       </div>
       <div class="file-state">
         <div class="file-line"><span id="locStatus">Loading LocCodes.xlsx...</span><button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button></div>
@@ -484,7 +521,7 @@
               <div class="summary-status"><span>Profit target</span><strong id="summaryProfit">8 000 SEK / detail</strong></div>
               <div class="summary-status"><span>Selling currency</span><strong id="summaryCurrency">USD</strong></div>
               <div class="summary-actions">
-                <button type="button" class="btn primary" id="generateScript" disabled>Generate AHK script</button>
+                <button type="button" class="btn primary" id="generateScript" disabled>Generate & download AHK</button>
                 <button type="button" class="btn" id="importScript">Import .ahk</button>
                 <input id="importScriptFile" class="hidden" type="file" accept=".ahk,.txt,text/plain">
                 <button type="button" class="btn" id="resetForm">Reset</button>
@@ -531,130 +568,138 @@
         <summary>Generated AutoHotkey script</summary>
         <div class="script-toolbar">
           <button type="button" class="btn" id="copyScript" disabled>Copy</button>
-          <button type="button" class="btn primary" id="downloadScript" disabled>Download .ahk</button>
+          <button type="button" class="btn primary hidden" id="downloadScript" disabled aria-hidden="true">Download .ahk</button>
         </div>
         <textarea id="scriptOutput" readonly spellcheck="false"></textarea>
       </details>
     </div>
 
 <div id="lclPane" class="mode-pane hidden">
-      <section class="section paste-box">
-        <div class="section-head"><h2>Nordicon quote</h2></div>
-        <div class="section-body">
-          <div id="lclPasteWrap">
-            <label class="field">Paste Nordicon quote
-              <textarea id="lclQuotePaste" placeholder="Paste the complete Nordicon quote here"></textarea>
-            </label>
-            <div class="actions compact-actions">
-              <button type="button" class="btn primary" id="lclParseQuote">Read pasted quote</button>
-              <button type="button" class="btn" id="lclOpenXlsx">Load Nordicon .xlsx</button>
-              <input id="lclXlsxFile" class="hidden" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-            </div>
-          </div>
-          <div id="lclQuoteLoaded" class="quote-loaded hidden">
-            <div><strong id="lclQuoteLoadedTitle">Nordicon quote</strong><span id="lclQuoteLoadedInfo"></span></div>
-            <button type="button" class="btn small" id="lclReplaceQuote">Replace</button>
-          </div>
-          <div id="lclParseMessage" class="small-note"></div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-head"><h2>Quote</h2></div>
-        <div class="section-body">
-          <div class="grid three">
-            <label class="field">Client name<input id="lclClientName" autocomplete="off"></label>
-            <label class="field">Attention to<input id="lclAttentionTo" autocomplete="off"></label>
-            <label class="field">Sales operator<select id="lclSalesOperator"><option>Christoffer Josefsson</option><option selected>Erik Stahl</option><option>Hilma Stahl</option><option>Malin Noren</option><option>Malin Stahl</option><option>Markus Odenstam</option><option>Martin Soderberg</option><option>Par Kjellstrand</option><option>Sakar Mustafa</option><option>Sven Karlund</option><option>Teo Sjogren</option></select></label>
-          </div>
-          <div class="separator"></div>
-          <div class="grid four">
-            <label class="field">Valid to<input id="lclValidTo" type="date"></label>
-            <label class="field">Payment term days<input id="lclPaymentDays" type="number" min="0" step="1" value="30"></label>
-            <label class="field">Incoterm<select id="lclIncoterm"><option>EXW</option><option>FCA</option><option>FOB</option></select></label>
-            <label class="field">Supplier<select id="lclSupplier"><option value="NORDICON">Nordicon</option><option value="SHIPCO">Shipco</option></select></label>
-          </div>
-          <div class="separator"></div>
-          <div class="grid three">
-            <label class="field">Collection city<div id="lclCollectionLocation" class="combo"><input id="lclCollectionCity" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
-            <label class="field">POL<div class="fixed-value">SEGOT - GOTHENBURG</div></label>
-            <label class="field">POD<div id="lclPodLocation" class="combo"><input id="lclPodCity" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
-          </div>
-          <input id="lclCollectionName" type="hidden"><input id="lclCollectionCode" type="hidden">
-          <input id="lclPodName" type="hidden"><input id="lclPodCode" type="hidden">
-          <div class="separator"></div>
-          <div class="grid four">
-            <label class="field">Pallets<input id="lclPallets" type="number" min="1" step="1"></label>
-            <label class="field">Weight <span class="hint">kg</span><input id="lclWeight" type="number" min="0.01" step="0.01"></label>
-            <label class="field">Volume <span class="hint">cbm</span><input id="lclVolume" type="number" min="0.01" step="0.01"></label>
-            <label class="field">Cargo<select id="lclStackable"><option value="STACKABLE">Stackable</option><option value="NON STACKABLE">Non stackable</option></select></label>
-          </div>
-          <div class="grid two" style="margin-top:10px">
-            <label class="field">Transit time <span class="hint">days; blank = TBA</span><input id="lclTransitDays" type="number" min="1" step="1"></label>
-            <label class="field">Selling currency<div class="fixed-value">USD</div></label>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-head"><h2>Profit</h2></div>
-        <div class="section-body">
-          <label class="field" style="max-width:260px">Profit <span class="hint">SEK</span><input id="lclProfitSek" type="number" min="0" step="100" value="7500"></label>
-          <details class="compact-details">
-            <summary>ROE</summary>
-            <div class="roe-panel">
-              <div id="lclRoeStatus" class="small-note">Uses current ROE loaded by the tool.</div>
-              <div class="grid two">
-                <label class="field">1 SEK = USD<input id="lclSekUsd" type="number" min="0" step="0.000001"></label>
-                <label class="field">1 SEK = EUR<input id="lclSekEur" type="number" min="0" step="0.000001"></label>
+      <div class="lcl-workspace">
+        <div class="lcl-left-stack">
+          <section class="section lcl-quote-panel">
+            <div class="section-head"><h2>Quote & route</h2></div>
+            <div class="section-body">
+              <div class="grid two lcl-client-grid">
+                <label class="field span-two">Client name<input id="lclClientName" autocomplete="off"></label>
+                <label class="field span-two">Attention to<input id="lclAttentionTo" autocomplete="off"></label>
+                <label class="field">Sales operator<select id="lclSalesOperator"><option>Christoffer Josefsson</option><option selected>Erik Stahl</option><option>Hilma Stahl</option><option>Malin Noren</option><option>Malin Stahl</option><option>Markus Odenstam</option><option>Martin Soderberg</option><option>Par Kjellstrand</option><option>Sakar Mustafa</option><option>Sven Karlund</option><option>Teo Sjogren</option></select></label>
+                <label class="field">Valid to<input id="lclValidTo" type="date"></label>
               </div>
-              <div class="roe-actions"><button type="button" class="btn small" id="lclRefreshRates">Refresh ROE</button></div>
+
+              <div class="lcl-subsection-title">Commercial setup</div>
+              <div class="grid three lcl-commercial-grid">
+                <label class="field">Incoterm<select id="lclIncoterm"><option>EXW</option><option>FCA</option><option>FOB</option></select></label>
+                <label class="field">Supplier<select id="lclSupplier"><option value="NORDICON">Nordicon</option><option value="SHIPCO">Shipco</option></select></label>
+                <label class="field">Payment days<input id="lclPaymentDays" type="number" min="0" step="1" value="30"></label>
+              </div>
+              <div id="lclIncotermNote" class="lcl-incoterm-note"></div>
+
+              <div class="lcl-subsection-title">Route</div>
+              <div class="grid two lcl-route-grid">
+                <label class="field" id="lclCollectionField">Collection city<div id="lclCollectionLocation" class="combo"><input id="lclCollectionCity" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                <label class="field">POD<div id="lclPodLocation" class="combo"><input id="lclPodCity" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                <label class="field">POL<div class="fixed-value">SEGOT - GOTHENBURG</div></label>
+                <label class="field">Transit time <span class="hint">blank = TBA</span><input id="lclTransitDays" type="number" min="1" step="1"></label>
+              </div>
+              <input id="lclCollectionName" type="hidden"><input id="lclCollectionCode" type="hidden">
+              <input id="lclPodName" type="hidden"><input id="lclPodCode" type="hidden">
+
+              <div class="lcl-subsection-title">Cargo</div>
+              <div class="lcl-cargo-grid">
+                <label class="field compact-number-field">Pallets<input id="lclPallets" type="number" min="1" step="1"></label>
+                <label class="field">Weight <span class="hint">kg</span><input id="lclWeight" type="number" min="0.01" step="0.01"></label>
+                <label class="field">Volume <span class="hint">cbm</span><input id="lclVolume" type="number" min="0.01" step="0.01"></label>
+                <label class="field">Cargo<select id="lclStackable"><option value="STACKABLE">Stackable</option><option value="NON STACKABLE">Non stackable</option></select></label>
+              </div>
+              <label class="field lcl-imo-field">IMO details <span class="hint">filled automatically from Nordicon XLSX when present</span><textarea id="lclImoDetails" rows="2" placeholder="Example: Class 9, UN 3480, PG 2"></textarea></label>
+            </div>
+          </section>
+
+          <section class="section lcl-profit-panel">
+            <div class="section-head"><h2>Profit & create</h2></div>
+            <div class="section-body">
+              <div class="lcl-profit-row">
+                <label class="field">Profit <span class="hint">SEK</span><input id="lclProfitSek" type="number" min="0" step="100" value="7500"></label>
+                <div class="lcl-fixed-summary"><span>Selling currency</span><strong>USD</strong></div>
+              </div>
+              <details class="compact-details lcl-roe-details">
+                <summary>ROE</summary>
+                <div class="roe-panel">
+                  <div id="lclRoeStatus" class="small-note">Uses current ROE loaded by the tool.</div>
+                  <div class="grid two">
+                    <label class="field">1 SEK = USD<input id="lclSekUsd" type="number" min="0" step="0.000001"></label>
+                    <label class="field">1 SEK = EUR<input id="lclSekEur" type="number" min="0" step="0.000001"></label>
+                  </div>
+                  <div class="roe-actions"><button type="button" class="btn small" id="lclRefreshRates">Refresh ROE</button></div>
+                </div>
+              </details>
+              <div class="lcl-primary-actions">
+                <button type="button" class="btn primary" id="lclGenerateScript" disabled>Generate & download AHK</button>
+                <button type="button" class="btn" id="lclImportScript">Import .ahk</button>
+                <input id="lclImportScriptFile" class="hidden" type="file" accept=".ahk,.txt,text/plain">
+                <button type="button" class="btn" id="lclResetForm">Reset</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="lcl-right-stack">
+          <section class="section paste-box lcl-import-panel">
+            <div class="section-head"><h2>Nordicon quote</h2></div>
+            <div class="section-body">
+              <div id="lclPasteWrap">
+                <label class="field">Paste Nordicon quote<textarea id="lclQuotePaste" placeholder="Paste the complete Nordicon quote here"></textarea></label>
+                <div class="actions compact-actions">
+                  <button type="button" class="btn primary" id="lclParseQuote">Read pasted quote</button>
+                  <button type="button" class="btn" id="lclOpenXlsx">Load Nordicon .xlsx</button>
+                  <input id="lclXlsxFile" class="hidden" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                </div>
+              </div>
+              <div id="lclQuoteLoaded" class="quote-loaded hidden">
+                <div><strong id="lclQuoteLoadedTitle">Nordicon quote</strong><span id="lclQuoteLoadedInfo"></span></div>
+                <button type="button" class="btn small" id="lclReplaceQuote">Replace</button>
+              </div>
+              <div id="lclParseMessage" class="small-note"></div>
+            </div>
+          </section>
+
+          <details class="section lcl-data-section" id="lclCostsSection" open>
+            <summary class="section-head"><h2>Buying costs</h2></summary>
+            <div class="section-body cost-scroll">
+              <table class="lcl-cost-table">
+                <thead><tr><th>Charge</th><th>Buying total</th><th class="currency-column">Currency</th><th class="rate-column">Quoted unit rate</th></tr></thead>
+                <tbody>
+                  <tr data-lcl-origin-row="true"><td>Trucking incl. inland fuel</td><td><input data-lcl-charge="trucking" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="trucking" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
+                  <tr><td>Ocean freight</td><td><input data-lcl-charge="ocean" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="ocean" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td>—</td></tr>
+                  <tr><td>Fuel contingency</td><td><input data-lcl-charge="fuel" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="fuel" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td><input data-lcl-charge="fuel" data-lcl-field="rate" type="number" step="0.01"></td></tr>
+                  <tr><td>EU ETS</td><td><input data-lcl-charge="eu" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="eu" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td><input data-lcl-charge="eu" data-lcl-field="rate" type="number" step="0.01"></td></tr>
+                  <tr><td><label class="table-check"><input id="lclIncludeWar" type="checkbox"> War risk</label></td><td><input data-lcl-charge="war" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="war" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td><input data-lcl-charge="war" data-lcl-field="rate" type="number" step="0.01"></td></tr>
+                  <tr data-lcl-origin-row="true"><td>Terminal handling</td><td><input data-lcl-charge="terminal" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="terminal" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
+                  <tr data-lcl-origin-row="true"><td>Port dues</td><td><input data-lcl-charge="port" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="port" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
+                  <tr><td>Handling fee</td><td><input data-lcl-charge="handling" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="handling" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
+                  <tr><td>ISPS</td><td><input data-lcl-charge="isps" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="isps" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td>—</td></tr>
+                  <tr><td>Customs check MRN</td><td><input data-lcl-charge="customs" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="customs" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
+                </tbody>
+                <tbody id="lclExtraCostsBody"></tbody>
+              </table>
             </div>
           </details>
-        </div>
-      </section>
 
-      <details class="section compact-details" id="lclCostsSection">
-        <summary class="section-head"><h2>Buying costs</h2></summary>
-        <div class="section-body cost-scroll">
-          <table class="lcl-cost-table">
-            <thead><tr><th>Charge</th><th>Buying total</th><th class="currency-column">Currency</th><th class="rate-column">Quoted unit rate</th></tr></thead>
-            <tbody>
-              <tr><td>Trucking incl. inland fuel</td><td><input data-lcl-charge="trucking" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="trucking" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
-              <tr><td>Ocean freight</td><td><input data-lcl-charge="ocean" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="ocean" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td>—</td></tr>
-              <tr><td>Fuel contingency</td><td><input data-lcl-charge="fuel" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="fuel" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td><input data-lcl-charge="fuel" data-lcl-field="rate" type="number" step="0.01"></td></tr>
-              <tr><td>EU ETS</td><td><input data-lcl-charge="eu" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="eu" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td><input data-lcl-charge="eu" data-lcl-field="rate" type="number" step="0.01"></td></tr>
-              <tr><td><label><input id="lclIncludeWar" type="checkbox"> War risk</label></td><td><input data-lcl-charge="war" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="war" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td><input data-lcl-charge="war" data-lcl-field="rate" type="number" step="0.01"></td></tr>
-              <tr><td>Terminal handling</td><td><input data-lcl-charge="terminal" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="terminal" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
-              <tr><td>Port dues</td><td><input data-lcl-charge="port" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="port" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
-              <tr><td>Handling fee</td><td><input data-lcl-charge="handling" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="handling" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
-              <tr><td>ISPS</td><td><input data-lcl-charge="isps" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="isps" data-lcl-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td>—</td></tr>
-              <tr><td>Customs check MRN</td><td><input data-lcl-charge="customs" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="customs" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>—</td></tr>
-            </tbody>
-            <tbody id="lclExtraCostsBody"></tbody>
-          </table>
+          <details class="section lcl-data-section" id="lclCalculationSection" open>
+            <summary class="section-head"><h2>Calculation</h2></summary>
+            <div class="section-body"><div id="lclCalculation" class="preview-box"></div></div>
+          </details>
         </div>
-      </details>
-
-      <details class="section compact-details" id="lclCalculationSection">
-        <summary class="section-head"><h2>Calculation</h2></summary>
-        <div class="section-body"><div id="lclCalculation" class="preview-box"></div></div>
-      </details>
+      </div>
 
       <div id="lclErrorBox" class="alert error"></div>
       <div id="lclWarningBox" class="alert warning"></div>
-      <div class="actions">
-        <button type="button" class="btn primary" id="lclGenerateScript" disabled>Generate AHK script</button>
-        <button type="button" class="btn" id="lclImportScript">Import .ahk</button>
-        <input id="lclImportScriptFile" class="hidden" type="file" accept=".ahk,.txt,text/plain">
-        <button type="button" class="btn" id="lclResetForm">Reset</button>
-      </div>
-
-      <details id="lclScriptSection">
+      <details id="lclScriptSection" class="script-section">
         <summary>Generated AutoHotkey script</summary>
         <div class="script-toolbar">
           <button type="button" class="btn" id="lclCopyScript" disabled>Copy</button>
-          <button type="button" class="btn primary" id="lclDownloadScript" disabled>Download .ahk</button>
+          <button type="button" class="btn primary hidden" id="lclDownloadScript" disabled aria-hidden="true">Download .ahk</button>
         </div>
         <textarea id="lclScriptOutput" readonly spellcheck="false"></textarea>
       </details>
@@ -858,9 +903,11 @@
       "fcl.charges.waitingIncluded", "fcl.charges.waitingNotIncluded", "fcl.charges.precarriage", "fcl.charges.precarriageByEquipment",
       "fcl.charges.pickup", "fcl.charges.stuffing", "fcl.charges.oceanFreight", "fcl.charges.oceanFreightByEquipment",
       "fcl.charges.originCharges", "fcl.charges.originChargesByEquipment", "fcl.charges.exportCustom", "fcl.charges.reeferMonitoring",
-      "lcl.subject", "lcl.cargoDescription", "lcl.excluding", "lcl.remarks.carrier", "lcl.remarks.profitShare",
-      "lcl.remarks.loadingTime", "lcl.remarks.additionalHsCodes", "lcl.charges.inlandHaulage", "lcl.charges.oceanFreight",
-      "lcl.charges.fuelContingency", "lcl.charges.solasFee", "lcl.charges.customsCheckMrn"
+      "lcl.subject", "lcl.subjectFob", "lcl.cargoDescription", "lcl.cargoDescriptionImo",
+      "lcl.excluding.destinationCharges", "lcl.excluding.fcaCustomExport", "lcl.excluding.fobOriginCharges",
+      "lcl.remarks.carrier", "lcl.remarks.profitShare", "lcl.remarks.loadingTime", "lcl.remarks.additionalHsCodes", "lcl.remarks.directNonStack",
+      "lcl.charges.inlandHaulage", "lcl.charges.oceanFreight", "lcl.charges.fuelContingency", "lcl.charges.solasFee", "lcl.charges.customsCheckMrn",
+      "lcl.nordiconTranslations.inrikes", "lcl.nordiconTranslations.tillagg"
     ]);
 
     function nestedValue(source, path) {
@@ -1987,7 +2034,7 @@
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.2.0
+; Generated by BLU Auto Quote → AutoHotkey v8.2.1
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
 ; Selling currency: ${$("targetCurrency").value}
@@ -2183,7 +2230,7 @@ RunQuote() {
     TypeField("terms of payment days", quote["paymentDays"])
     SelectField("service type", "f")
     SelectField("incoterm", quote["incoterm"])
-    TypeField("incoterm location", quote["collection"])
+    TypeField("incoterm location", quote["incotermLocation"])
 
     ScrollDetailDown()
 
@@ -2947,10 +2994,12 @@ RestoreClipboard(*) {
       const metadata = metadataBlock(exportLclData());
       const client = textValue("lclClientName");
       const attention = textValue("lclAttentionTo");
-      const incoterm = upper($("lclIncoterm").value);
-      const collection = upper(lclCollectionValue());
-      const podName = upper(textValue("lclPodName"));
-      const cargoDescription = quoteText("lcl.cargoDescription", { STACKABLE: $("lclStackable").value });
+      const incoterm = lclIncoterm();
+      const removePlor = incoterm === "FOB";
+      const collection = removePlor ? "" : normalisedLocationName(lclCollectionValue());
+      const incotermLocation = removePlor ? "GOTHENBURG" : collection;
+      const podName = normalisedLocationName(textValue("lclPodName"));
+      const cargoDescription = lclCargoDescription();
       const basisText = quoteText("common.detailBasis", { SUPPLIER: supplier.display, INCOTERM: incoterm });
       const volumeText = formatBluDecimal($("lclVolume").value);
       const stackable = $("lclStackable").value === "STACKABLE";
@@ -2959,7 +3008,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.0
+; Generated by BLU Auto Quote - LCL AutoHotkey v8.2.1
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -3052,7 +3101,7 @@ quote := Map(
   "salutation", ${ahkString(quoteText("common.salutation", { ATTENTION: attention }))},
   "coverLetter", ${ahkString(FIXED.coverLetter)},
   "subjectTo", ${ahkString(FIXED.subjectTo)},
-  "excluding", ${ahkString(quoteText("lcl.excluding"))},
+  "excluding", ${ahkString(lclExcludingText())},
   "basisText", ${ahkString(basisText)},
   "salesOperator", ${ahkString(textValue("lclSalesOperator"))},
   "subject", ${ahkString(subject)},
@@ -3060,7 +3109,9 @@ quote := Map(
   "paymentDays", ${ahkString($("lclPaymentDays").value)},
   "incoterm", ${ahkString(incoterm.toLowerCase())},
   "collection", ${ahkString(collection)},
-  "collectionCode", ${ahkString(upper(textValue("lclCollectionCode")))},
+  "collectionCode", ${ahkString(removePlor ? "" : upper(textValue("lclCollectionCode")))},
+  "removePlor", ${removePlor ? "true" : "false"},
+  "incotermLocation", ${ahkString(incotermLocation)},
   "polCode", "SEGOT",
   "podCode", ${ahkString(upper(textValue("lclPodCode")))},
   "transitTime", ${ahkString(transitTimeText($("lclTransitDays").value))},
@@ -3147,21 +3198,26 @@ RunQuote() {
   ClickField("create new detail", ROW_DELAY)
   TypeField("detail subtitle", quote["subtitle"])
   TypeLclDetailDescription(quote["clientName"], quote["basisText"])
-  if quote["collectionCode"] != ""
+  if !quote["removePlor"] && quote["collectionCode"] != ""
     SelectField("plor loc code", quote["collectionCode"])
   SelectField("polout loc code", quote["polCode"])
   SelectField("podin loc code", quote["podCode"])
   ClickField("plod loc code")
   ClickField("delete route point", MENU_ENTER_DELAY)
-  DoubleSelectField("plor mot", "t")
+  if !quote["removePlor"]
+    DoubleSelectField("plor mot", "t")
   DoubleSelectField("polout/podin mot", "v")
+  if quote["removePlor"] {
+    ClickField("plor loc code")
+    ClickField("delete route point", MENU_ENTER_DELAY)
+  }
   TypeField("transit time", quote["transitTime"])
   TypeField("excluding", quote["excluding"])
   PasteField("subject to", quote["subjectTo"])
   TypeField("terms of payment days", quote["paymentDays"])
   SelectField("service type", "lcl/lcl")
   SelectField("incoterm", quote["incoterm"])
-  TypeField("incoterm location", quote["collection"])
+  TypeField("incoterm location", quote["incotermLocation"])
   ScrollDetailDown()
 
   for charge in quote["charges"]
@@ -3668,7 +3724,7 @@ RestoreClipboard(*) {
     }
 
     // ==============================
-    // v8.2.0 FCL route/detail overrides
+    // v8.2.1 FCL route/detail overrides
     // ==============================
 
     function makeStableId(prefix = "id") {
@@ -4277,6 +4333,31 @@ RestoreClipboard(*) {
       };
     }
 
+    function configurePrecarriageSupplierSelect(select, equipment) {
+      if (!select || !equipment) return;
+      const current = upper(equipment.precarriageSupplier) || "DANIA";
+      const choices = equipment.includeStuff ? [current] : Object.keys(PRE_CARRIAGE_CONFIG);
+      select.replaceChildren(...choices.map((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        return option;
+      }));
+      select.value = current;
+    }
+
+    function reflectCarrierWithinDetail(route, sourceEquipment) {
+      if (!route || !sourceEquipment) return;
+      const row = detailRowNumber(sourceEquipment, 1);
+      const carrier = upper(sourceEquipment.carrier) || "MSC";
+      route.equipment.forEach((equipment, index) => {
+        if (detailRowNumber(equipment, index + 1) !== row) return;
+        equipment.carrier = carrier;
+        const peerSelect = document.querySelector(`.equipment-card[data-index="${index}"] [data-key="carrier"]`);
+        if (peerSelect) peerSelect.value = carrier;
+      });
+    }
+
     function renderEquipment() {
       const route = activeRoute();
       applyDefaultStuffSuppliers(route);
@@ -4317,6 +4398,7 @@ RestoreClipboard(*) {
               const nextRow = detailRowNumber(equipment, index + 1);
               migrateOrphanedCustomCharges(route, previousDetailRow, nextRow, equipment);
               syncCarrierWithinDetail(route, equipment, true);
+              reflectCarrierWithinDetail(route, equipment);
               const carrierSelect = card.querySelector('[data-key="carrier"]');
               if (carrierSelect) carrierSelect.value = equipment.carrier;
               if (eventType === "change") {
@@ -4327,17 +4409,14 @@ RestoreClipboard(*) {
             }
             if (key === "carrier") {
               syncCarrierWithinDetail(route, equipment, false);
-              if (eventType === "change") {
-                renderEquipment();
-                updateAllPreviews();
-                return;
-              }
+              reflectCarrierWithinDetail(route, equipment);
             }
             if (key === "includeOriginCharges") syncOriginVisibility();
             if (key === "includeStuff") {
               if (equipment.includeStuff && !equipment.stuffSupplier) equipment.stuffSupplier = defaultStuffSupplierForRoute(route);
               const supplierSelect = card.querySelector('[data-key="stuffSupplier"]');
               if (supplierSelect) supplierSelect.value = equipment.stuffSupplier || "";
+              configurePrecarriageSupplierSelect(card.querySelector('[data-key="precarriageSupplier"]'), equipment);
               syncStuffVisibility();
             }
             if (key === "stuffSupplier" && eventType === "change") {
@@ -4353,6 +4432,7 @@ RestoreClipboard(*) {
           input.addEventListener("input", () => sync("input"));
           input.addEventListener("change", () => sync("change"));
         });
+        configurePrecarriageSupplierSelect(card.querySelector('[data-key="precarriageSupplier"]'), equipment);
         syncOriginVisibility();
         syncStuffVisibility();
 
@@ -4414,7 +4494,7 @@ RestoreClipboard(*) {
         const originSelling = item.includeOriginCharges ? round5(originCost) : 0;
         const includeStuff = includePrecarriage && Boolean(item.includeStuff);
         const stuffCost = includeStuff ? convert(item.stuffAmount, item.stuffCurrency, target) : 0;
-        const stuffSelling = includeStuff ? round5(stuffCost) : 0;
+        const stuffSelling = includeStuff ? stuffCost : 0;
         return { equipment: item, quantity, freightCost, precarriageCost, originCost, originSelling, includeStuff, stuffCost, stuffSelling };
       });
       const values = [desiredProfitTarget, linerCost, exportCustomCost, customSellingTotal, ...rows.flatMap((row) => [row.freightCost, row.precarriageCost, row.originCost, row.stuffCost])];
@@ -4431,11 +4511,18 @@ RestoreClipboard(*) {
         customSellingTotal +
         (includeCustomExport ? (100 - exportCustomCost) : 0);
       const remainingProfit = desiredProfitTarget - fixedProfit;
-      const freightMarkupPerContainer = (remainingProfit * (includePrecarriage ? 0.30 : 1)) / totalQuantity;
-      const precarriageMarkupPerContainer = includePrecarriage ? (remainingProfit * 0.70) / totalQuantity : 0;
+      const stuffQuantity = rows.filter((row) => row.includeStuff).reduce((sum, row) => sum + row.quantity, 0);
+      const hasStuff = includePrecarriage && stuffQuantity > 0;
+      const freightShare = includePrecarriage ? 0.30 : 1;
+      const precarriageShare = includePrecarriage ? (hasStuff ? 0.35 : 0.70) : 0;
+      const stuffShare = hasStuff ? 0.35 : 0;
+      const freightMarkupPerContainer = (remainingProfit * freightShare) / totalQuantity;
+      const precarriageMarkupPerContainer = includePrecarriage ? (remainingProfit * precarriageShare) / totalQuantity : 0;
+      const stuffMarkupPerContainer = hasStuff ? (remainingProfit * stuffShare) / stuffQuantity : 0;
       rows.forEach((row) => {
         row.freightSelling = round5(row.freightCost + freightMarkupPerContainer);
         row.precarriageSelling = includePrecarriage ? round5(row.precarriageCost + precarriageMarkupPerContainer) : 0;
+        row.stuffSelling = row.includeStuff ? round5(row.stuffCost + stuffMarkupPerContainer) : 0;
       });
       const commonPrecarriage = includePrecarriage && rows.every((row) =>
         Math.abs(row.precarriageCost - rows[0].precarriageCost) < 0.0001 &&
@@ -4856,7 +4943,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.2.0
+; Generated by BLU Auto Quote → AutoHotkey v8.2.1
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR
 ; Selling currency: ${$("targetCurrency").value}
@@ -5423,7 +5510,7 @@ RestoreClipboard(*) {
     }
 
     // =====================================
-    // v8.2.0 Nordicon / LCL compatibility work
+    // v8.2.1 Nordicon / LCL compatibility work
     // =====================================
 
     function parseNordiconCharge(lines, pattern) {
@@ -5894,6 +5981,735 @@ RestoreClipboard(*) {
       });
     }
 
+
+    // =====================================
+    // v8.2.1 effective LCL / Nordicon overrides
+    // =====================================
+
+    function newLclState(overrides = {}) {
+      return {
+        quoteLoaded: false,
+        quoteLabel: "",
+        costs: cloneLclCosts(),
+        generatedScript: "",
+        extraCharges: [],
+        directNonStack: false,
+        imoDetails: "",
+        ...overrides
+      };
+    }
+
+    function lclIncoterm() {
+      return upper($("lclIncoterm")?.value || "EXW");
+    }
+
+    function lclIsFob() {
+      return lclIncoterm() === "FOB";
+    }
+
+    function lclIncludesOrigin() {
+      return !lclIsFob();
+    }
+
+    function lclIncludesCustomExport() {
+      return lclIncoterm() === "EXW";
+    }
+
+    function normaliseNordiconWords(value) {
+      const inland = state.quoteTexts ? quoteText("lcl.nordiconTranslations.inrikes") : "INLAND";
+      const surcharge = state.quoteTexts ? quoteText("lcl.nordiconTranslations.tillagg") : "SURCHARGE";
+      return upper(value)
+        .replace(/\bINRIKES\b/giu, inland)
+        .replace(/\bTILL(?:Ä|A)GG\b/giu, surcharge)
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function normaliseNordiconDescription(value) {
+      return normaliseNordiconWords(value).replace(/\s*[:;,.]+\s*$/g, "").trim();
+    }
+
+    function nordiconDirectNonStack(text) {
+      return /Based\s+on\s+DIRECT\s+routing\s*;\s*NON[- ]STACK\s+is\s+accepted\s+without\s+extra\s+charges\s*\.?/i.test(String(text || ""));
+    }
+
+    function normaliseImoDetails(value) {
+      const seen = new Set();
+      return String(value || "")
+        .replace(/\r/g, "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => {
+          if (!line || seen.has(line.toUpperCase())) return false;
+          seen.add(line.toUpperCase());
+          return true;
+        })
+        .join("\n");
+    }
+
+    function nordiconImoFromText(text) {
+      const lines = String(text || "").replace(/\r/g, "").split("\n").map((line) => line.trim());
+      const found = lines.filter((line) => /\b(?:CLASS\s*\d|UN\s*\d{4}|PACKING\s+GROUP|PG\s*[IVX0-9]+)\b/i.test(line));
+      return normaliseImoDetails(found.join("\n"));
+    }
+
+    function nordiconChargeDescription(line) {
+      const match = /^(.+?)\s+\d+(?:[.,]\d+)?\b/.exec(String(line || ""));
+      return normaliseNordiconDescription(match?.[1] || "");
+    }
+
+    function knownNordiconDescription(description) {
+      const clean = normaliseNordiconDescription(description);
+      return [
+        /^OCEAN FREIGHT\b/, /^FUEL CONTINGENCY SURCHARGE\b/, /^ETS SURCHARGE\b/,
+        /^TERMINAL HANDLING\b/, /^PORT DUES\b/, /^ISPS SURCHARGE\b/,
+        /^HANDLING FEE\b/, /^INLAND HAULAGE\b/, /^FUEL SURCHARGE INLAND\b/,
+        /^WAR RISK SURCHARGE\b/, /^CUSTOMS CHECK MRN\b/
+      ].some((pattern) => pattern.test(clean));
+    }
+
+    function isLclOriginExtraCharge(charge) {
+      const name = normaliseNordiconDescription(charge?.name || charge || "");
+      return /^INLAND\b.*\bSURCHARGE\b/.test(name);
+    }
+
+    function extraNordiconChargesFromText(text) {
+      return nordiconTableLines(text).map((sourceLine) => {
+        const line = normaliseNordiconWords(sourceLine);
+        const description = nordiconChargeDescription(line);
+        if (!description || knownNordiconDescription(description)) return null;
+        const parsed = parseNordiconCharge([line], /^/);
+        return parsed ? {
+          name: description,
+          total: parsed.total,
+          currency: parsed.currency,
+          originCharge: isLclOriginExtraCharge(description)
+        } : null;
+      }).filter(Boolean);
+    }
+
+    function parseNordiconQuote(text) {
+      const cleanText = String(text ?? "").replace(/\r/g, "");
+      if (!/Nordicon/i.test(cleanText) || !/OCEAN\s+FREIGHT/i.test(cleanText)) throw new Error("The pasted text does not look like a Nordicon LCL quote.");
+      const lines = cleanText.split("\n").map((line) => normaliseNordiconWords(line)).filter(Boolean);
+      const validity = /Validity\s*:?\s*(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})/i.exec(cleanText.replace(/\n/g, " "));
+      const result = {
+        validTo: validity?.[2] ?? "",
+        pod: firstTextMatch(cleanText, /Ship to\s*[\n ]+([^\n]+)/i),
+        collection: lclIsFob() ? "" : nordiconCollectionFromText(cleanText),
+        pallets: firstTextMatch(cleanText, /No of pcs\s*[\n ]+(\d+)/i),
+        weight: firstTextMatch(cleanText, /Weight\s*[\n ]+([\d.,]+)/i),
+        volume: firstTextMatch(cleanText, /Volume\s*[\n ]+([\d.,]+)/i),
+        transitDays: firstTextMatch(cleanText, /TRANSIT TIME\s*[\n ]+(\d+)\s*DAYS/i),
+        imoDetails: nordiconImoFromText(cleanText),
+        directNonStack: nordiconDirectNonStack(cleanText),
+        costs: cloneLclCosts(),
+        extraCharges: extraNordiconChargesFromText(cleanText),
+        source: "pasted Nordicon quote"
+      };
+      const rows = {
+        ocean: parseNordiconCharge(lines, /^OCEAN FREIGHT\b/i),
+        fuel: parseNordiconCharge(lines, /^FUEL CONTINGENCY SURCHARGE\b/i),
+        eu: parseNordiconCharge(lines, /^ETS SURCHARGE(?:\s+USD)?\b/i),
+        war: parseNordiconCharge(lines, /^WAR RISK SURCHARGE\b/i),
+        terminal: parseNordiconCharge(lines, /^TERMINAL HANDLING\b/i),
+        port: parseNordiconCharge(lines, /^PORT DUES\b/i),
+        handling: parseNordiconCharge(lines, /^HANDLING FEE\b/i),
+        isps: parseNordiconCharge(lines, /^ISPS SURCHARGE\b/i),
+        customs: parseNordiconCharge(lines, /^CUSTOMS CHECK MRN\b/i),
+        inland: parseNordiconCharge(lines, /^INLAND HAULAGE\b/i),
+        inlandFuel: parseNordiconCharge(lines, /^FUEL SURCHARGE INLAND\b/i)
+      };
+      rows.trucking = combineNordiconCharges(rows.inland, rows.inlandFuel);
+      const required = ["ocean", "fuel", "eu", "handling", "isps", "customs", ...(lclIncludesOrigin() ? ["trucking", "terminal", "port"] : [])];
+      for (const key of required) {
+        if (!rows[key]) throw new Error(`Could not find ${key} in the Nordicon charge table.`);
+      }
+      for (const key of Object.keys(result.costs)) if (rows[key]) result.costs[key] = { ...result.costs[key], ...rows[key] };
+      if (rows.war) result.costs.war = { ...result.costs.war, ...rows.war };
+      result.includeWar = Boolean(rows.war);
+      if (!result.pod || !result.pallets || !result.weight || !result.volume || (lclIncludesOrigin() && !result.collection)) {
+        throw new Error("The Nordicon quote is missing route or cargo data.");
+      }
+      return result;
+    }
+
+    function workbookValuesBelowHeader(rows, labelPattern) {
+      for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+        const row = rows[rowIndex] || [];
+        for (let column = 0; column < row.length; column += 1) {
+          if (!labelPattern.test(String(row[column] ?? ""))) continue;
+          const values = [];
+          let blanks = 0;
+          for (let offset = 1; offset <= 15 && rowIndex + offset < rows.length; offset += 1) {
+            const candidateRow = rows[rowIndex + offset] || [];
+            const value = String(candidateRow[column] ?? "").trim();
+            if (/No\. of packages/i.test(candidateRow.map((cell) => String(cell ?? "")).join(" ")) && !value) break;
+            if (value) {
+              blanks = 0;
+              if (/\b(?:CLASS\s*\d|UN\s*\d{4}|PACKING\s+GROUP|PG\s*[IVX0-9]+)\b/i.test(value)) values.push(value);
+            } else if (values.length && ++blanks >= 2) break;
+          }
+          return normaliseImoDetails(values.join("\n"));
+        }
+      }
+      return "";
+    }
+
+    async function parseNordiconWorkbook(arrayBuffer) {
+      const rows = await parseWorkbookRows(arrayBuffer);
+      const allText = rows.flatMap((row) => row || []).map((value) => String(value ?? "")).join("\n");
+      const validCell = firstWorkbookCell(rows, /RATES VALID UNTIL:/i);
+      const validTo = /RATES VALID UNTIL:\s*(\d{4}-\d{2}-\d{2})/i.exec(validCell)?.[1] || "";
+      const pickupRaw = workbookValueBelow(rows, /^Pick up location$/i).replace(/,+\s*$/, "").trim();
+      const parsedCollection = /^\d{3}\s?\d{2}$/.test(pickupRaw) ? "" : pickupRaw.replace(/^\d{3}\s?\d{2},?\s*/, "").trim();
+      const collection = lclIsFob() ? "" : parsedCollection;
+      const podRaw = workbookValueBelow(rows, /^To port, country$/i);
+      const pod = podRaw.split(",")[0].trim();
+      const transitCell = firstWorkbookCell(rows, /\b\d+\s+DAYS\b/i);
+      const transitDays = /([0-9]+)\s+DAYS/i.exec(transitCell)?.[1] || "";
+      const imoDetails = workbookValuesBelowHeader(rows, /^IMO$/i) || nordiconImoFromText(allText);
+      let pallets = "", weight = "", volume = "";
+      for (let index = 0; index < rows.length; index += 1) {
+        const row = rows[index] || [];
+        const packageColumn = row.findIndex((value) => /No\. of packages/i.test(String(value ?? "")));
+        if (packageColumn >= 0) {
+          pallets = String(rows[index + 1]?.[packageColumn] ?? "").trim();
+          const weightColumn = row.findIndex((value) => /^Weight$/i.test(String(value ?? "")));
+          const volumeColumn = row.findIndex((value) => /^Volume$/i.test(String(value ?? "")));
+          weight = /[\d.,]+/.exec(String(rows[index + 1]?.[weightColumn] ?? ""))?.[0] || "";
+          volume = /[\d.,]+/.exec(String(rows[index + 1]?.[volumeColumn] ?? ""))?.[0] || "";
+          break;
+        }
+      }
+      const headerIndex = rows.findIndex((row) => (row || []).some((value) => /^Description$/i.test(String(value ?? ""))));
+      if (headerIndex < 0) throw new Error("Could not find the charge table in the Nordicon workbook.");
+      const header = rows[headerIndex] || [];
+      const descriptionColumn = header.findIndex((value) => /^Description$/i.test(String(value ?? "")));
+      const currencyColumn = header.findIndex((value) => /^Currency$/i.test(String(value ?? "")));
+      const rateColumn = header.findIndex((value) => /^Rate$/i.test(String(value ?? "")));
+      const amountColumn = header.findIndex((value) => /^Amount$/i.test(String(value ?? "")));
+      const parsedRows = [];
+      for (let index = headerIndex + 1; index < rows.length; index += 1) {
+        const row = rows[index] || [];
+        const description = normaliseNordiconDescription(row[descriptionColumn] || "");
+        if (!description || /Rate of exchange|Conditions/i.test(description)) break;
+        const currency = upper(row[currencyColumn] || "");
+        if (!/^(USD|EUR|SEK)$/.test(currency)) continue;
+        const total = decimalNumber(row[amountColumn]);
+        const rate = decimalNumber(row[rateColumn]);
+        if (!Number.isFinite(total)) continue;
+        parsedRows.push({ description, total: formatPlainNumber(total), currency, rate: Number.isFinite(rate) ? formatPlainNumber(rate) : "" });
+      }
+      const find = (pattern) => parsedRows.find((row) => pattern.test(row.description)) || null;
+      const known = {
+        ocean: find(/^OCEAN FREIGHT\b/), fuel: find(/^FUEL CONTINGENCY SURCHARGE\b/), eu: find(/^ETS SURCHARGE\b/),
+        war: find(/^WAR RISK SURCHARGE\b/), terminal: find(/^TERMINAL HANDLING\b/), port: find(/^PORT DUES\b/),
+        handling: find(/^HANDLING FEE\b/), isps: find(/^ISPS SURCHARGE\b/), customs: find(/^CUSTOMS CHECK MRN\b/),
+        inland: find(/^INLAND HAULAGE\b/), inlandFuel: find(/^FUEL SURCHARGE INLAND\b/)
+      };
+      known.trucking = combineNordiconCharges(known.inland, known.inlandFuel);
+      const required = ["ocean", "fuel", "eu", "handling", "isps", "customs", ...(lclIncludesOrigin() ? ["trucking", "terminal", "port"] : [])];
+      for (const key of required) if (!known[key]) throw new Error(`Could not find ${key} in the Nordicon workbook.`);
+      const costs = cloneLclCosts();
+      for (const key of Object.keys(costs)) if (known[key]) costs[key] = { ...costs[key], ...known[key] };
+      if (known.war) costs.war = { ...costs.war, ...known.war };
+      const extraCharges = parsedRows
+        .filter((row) => !knownNordiconDescription(row.description))
+        .map((row) => ({ name: row.description, total: row.total, currency: row.currency, originCharge: isLclOriginExtraCharge(row.description) }));
+      if (!pod || !pallets || !weight || !volume || (lclIncludesOrigin() && !collection)) throw new Error("The Nordicon workbook is missing route or cargo data.");
+      return {
+        validTo, pod, collection, pallets, weight, volume, transitDays, imoDetails,
+        costs, includeWar: Boolean(known.war), extraCharges,
+        directNonStack: nordiconDirectNonStack(allText), source: "Nordicon workbook"
+      };
+    }
+
+    function includedLclExtraCharges() {
+      return (state.lcl.extraCharges || []).filter((charge) => !lclIsFob() || !isLclOriginExtraCharge(charge));
+    }
+
+    function calculateLcl() {
+      const costs = readLclCosts();
+      const volume = decimalNumber($("lclVolume").value);
+      const weightKg = decimalNumber($("lclWeight").value);
+      const weightTon = weightKg / 1000;
+      const volumeBased = volume >= 1;
+      const weightBased = weightTon >= 1;
+      const includeOrigin = lclIncludesOrigin();
+      const includeCustomExport = lclIncludesCustomExport();
+      const desiredProfit = lclConvert($("lclProfitSek").value, "SEK", "USD");
+      const truckingCost = includeOrigin ? lclChargeCost(costs, "trucking") : 0;
+      const oceanCost = lclChargeCost(costs, "ocean");
+      const fuelCost = lclChargeCost(costs, "fuel");
+      const euCost = lclChargeCost(costs, "eu");
+      const warCost = $("lclIncludeWar").checked ? lclChargeCost(costs, "war") : 0;
+      const terminalCost = includeOrigin ? lclChargeCost(costs, "terminal") : 0;
+      const portCost = includeOrigin ? lclChargeCost(costs, "port") : 0;
+      const handlingCost = lclChargeCost(costs, "handling");
+      const ispsCost = lclChargeCost(costs, "isps");
+      const customsCost = lclChargeCost(costs, "customs");
+      const extraCharges = includedLclExtraCharges();
+      const extraCosts = extraCharges.map((charge) => lclConvert(charge.total, charge.currency, "USD"));
+      const values = [volume, weightKg, desiredProfit, truckingCost, oceanCost, fuelCost, euCost, warCost, terminalCost, portCost, handlingCost, ispsCost, customsCost, ...extraCosts];
+      if (!values.every(Number.isFinite) || volume <= 0 || weightKg <= 0) return null;
+
+      const fuelSelling = lclNoMarginRate(costs, "fuel", volumeBased, volume);
+      const euSelling = lclNoMarginRate(costs, "eu", volumeBased, volume);
+      const warSelling = $("lclIncludeWar").checked ? lclNoMarginRate(costs, "war", volumeBased, volume) : 0;
+      const fuelSellingTotal = volumeBased ? fuelSelling * volume : fuelSelling;
+      const euSellingTotal = volumeBased ? euSelling * volume : euSelling;
+      const warSellingTotal = $("lclIncludeWar").checked ? (volumeBased ? warSelling * volume : warSelling) : 0;
+      const terminalSelling = includeOrigin ? 40 : 0;
+      const portSelling = includeOrigin ? 4 : 0;
+      const terminalSellingTotal = includeOrigin ? (weightBased ? terminalSelling * weightTon : terminalSelling) : 0;
+      const portSellingTotal = includeOrigin ? (weightBased ? portSelling * weightTon : portSelling) : 0;
+      const handlingSelling = 45;
+      const ispsSelling = 4;
+      const customExportSelling = includeCustomExport ? 100 : 0;
+      const forwardingSelling = 100;
+      const solasSelling = 10;
+      const customsSelling = 5;
+      const profitSelling = 50;
+
+      const fixedProfit =
+        (fuelSellingTotal - fuelCost) +
+        (euSellingTotal - euCost) +
+        (warSellingTotal - warCost) +
+        (includeOrigin ? (terminalSellingTotal - terminalCost) + (portSellingTotal - portCost) : 0) +
+        (handlingSelling - handlingCost) +
+        (ispsSelling - ispsCost) +
+        customExportSelling + forwardingSelling + solasSelling +
+        (customsSelling - customsCost) + profitSelling;
+      const remaining = desiredProfit - fixedProfit;
+      const truckingSelling = includeOrigin ? round5(truckingCost + remaining * 0.70) : 0;
+      const oceanMarkup = remaining * (includeOrigin ? 0.30 : 1);
+      const oceanSelling = volumeBased ? round5((oceanCost + oceanMarkup) / volume) : round5(oceanCost + oceanMarkup);
+      const oceanSellingTotal = volumeBased ? oceanSelling * volume : oceanSelling;
+      const actualProfit =
+        (includeOrigin ? truckingSelling - truckingCost : 0) +
+        (oceanSellingTotal - oceanCost) + fixedProfit;
+
+      return {
+        costs, volume, weightKg, weightTon, volumeBased, weightBased, desiredProfit,
+        includeOrigin, includeCustomExport, extraCharges, extraCosts,
+        truckingCost, oceanCost, fuelCost, euCost, warCost, terminalCost, portCost, handlingCost, ispsCost, customsCost,
+        truckingSelling, oceanSelling, fuelSelling, euSelling, warSelling,
+        terminalSelling, portSelling, handlingSelling, ispsSelling, customExportSelling, forwardingSelling, solasSelling, customsSelling, profitSelling,
+        actualProfit, remaining,
+        negativeSelling: oceanSelling < 0 || (includeOrigin && truckingSelling < 0)
+      };
+    }
+
+    function lclSubject() {
+      const pod = normalisedLocationName(textValue("lclPodName")) || "POD";
+      const replacements = { POD: pod, STACKABLE: $("lclStackable").value };
+      if (lclIsFob()) return quoteText("lcl.subjectFob", replacements);
+      replacements.COLLECTION = normalisedLocationName(lclCollectionValue()) || "COLLECTION";
+      return quoteText("lcl.subject", replacements);
+    }
+
+    function lclExcludingText() {
+      const lines = [quoteText("lcl.excluding.destinationCharges")];
+      if (lclIncoterm() === "FCA") lines.push(quoteText("lcl.excluding.fcaCustomExport"));
+      if (lclIsFob()) lines.push(quoteText("lcl.excluding.fobOriginCharges"));
+      return lines.filter(Boolean).join("\n");
+    }
+
+    function lclCargoDescription() {
+      const imo = normaliseImoDetails($("lclImoDetails")?.value || state.lcl.imoDetails || "");
+      if (imo) return quoteText("lcl.cargoDescriptionImo", { STACKABLE: $("lclStackable").value, IMO: imo });
+      return quoteText("lcl.cargoDescription", { STACKABLE: $("lclStackable").value });
+    }
+
+    function lclRemarksText() {
+      const supplier = lclSupplierConfig().display.toUpperCase();
+      const remarks = [
+        quoteText("lcl.remarks.carrier", { SUPPLIER: supplier }),
+        quoteText("lcl.remarks.profitShare")
+      ];
+      if (!lclIsFob()) {
+        remarks.push(quoteText("lcl.remarks.loadingTime"));
+        remarks.push(quoteText("lcl.remarks.additionalHsCodes"));
+      }
+      if (state.lcl.directNonStack) remarks.push(quoteText("lcl.remarks.directNonStack"));
+      return remarks.filter(Boolean).join("\n\n");
+    }
+
+    function lclCreateCharges(calc) {
+      const supplier = lclSupplierConfig();
+      const costs = calc.costs;
+      const collection = normalisedLocationName(lclCollectionValue());
+      const source = (key) => ({
+        buyRate: formatPlainNumber(decimalNumber(costs[key].total)),
+        buyCurrency: costs[key].currency,
+        supplier: supplier.supplier,
+        supplierArrow: supplier.supplierArrow
+      });
+      const volumePer = calc.volumeBased ? "v" : "";
+      const weightPer = calc.weightBased ? "w" : "";
+      const charges = [];
+      if (calc.includeOrigin) charges.push({ type: "trucking", description: quoteText("lcl.charges.inlandHaulage", { COLLECTION: collection }), ...source("trucking"), sellingRate: formatPlainNumber(calc.truckingSelling), sellingCurrency: "USD", per: "", weightUnit: "" });
+      charges.push(
+        { type: "freight", description: quoteText("lcl.charges.oceanFreight"), ...source("ocean"), sellingRate: formatPlainNumber(calc.oceanSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
+        { type: "fuel", description: quoteText("lcl.charges.fuelContingency"), ...source("fuel"), sellingRate: formatPlainNumber(calc.fuelSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" },
+        { type: "eu", description: "", ...source("eu"), sellingRate: formatPlainNumber(calc.euSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" }
+      );
+      if ($("lclIncludeWar").checked) charges.push({ type: "war", description: "", ...source("war"), sellingRate: formatPlainNumber(calc.warSelling), sellingCurrency: "USD", per: volumePer, weightUnit: "" });
+      if (calc.includeOrigin) {
+        charges.push(
+          { type: "terminal", description: "", ...source("terminal"), sellingRate: "40", sellingCurrency: "USD", per: weightPer, weightUnit: weightPer ? "t" : "" },
+          { type: "port", description: "", ...source("port"), sellingRate: "4", sellingCurrency: "USD", per: weightPer, weightUnit: weightPer ? "t" : "" }
+        );
+      }
+      if (calc.includeCustomExport) charges.push({ type: "custom export", description: quoteText("fcl.charges.exportCustom"), buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "100", sellingCurrency: "USD", per: "", weightUnit: "" });
+      charges.push(
+        { type: "forwarding fee", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "100", sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "handling", description: "", ...source("handling"), sellingRate: "45", sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "isps", description: "", ...source("isps"), sellingRate: "4", sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "other", description: quoteText("lcl.charges.solasFee"), buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "10", sellingCurrency: "USD", per: "", weightUnit: "" },
+        { type: "other", description: quoteText("lcl.charges.customsCheckMrn"), ...source("customs"), sellingRate: "5", sellingCurrency: "USD", per: "", weightUnit: "" }
+      );
+      calc.extraCharges.forEach((charge) => charges.push({
+        type: "other", description: normaliseNordiconDescription(charge.name),
+        buyRate: formatPlainNumber(decimalNumber(charge.total)), buyCurrency: charge.currency,
+        supplier: supplier.supplier, supplierArrow: supplier.supplierArrow,
+        sellingRate: formatPlainNumber(lclConvert(charge.total, charge.currency, "USD")), sellingCurrency: "USD", per: "", weightUnit: ""
+      }));
+      charges.push({ type: "profit", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0, sellingRate: "50", sellingCurrency: "USD", per: "", weightUnit: "" });
+      return charges;
+    }
+
+    function renderLclExtraCosts() {
+      const body = $("lclExtraCostsBody");
+      if (!body) return;
+      body.replaceChildren();
+      const extras = state.lcl.extraCharges || [];
+      let visibleCount = 0;
+      extras.forEach((charge, index) => {
+        if (lclIsFob() && isLclOriginExtraCharge(charge)) return;
+        visibleCount += 1;
+        const row = document.createElement("tr");
+        row.className = "lcl-extra-row";
+        row.innerHTML = `<td><input data-lcl-extra-index="${index}" data-lcl-extra-field="name" value="${String(charge.name || "").replaceAll('"', '&quot;')}"></td><td><input data-lcl-extra-index="${index}" data-lcl-extra-field="total" type="number" step="0.01" value="${charge.total ?? ""}"></td><td><select data-lcl-extra-index="${index}" data-lcl-extra-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td>No margin</td>`;
+        const currency = row.querySelector("select");
+        currency.value = charge.currency || "USD";
+        row.querySelectorAll("input, select").forEach((input) => {
+          input.addEventListener("input", () => {
+            state.lcl.extraCharges[index][input.dataset.lclExtraField] = input.value;
+            if (input.dataset.lclExtraField === "name") state.lcl.extraCharges[index].originCharge = isLclOriginExtraCharge(input.value);
+            updateLclCalculation();
+          });
+          input.addEventListener("change", () => {
+            state.lcl.extraCharges[index][input.dataset.lclExtraField] = input.value;
+            if (input.dataset.lclExtraField === "name") state.lcl.extraCharges[index].originCharge = isLclOriginExtraCharge(input.value);
+            renderLclExtraCosts();
+            updateLclCalculation();
+          });
+        });
+        body.append(row);
+      });
+      const hiddenOrigin = lclIsFob() ? extras.filter(isLclOriginExtraCharge).length : 0;
+      if (!visibleCount && hiddenOrigin) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="4" class="small-note">${hiddenOrigin} inland surcharge ${hiddenOrigin === 1 ? "is" : "are"} excluded for FOB.</td>`;
+        body.append(row);
+      }
+    }
+
+    function applyParsedNordiconQuote(parsed) {
+      state.lcl.quoteLoaded = true;
+      state.lcl.quoteLabel = parsed.source || "Nordicon quote";
+      state.lcl.extraCharges = (parsed.extraCharges || []).map((charge) => ({ ...charge, name: normaliseNordiconDescription(charge.name), originCharge: isLclOriginExtraCharge(charge) }));
+      state.lcl.directNonStack = Boolean(parsed.directNonStack);
+      state.lcl.imoDetails = normaliseImoDetails(parsed.imoDetails || "");
+      $("lclSupplier").value = "NORDICON";
+      if (parsed.validTo) $("lclValidTo").value = parsed.validTo;
+      $("lclPallets").value = parsed.pallets;
+      $("lclWeight").value = String(parsed.weight).replace(",", ".");
+      $("lclVolume").value = String(parsed.volume).replace(",", ".");
+      $("lclTransitDays").value = parsed.transitDays;
+      $("lclIncludeWar").checked = parsed.includeWar;
+      $("lclImoDetails").value = state.lcl.imoDetails;
+      if (!lclIsFob() && parsed.collection) setLclCollectionFromText(parsed.collection);
+      else {
+        lclCollectionCombo.value = "";
+        lclCollectionCombo.input.value = "";
+        $("lclCollectionCode").value = "";
+        $("lclCollectionName").value = "";
+      }
+      setLclPodFromText(parsed.pod);
+      setLclCosts(parsed.costs);
+      if (state.lcl.directNonStack || state.lcl.extraCharges.some((charge) => /NON\s*[- ]?STACK/i.test(charge.name))) $("lclStackable").value = "NON STACKABLE";
+      renderLclExtraCosts();
+      $("lclQuotePaste").value = "";
+      $("lclPasteWrap").classList.add("hidden");
+      $("lclQuoteLoaded").classList.remove("hidden");
+      $("lclQuoteLoadedTitle").textContent = parsed.source || "Nordicon quote";
+      const collectionLabel = lclIsFob() ? "GOTHENBURG" : (parsed.collection ? normalisedLocationName(parsed.collection) : "COLLECTION CITY REQUIRED");
+      $("lclQuoteLoadedInfo").textContent = `${collectionLabel} → ${normalisedLocationName(parsed.pod)} · ${parsed.pallets} pallets · ${parsed.weight} kg · ${parsed.volume} cbm${state.lcl.imoDetails ? " · IMO" : ""}`;
+      $("lclParseMessage").textContent = (!lclIsFob() && !parsed.collection) ? "Quote loaded. The workbook only contained a postcode, so select the collection city manually." : "Quote data extracted successfully.";
+      $("lclParseMessage").classList.remove("status-error");
+      toggleLclIncotermFields(false);
+      updateLclCalculation();
+    }
+
+    function updateLclCalculation() {
+      const calc = calculateLcl();
+      const box = $("lclCalculation");
+      if (!box) return;
+      if (!calc) {
+        box.innerHTML = `<div class="small-note" style="padding:12px">Paste a Nordicon quote or enter the buying costs manually.</div>`;
+        return;
+      }
+      const rows = [];
+      if (calc.includeOrigin) rows.push(["Trucking", calc.truckingCost, calc.truckingSelling, calc.truckingSelling - calc.truckingCost]);
+      rows.push(
+        ["Ocean freight", calc.oceanCost, calc.oceanSelling, (calc.volumeBased ? calc.oceanSelling * calc.volume : calc.oceanSelling) - calc.oceanCost],
+        ["Fuel", calc.fuelCost, calc.fuelSelling, (calc.volumeBased ? calc.fuelSelling * calc.volume : calc.fuelSelling) - calc.fuelCost],
+        ["EU ETS", calc.euCost, calc.euSelling, (calc.volumeBased ? calc.euSelling * calc.volume : calc.euSelling) - calc.euCost]
+      );
+      if ($("lclIncludeWar").checked) rows.push(["War risk", calc.warCost, calc.warSelling, (calc.volumeBased ? calc.warSelling * calc.volume : calc.warSelling) - calc.warCost]);
+      if (calc.includeOrigin) rows.push(
+        ["Terminal", calc.terminalCost, calc.terminalSelling, (calc.weightBased ? calc.terminalSelling * calc.weightTon : calc.terminalSelling) - calc.terminalCost],
+        ["Port", calc.portCost, calc.portSelling, (calc.weightBased ? calc.portSelling * calc.weightTon : calc.portSelling) - calc.portCost]
+      );
+      rows.push(
+        ["Handling", calc.handlingCost, calc.handlingSelling, calc.handlingSelling - calc.handlingCost],
+        ["ISPS", calc.ispsCost, calc.ispsSelling, calc.ispsSelling - calc.ispsCost]
+      );
+      if (calc.includeCustomExport) rows.push(["Custom export", 0, calc.customExportSelling, calc.customExportSelling]);
+      rows.push(
+        ["Forwarding fee", 0, 100, 100], ["SOLAS fee", 0, 10, 10],
+        ["Customs check MRN", calc.customsCost, 5, 5 - calc.customsCost]
+      );
+      calc.extraCharges.forEach((charge) => {
+        const usd = lclConvert(charge.total, charge.currency, "USD");
+        rows.push([normaliseNordiconDescription(charge.name), usd, usd, 0]);
+      });
+      rows.push(["Profit", 0, 50, 50]);
+      box.innerHTML = `<table><thead><tr><th>Charge</th><th>Buying total USD</th><th>Selling rate USD</th><th>Profit total USD</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${row[0]}</td><td>${formatMoney(row[1], "USD", 2)}</td><td>${formatMoney(row[2], "USD", 2)}</td><td>${formatMoney(row[3], "USD", 2)}</td></tr>`).join("")}</tbody></table><div class="profit-line"><span>Calculated profit</span><span>${formatMoney(calc.actualProfit, "USD", 2)} <small>(${formatMoney(lclConvert(calc.actualProfit, "USD", "SEK"), "SEK", 0)})</small></span></div>`;
+    }
+
+    function validateLcl() {
+      const errors = [];
+      const warnings = [];
+      const required = [
+        ["lclClientName", "Client name"], ["lclAttentionTo", "Attention to"], ["lclSalesOperator", "Sales operator"],
+        ["lclValidTo", "Validity"], ["lclPodCity", "POD"], ["lclPallets", "Pallet quantity"],
+        ["lclWeight", "Weight"], ["lclVolume", "Volume"]
+      ];
+      if (!lclIsFob()) required.splice(4, 0, ["lclCollectionCity", "Collection city"]);
+      $("lclPane").querySelectorAll(".invalid").forEach((element) => element.classList.remove("invalid"));
+      for (const [id, label] of required) {
+        if (!String($(id).value).trim()) { $(id).classList.add("invalid"); errors.push(`${label} is missing.`); }
+      }
+      if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(textValue("lclPodCode"))) {
+        lclPodCombo.input.classList.add("invalid"); errors.push("Select a valid POD from LocCodes.xlsx.");
+      }
+      if (!(decimalNumber($("lclPallets").value) >= 1) || !Number.isInteger(decimalNumber($("lclPallets").value))) errors.push("Pallet quantity must be a whole number of at least 1.");
+      if (!(decimalNumber($("lclWeight").value) > 0)) errors.push("Weight must be greater than 0.");
+      if (!(decimalNumber($("lclVolume").value) > 0)) errors.push("Volume must be greater than 0.");
+      if (String($("lclTransitDays").value).trim() && (!(numberValue($("lclTransitDays").value) >= 1) || !Number.isInteger(numberValue($("lclTransitDays").value)))) errors.push("Transit time must be a whole number of at least 1, or left blank for TBA.");
+      if (!(numberValue($("lclSekUsd").value) > 0) || !(numberValue($("lclSekEur").value) > 0)) errors.push("Valid ROE for USD and EUR is required.");
+      const costs = readLclCosts();
+      const costKeys = ["ocean", "fuel", "eu", "handling", "isps", "customs", ...(lclIncludesOrigin() ? ["trucking", "terminal", "port"] : [])];
+      for (const key of costKeys) if (!(decimalNumber(costs[key].total) >= 0)) errors.push(`${key} buying total is missing or invalid.`);
+      if ($("lclIncludeWar").checked && !(decimalNumber(costs.war.total) >= 0)) errors.push("War risk buying total is missing.");
+      includedLclExtraCharges().forEach((charge, index) => {
+        if (!normaliseNordiconDescription(charge.name)) errors.push(`Extra Nordicon charge ${index + 1} is missing a description.`);
+        if (!(decimalNumber(charge.total) >= 0)) errors.push(`Extra Nordicon charge ${index + 1} has an invalid buying total.`);
+        if (!/^(USD|EUR|SEK)$/.test(upper(charge.currency))) errors.push(`Extra Nordicon charge ${index + 1} has an invalid currency.`);
+      });
+      const calc = calculateLcl();
+      if (calc?.negativeSelling) warnings.push("The selected profit produces a negative trucking or ocean selling rate.");
+      if (calc && Math.abs(lclConvert(calc.actualProfit, "USD", "SEK") - decimalNumber($("lclProfitSek").value)) > 250) warnings.push("Rounding gives more than 250 SEK deviation from the requested profit.");
+      return { errors: [...new Set(errors)], warnings: [...new Set(warnings)] };
+    }
+
+    function exportLclData() {
+      return {
+        version: 3, mode: "LCL",
+        clientName: textValue("lclClientName"), attentionTo: textValue("lclAttentionTo"), salesOperator: textValue("lclSalesOperator"),
+        validTo: $("lclValidTo").value, paymentDays: $("lclPaymentDays").value, incoterm: $("lclIncoterm").value,
+        supplier: $("lclSupplier").value, collectionCity: $("lclCollectionCity").value.trim(), collectionName: textValue("lclCollectionName"), collectionCode: upper(textValue("lclCollectionCode")),
+        podName: textValue("lclPodName"), podCode: upper(textValue("lclPodCode")), pallets: $("lclPallets").value,
+        weight: $("lclWeight").value, volume: $("lclVolume").value, stackable: $("lclStackable").value,
+        imoDetails: normaliseImoDetails($("lclImoDetails").value), directNonStack: Boolean(state.lcl.directNonStack),
+        transitDays: $("lclTransitDays").value, profitSek: $("lclProfitSek").value, sekUsd: $("lclSekUsd").value, sekEur: $("lclSekEur").value,
+        roeDate: state.rates.date || "", includeWar: $("lclIncludeWar").checked, costs: readLclCosts(), quoteLoaded: state.lcl.quoteLoaded,
+        extraCharges: (state.lcl.extraCharges || []).map((charge) => ({ ...charge }))
+      };
+    }
+
+    function applyImportedLclData(data) {
+      if (!data || ![2, 3].includes(Number(data.version)) || data.mode !== "LCL") throw new Error("Unsupported LCL quote data version.");
+      activateMode("lcl");
+      $("lclClientName").value = data.clientName || "";
+      $("lclAttentionTo").value = data.attentionTo || "";
+      setSelectValue("lclSalesOperator", data.salesOperator, "Erik Stahl");
+      $("lclValidTo").value = data.validTo || "";
+      $("lclPaymentDays").value = data.paymentDays || "30";
+      setSelectValue("lclIncoterm", data.incoterm, "EXW");
+      setSelectValue("lclSupplier", data.supplier, "NORDICON");
+      $("lclPallets").value = data.pallets || "";
+      $("lclWeight").value = data.weight || "";
+      $("lclVolume").value = data.volume || "";
+      setSelectValue("lclStackable", data.stackable, "STACKABLE");
+      $("lclImoDetails").value = normaliseImoDetails(data.imoDetails || "");
+      $("lclTransitDays").value = data.transitDays || "";
+      $("lclProfitSek").value = data.profitSek || "7500";
+      if (data.sekUsd) $("lclSekUsd").value = data.sekUsd;
+      if (data.sekEur) $("lclSekEur").value = data.sekEur;
+      $("lclIncludeWar").checked = Boolean(data.includeWar);
+      setLclCosts(data.costs || cloneLclCosts());
+      state.lcl.quoteLoaded = Boolean(data.quoteLoaded);
+      state.lcl.extraCharges = Array.isArray(data.extraCharges) ? data.extraCharges.map((charge) => ({ ...charge, name: normaliseNordiconDescription(charge.name), originCharge: isLclOriginExtraCharge(charge) })) : [];
+      state.lcl.directNonStack = Boolean(data.directNonStack);
+      state.lcl.imoDetails = normaliseImoDetails(data.imoDetails || "");
+      renderLclExtraCosts();
+      if (state.lcl.quoteLoaded) {
+        $("lclPasteWrap").classList.add("hidden");
+        $("lclQuoteLoaded").classList.remove("hidden");
+        $("lclQuoteLoadedTitle").textContent = `${lclSupplierConfig().display} quote`;
+        const start = lclIsFob() ? "GOTHENBURG" : normalisedLocationName(data.collectionName || data.collectionCity);
+        $("lclQuoteLoadedInfo").textContent = `${start} → ${normalisedLocationName(data.podName)} · ${data.pallets} pallets · ${data.weight} kg · ${data.volume} cbm${state.lcl.imoDetails ? " · IMO" : ""}`;
+      } else {
+        $("lclPasteWrap").classList.remove("hidden");
+        $("lclQuoteLoaded").classList.add("hidden");
+      }
+      applyImportedLclLocations(data);
+      state.lcl.generatedScript = "";
+      $("lclScriptOutput").value = "";
+      $("lclScriptSection").open = false;
+      $("lclCopyScript").disabled = true;
+      $("lclDownloadScript").disabled = true;
+      showLclMessages({ errors: [], warnings: [] });
+      toggleLclIncotermFields(false);
+      updateLclCalculation();
+    }
+
+    function toggleLclIncotermFields(update = true) {
+      const fob = lclIsFob();
+      $("lclCollectionField")?.classList.toggle("hidden", fob);
+      document.querySelectorAll('[data-lcl-origin-row="true"]').forEach((row) => row.classList.toggle("hidden", fob));
+      const note = $("lclIncotermNote");
+      if (note) {
+        note.textContent = fob
+          ? "FOB: pickup and Nordicon origin charges are excluded. POL is GOTHENBURG."
+          : (lclIncoterm() === "FCA" ? "FCA: pickup is included; custom export is excluded." : "EXW: pickup and custom export are included.");
+        note.classList.toggle("fob", fob);
+      }
+      renderLclExtraCosts();
+      if (update) updateLclCalculation();
+    }
+
+    function resetLclForm(confirmReset = true) {
+      if (confirmReset && !confirm("Reset all LCL inputs?")) return;
+      $("lclPane").querySelectorAll("input, textarea").forEach((input) => {
+        if (["lclPaymentDays", "lclProfitSek", "lclSekUsd", "lclSekEur"].includes(input.id)) return;
+        if (input.type === "checkbox") input.checked = false;
+        else input.value = "";
+      });
+      $("lclSalesOperator").value = "Erik Stahl";
+      $("lclPaymentDays").value = "30";
+      $("lclProfitSek").value = "7500";
+      $("lclIncoterm").value = "EXW";
+      $("lclSupplier").value = "NORDICON";
+      $("lclStackable").value = "STACKABLE";
+      state.lcl = newLclState();
+      setLclCosts(state.lcl.costs);
+      renderLclExtraCosts();
+      setDefaultLclValidity();
+      if (state.locations.size) initialiseLocationSelectors();
+      $("lclPasteWrap").classList.remove("hidden");
+      $("lclQuoteLoaded").classList.add("hidden");
+      $("lclParseMessage").textContent = "";
+      $("lclScriptOutput").value = "";
+      $("lclScriptSection").open = false;
+      $("lclCopyScript").disabled = true;
+      $("lclDownloadScript").disabled = true;
+      showLclMessages({ errors: [], warnings: [] });
+      toggleLclIncotermFields(false);
+      updateLclCalculation();
+    }
+
+    function generateLclScript() {
+      if (!state.quoteTexts) {
+        alert("QuoteTexts.txt must be loaded before an LCL script can be generated.");
+        return false;
+      }
+      const validation = validateLcl();
+      showLclMessages(validation);
+      if (validation.errors.length) {
+        $("lclErrorBox").scrollIntoView({ behavior: "smooth", block: "center" });
+        return false;
+      }
+      state.lcl.generatedScript = generateLclAhk();
+      $("lclScriptOutput").value = state.lcl.generatedScript;
+      $("lclScriptSection").open = true;
+      $("lclCopyScript").disabled = false;
+      $("lclDownloadScript").disabled = false;
+      downloadLclScript();
+      return true;
+    }
+
+    function generateScript() {
+      if (!state.quoteTexts) {
+        alert("QuoteTexts.txt must be loaded before an FCL script can be generated.");
+        return false;
+      }
+      const validation = validateForm();
+      showMessages(validation);
+      if (validation.errors.length) {
+        $("errorBox").scrollIntoView({ behavior: "smooth", block: "center" });
+        return false;
+      }
+      state.generatedScript = generateAhk();
+      $("scriptOutput").value = state.generatedScript;
+      $("scriptSection").open = true;
+      $("copyScript").disabled = false;
+      $("downloadScript").disabled = false;
+      downloadScript();
+      return true;
+    }
+
+    function bindLclEvents() {
+      document.querySelectorAll(".mode-tab").forEach((button) => button.addEventListener("click", () => activateMode(button.dataset.mode)));
+      $("lclParseQuote").addEventListener("click", readNordiconPaste);
+      $("lclQuotePaste").addEventListener("paste", () => setTimeout(readNordiconPaste, 0));
+      $("lclOpenXlsx").addEventListener("click", () => $("lclXlsxFile").click());
+      $("lclXlsxFile").addEventListener("change", readNordiconXlsx);
+      $("lclReplaceQuote").addEventListener("click", () => {
+        state.lcl.quoteLoaded = false;
+        $("lclQuoteLoaded").classList.add("hidden");
+        $("lclPasteWrap").classList.remove("hidden");
+        $("lclQuotePaste").focus();
+      });
+      $("lclRefreshRates").addEventListener("click", fetchRates);
+      $("lclGenerateScript").addEventListener("click", generateLclScript);
+      $("lclImportScript").addEventListener("click", () => $("lclImportScriptFile").click());
+      $("lclImportScriptFile").addEventListener("change", async () => {
+        const file = $("lclImportScriptFile").files?.[0];
+        if (!file) return;
+        try { await importAhkFile(file); alert("Quote data imported from the AHK file."); }
+        catch (error) { alert(error instanceof Error ? error.message : "Could not import the AHK file."); }
+        finally { $("lclImportScriptFile").value = ""; }
+      });
+      $("lclCopyScript").addEventListener("click", copyLclScript);
+      $("lclDownloadScript").addEventListener("click", downloadLclScript);
+      $("lclResetForm").addEventListener("click", () => resetLclForm(true));
+      $("lclCollectionCity").addEventListener("input", applyLclCollectionSelection);
+      $("lclCollectionCity").addEventListener("change", applyLclCollectionSelection);
+      $("lclIncoterm").addEventListener("change", () => toggleLclIncotermFields(true));
+      $("lclImoDetails").addEventListener("input", () => { state.lcl.imoDetails = normaliseImoDetails($("lclImoDetails").value); updateLclCalculation(); });
+      $("lclPane").querySelectorAll("input, select, textarea").forEach((input) => {
+        if (["lclXlsxFile", "lclCollectionCity", "lclIncoterm", "lclImoDetails"].includes(input.id)) return;
+        input.addEventListener("input", updateLclCalculation);
+        input.addEventListener("change", updateLclCalculation);
+      });
+    }
+
     // Initialise the new multi-route model before the existing startup calls run.
     state.routes = [newRoute({ equipment: state.equipment })];
     state.activeRouteIndex = 0;
@@ -5913,6 +6729,7 @@ RestoreClipboard(*) {
     toggleWaitingTime();
     toggleAgent();
     toggleIncotermFields(false);
+    toggleLclIncotermFields(false);
     updateLclCalculation();
     activateMode("fcl");
     fetchRates();
