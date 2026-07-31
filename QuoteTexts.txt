@@ -1,6 +1,6 @@
 {
   "_instructions": "Editable quote wording for BLU Auto Quote. Keep this file in the same folder as index.html and LocCodes.xlsx. The file is JSON saved as plain text. Placeholders use {{UPPERCASE_NAME}} syntax and must not be renamed unless index.html is updated too.",
-  "version": "8.3.0",
+  "version": "8.4.0",
   "common": {
     "project": "949",
     "internalComment": "Agent Ocean Export",
@@ -9,7 +9,7 @@
     "salutation": "Dear {{ATTENTION}},",
     "detailBasis": "Based on {{SUPPLIER}} ({{INCOTERM}})",
     "subjectTo": "Space/equipment and any charge imposed by the line VATOS.\n\nAny additional requirement not previously notified could derive into this quote being reviewed.\n\nShipping line approval of commodity.\n\nAll quotes & tenders are subject to our Middle East Conflict Disclaimer, available on our website.\n\nAny Emergency Conflict/War Risk Surcharges, additional premiums, Route Changes and/or End of Voyage costs, whether existing, increased or newly imposed prior to or during the transport/voyage.",
-    "grossWeight": "20000",
+    "grossWeight": "25000",
     "transitTime": "{{DAYS}} DAYS // PORT-PORT",
     "transitTimeTba": "TBA DAYS // PORT-PORT"
   },
