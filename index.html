@@ -170,6 +170,10 @@
     .roe-panel { padding: 8px; border: 1px solid #bbb; background: #fafafa; }
     .roe-panel .roe-line { margin-bottom: 7px; }
     .roe-actions { margin-top: 7px; }
+    .roe-source-note { display: block; margin-bottom: 7px; }
+    .roe-extra-rates { margin-top: 8px; }
+    .roe-quick-line { display: flex; align-items: center; gap: 7px; margin-top: 7px; }
+    .roe-quick-line .roe-status { flex: 1; min-height: 28px; padding: 5px 7px; border: 1px solid #bbb; background: #fafafa; font-size: 11px; }
     .script-toolbar { display: flex; gap: 7px; padding: 8px; border-top: 1px solid #aaa; }
     #scriptOutput {
       min-height: 360px;
@@ -284,7 +288,7 @@
     }
 
 
-    /* Version 8.3.0 split workspace */
+    /* Version 8.4.0 split workspace */
     main { width: min(1180px, calc(100% - 24px)); }
     .file-state { display: grid; gap: 4px; min-width: 285px; }
     .file-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 26px; }
@@ -334,6 +338,7 @@
     .agent-manual-fields { margin-top: 9px; padding-top: 9px; border-top: 1px solid #ccc; }
     .agent-manual-fields .small-note { align-self: end; padding-bottom: 7px; }
     .equipment-option-row { margin-top: 7px; padding: 6px 8px; border: 1px solid #ccc; background: #fff; }
+    .equipment-option-row .add-custom-charge { margin-left: auto; }
     .equipment-advanced { margin-top: 7px; }
     .equipment-advanced .sync-grid { margin: 0; }
     .custom-charge-section { margin-top: 8px; }
@@ -365,7 +370,7 @@
       .location-title { grid-column: 1; }
     }
 
-    /* Version 8.3.0 compact LCL workspace */
+    /* Version 8.4.0 compact LCL workspace */
     #lclPane { max-width: none; margin: 0; }
     .lcl-workspace { display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 12px; align-items: start; }
     .lcl-left-stack, .lcl-right-stack { display: grid; gap: 12px; align-content: start; }
@@ -409,7 +414,7 @@
     <header>
       <div>
         <h1>BLU Auto Quote</h1>
-        <div class="app-version">AHK Script Gen // Version 8.3.0</div>
+        <div class="app-version">AHK Script Gen // Version 8.4.0</div>
       </div>
       <div class="file-state">
         <div class="file-line"><span id="locStatus">Loading LocCodes.xlsx...</span><button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button></div>
@@ -437,7 +442,7 @@
                 <label class="field">Valid to<input id="validTo" data-required type="date"></label>
               </div>
               <details class="advanced-panel">
-                <summary>Payment, agent and export</summary>
+                <summary>Payment and agent</summary>
                 <div class="advanced-panel-body">
                   <div class="grid two">
                     <label class="field">Payment term days<input id="paymentDays" data-required type="number" min="0" step="1" value="30"></label>
@@ -446,7 +451,6 @@
                   <div class="option-row">
                     <label class="waiting-check"><input id="useAgent" type="checkbox"> AGENT</label>
                     <label class="field hidden compact-select" id="agentField">Agent<select id="agent"><option>CHS</option><option>SR GROUP</option><option>N.A. NISSEN</option></select></label>
-                    <label class="waiting-check"><input id="exportQuote" type="checkbox"> Export quote</label>
                   </div>
                   <div id="agentManualFields" class="grid two agent-manual-fields hidden">
                     <label class="field"><span id="agentHandlingLabel">Handling buying</span><input id="agentHandlingAmount" type="number" min="0" step="0.01"></label>
@@ -475,8 +479,9 @@
               <div class="grid two route-core-grid">
                 <label class="field">Incoterm<select id="incoterm" data-required><option>EXW</option><option>FCA</option><option>FOB</option></select></label>
                 <label class="field">Transit time <span class="hint">blank = TBA</span><input id="transitDays" type="number" min="1" step="1"></label>
-                <label class="waiting-check span-two hidden" id="fcaOnCarriageOption"><input id="includeOnCarriage" type="checkbox" checked> Include on carriage</label>
-                <label class="field span-two" id="collectionField">Collection city<div id="collectionLocation" class="combo"><input id="collectionCity" autocomplete="off"><div class="combo-menu hidden"></div></div></label>
+                <label class="waiting-check span-two hidden" id="fcaOnCarriageOption"><input id="includeOnCarriage" type="checkbox" checked> Include precarriage</label>
+                <label class="field" id="collectionCountryField">Collection country<div id="collectionCountry" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                <label class="field" id="collectionField">Collection city<div id="collectionLocation" class="combo"><input id="collectionCity" autocomplete="off"><div class="combo-menu hidden"></div></div></label>
                 <label class="field hidden">Legacy precarriage supplier<select id="precarriageSupplier"><option>DANIA</option><option>SKARASLÄTTEN</option><option>PGF</option></select></label>
               </div>
               <input id="collectionName" type="hidden"><input id="collectionCode" type="hidden">
@@ -558,16 +563,20 @@
               <details class="compact-details roe-details">
                 <summary>ROE</summary>
                 <div class="roe-panel">
-                  <div class="roe-line"><div id="roeStatus" class="roe-status loading"><span class="dot"></span><span>Loading current rates...</span></div><span id="roeSource" class="small-note"></span></div>
+                  <div id="roeSource" class="small-note roe-source-note"></div>
                   <div class="grid two">
                     <label class="field">1 SEK = USD<input id="sekUsd" type="number" min="0" step="0.000001"></label>
                     <label class="field">1 SEK = EUR<input id="sekEur" type="number" min="0" step="0.000001"></label>
                     <label class="field">1 SEK = NOK<input id="sekNok" type="number" min="0" step="0.000001"></label>
                     <label class="field">1 SEK = DKK<input id="sekDkk" type="number" min="0" step="0.000001"></label>
                   </div>
-                  <div class="roe-actions"><button type="button" class="btn small" id="refreshRates">Refresh ROE</button></div>
+                  <div id="additionalRoeRates" class="grid two roe-extra-rates"></div>
                 </div>
               </details>
+              <div class="roe-quick-line">
+                <div id="roeStatus" class="roe-status loading"><span class="dot"></span><span>Loading rates...</span></div>
+                <button type="button" class="btn small" id="refreshRates">Refresh ROE</button>
+              </div>
             </div>
           </section>
         </div>
@@ -637,14 +646,18 @@
               <details class="compact-details lcl-roe-details">
                 <summary>ROE</summary>
                 <div class="roe-panel">
-                  <div id="lclRoeStatus" class="small-note">Uses current ROE loaded by the tool.</div>
+                  <div id="lclRoeSource" class="small-note roe-source-note">Uses current ROE loaded by the tool.</div>
                   <div class="grid two">
                     <label class="field">1 SEK = USD<input id="lclSekUsd" type="number" min="0" step="0.000001"></label>
                     <label class="field">1 SEK = EUR<input id="lclSekEur" type="number" min="0" step="0.000001"></label>
                   </div>
-                  <div class="roe-actions"><button type="button" class="btn small" id="lclRefreshRates">Refresh ROE</button></div>
+                  <div id="lclAdditionalRoeRates" class="grid two roe-extra-rates"></div>
                 </div>
               </details>
+              <div class="roe-quick-line">
+                <div id="lclRoeStatus" class="roe-status loading"><span class="dot"></span><span>Loading rates...</span></div>
+                <button type="button" class="btn small" id="lclRefreshRates">Refresh ROE</button>
+              </div>
               <div class="lcl-primary-actions">
                 <button type="button" class="btn primary" id="lclGenerateScript" disabled>Generate & download AHK</button>
                 <button type="button" class="btn" id="lclImportScript">Import .ahk</button>
@@ -756,6 +769,7 @@
         <div class="equipment-option-row">
           <label class="waiting-check"><input class="eq-input origin-toggle" data-key="includeOriginCharges" type="checkbox"> Origin charges</label>
           <label class="waiting-check stuffing-field"><input class="eq-input stuff-toggle" data-key="includeStuff" type="checkbox"> Stuff / lash / shunt</label>
+          <button type="button" class="btn small add-custom-charge">+ Add custom charge</button>
         </div>
 
         <div class="cost-grid origin-fields hidden">
@@ -776,7 +790,7 @@
               <label class="waiting-check precarriage-field"><input class="sync-toggle" data-sync-kind="precarriage" type="checkbox"> Keep precarriage buying synced between routes</label>
             </div>
             <div class="custom-charge-section">
-              <div class="custom-charge-head"><strong>Custom Other charges for this details row</strong><button type="button" class="btn small add-custom-charge">+ Add custom charge</button></div>
+              <div class="custom-charge-head"><strong>Custom Other charges for this details row</strong></div>
               <div class="custom-charge-list"></div>
             </div>
           </div>
@@ -830,7 +844,8 @@
     const PRE_CARRIAGE_CONFIG = Object.freeze({
       "DANIA": { supplier: "Dania", supplierArrow: 0 },
       "SKARASLÄTTEN": { supplier: "skara", supplierArrow: 0 },
-      "PGF": { supplier: "pgf", supplierArrow: 0 }
+      "PGF": { supplier: "pgf", supplierArrow: 0 },
+      "CARRIER": { label: "CARRIER (selected carrier)", useCarrier: true }
     });
 
     const STUFFING_SUPPLIER_CONFIG = Object.freeze({
@@ -875,7 +890,8 @@
     });
 
     const state = {
-      rates: { USD: null, EUR: null, NOK: null, DKK: null, date: null },
+      rates: { SEK: 1, USD: null, EUR: null, NOK: null, DKK: null, date: null },
+      availableCurrencies: ["SEK", "USD", "EUR"],
       locations: new Map(),
       equipment: [newEquipment()],
       generatedScript: "",
@@ -1175,6 +1191,7 @@
     }
 
     const locationCombos = {
+      collectionCountry: new SearchCombo($("collectionCountry"), () => updateCollectionLocationOptions()),
       polCountry: new SearchCombo($("polCountry"), () => updateLocationOptions("pol")),
       pol: new SearchCombo($("polLocation"), () => applyLocationSelection("pol")),
       podCountry: new SearchCombo($("podCountry"), () => updateLocationOptions("pod")),
@@ -1469,12 +1486,17 @@
 
     function formatMoney(value, currency, decimals = 0) {
       if (!Number.isFinite(value)) return "—";
-      return new Intl.NumberFormat("sv-SE", {
-        style: "currency",
-        currency,
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals
-      }).format(value);
+      const code = normaliseCurrencyCode(currency) || "SEK";
+      try {
+        return new Intl.NumberFormat("sv-SE", {
+          style: "currency",
+          currency: code,
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }).format(value);
+      } catch {
+        return `${new Intl.NumberFormat("sv-SE", { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(value)} ${code}`;
+      }
     }
 
     function formatPlainNumber(value) {
@@ -1506,13 +1528,157 @@
       };
     }
 
+    function normaliseCurrencyCode(value) {
+      const code = upper(value);
+      return /^[A-Z]{3}$/.test(code) ? code : "";
+    }
+
+    function availableCurrencyCodes() {
+      const codes = new Set(["SEK", "USD", "EUR", ...(state.availableCurrencies || [])]);
+      Object.entries(state.rates || {}).forEach(([code, rate]) => {
+        if (normaliseCurrencyCode(code) && numberValue(rate) > 0) codes.add(upper(code));
+      });
+      return [...codes].sort(collator.compare);
+    }
+
+    function populateCurrencySelect(select, preferredValue = select?.value) {
+      if (!select) return;
+      if (!select.dataset.currencyDefaults) {
+        select.dataset.currencyDefaults = [...select.options].map((option) => upper(option.value)).filter(normaliseCurrencyCode).join(",");
+      }
+      const defaults = select.dataset.currencyDefaults.split(",").map(normaliseCurrencyCode).filter(Boolean);
+      const preferred = normaliseCurrencyCode(preferredValue);
+      const codes = new Set([...defaults, ...availableCurrencyCodes()]);
+      if (preferred) codes.add(preferred);
+      const ordered = [...defaults, ...[...codes].filter((code) => !defaults.includes(code)).sort(collator.compare)];
+      select.replaceChildren(...ordered.map((code) => {
+        const option = document.createElement("option");
+        option.value = code;
+        option.textContent = code;
+        return option;
+      }));
+      select.value = ordered.includes(preferred) ? preferred : (defaults[0] || ordered[0] || "");
+    }
+
+    function populateAllCurrencySelects() {
+      document.querySelectorAll('select[data-key$="Currency"], #targetCurrency, select[data-lcl-field="currency"], select[data-lcl-extra-field="currency"]').forEach((select) => {
+        populateCurrencySelect(select, select.value);
+      });
+    }
+
+    function ratesFromState() {
+      const rates = { SEK: 1 };
+      Object.entries(state.rates || {}).forEach(([code, rate]) => {
+        const currency = normaliseCurrencyCode(code);
+        const value = numberValue(rate);
+        if (currency && value > 0) rates[currency] = value;
+      });
+      return rates;
+    }
+
+    function ratesForScope(scope = "fcl") {
+      const rates = ratesFromState();
+      const fixedInputs = scope === "lcl"
+        ? { USD: $("lclSekUsd"), EUR: $("lclSekEur") }
+        : { USD: $("sekUsd"), EUR: $("sekEur"), NOK: $("sekNok"), DKK: $("sekDkk") };
+      Object.entries(fixedInputs).forEach(([currency, input]) => {
+        const value = numberValue(input?.value);
+        if (value > 0) rates[currency] = value;
+      });
+      const container = scope === "lcl" ? $("lclAdditionalRoeRates") : $("additionalRoeRates");
+      container?.querySelectorAll("input[data-roe-currency]").forEach((input) => {
+        const currency = normaliseCurrencyCode(input.dataset.roeCurrency);
+        const value = numberValue(input.value);
+        if (currency && value > 0) rates[currency] = value;
+      });
+      return rates;
+    }
+
     function getRatesFromInputs() {
-      return {
-        USD: numberValue($("sekUsd").value),
-        EUR: numberValue($("sekEur").value),
-        NOK: numberValue($("sekNok").value),
-        DKK: numberValue($("sekDkk").value)
-      };
+      return ratesForScope("fcl");
+    }
+
+    function serialisableRates(scope = "fcl") {
+      return Object.fromEntries(Object.entries(ratesForScope(scope)).filter(([code, rate]) => normaliseCurrencyCode(code) && numberValue(rate) > 0));
+    }
+
+    function mergeImportedRates(rates, date = "") {
+      if (rates && typeof rates === "object" && !Array.isArray(rates)) {
+        Object.entries(rates).forEach(([code, rate]) => {
+          const currency = normaliseCurrencyCode(code);
+          const value = numberValue(rate);
+          if (currency && value > 0) state.rates[currency] = value;
+        });
+      }
+      if (date) state.rates.date = date;
+      state.rates.SEK = 1;
+      state.availableCurrencies = [...new Set([...state.availableCurrencies, ...Object.keys(state.rates).map(normaliseCurrencyCode).filter(Boolean)])].sort(collator.compare);
+    }
+
+    function selectedFclCurrencies() {
+      const codes = new Set();
+      const add = (value) => { const code = normaliseCurrencyCode(value); if (code) codes.add(code); };
+      add($("targetCurrency")?.value);
+      const includePrecarriage = fclIncludesPrecarriage();
+      (state.routes || []).forEach((route) => (route.equipment || []).forEach((equipment) => {
+        add(equipment.freightCurrency);
+        add((CARRIER_CONFIG[upper(equipment.carrier)] ?? CARRIER_CONFIG.MSC).linerCurrency);
+        if (includePrecarriage) {
+          add(equipment.precarriageCurrency);
+          if (equipment.includeStuff) add(equipment.stuffCurrency);
+        }
+        if (equipment.includeOriginCharges) add(equipment.originCurrency);
+      }));
+      const agent = agentConfig();
+      if (agent?.manualCosts) add(agent.costCurrency);
+      if (agent?.exportCustomCurrency) add(agent.exportCustomCurrency);
+      return codes;
+    }
+
+    function selectedLclCurrencies() {
+      const codes = new Set(["USD"]);
+      const add = (value) => { const code = normaliseCurrencyCode(value); if (code) codes.add(code); };
+      Object.values(state.lcl?.costs || {}).forEach((row) => add(row.currency));
+      (state.lcl?.extraCharges || []).forEach((row) => add(row.currency));
+      document.querySelectorAll('select[data-lcl-field="currency"], select[data-lcl-extra-field="currency"]').forEach((select) => add(select.value));
+      return codes;
+    }
+
+    function renderAdditionalRoeRates(scope = "fcl") {
+      const container = scope === "lcl" ? $("lclAdditionalRoeRates") : $("additionalRoeRates");
+      if (!container) return;
+      const fixed = new Set(scope === "lcl" ? ["SEK", "USD", "EUR"] : ["SEK", "USD", "EUR", "NOK", "DKK"]);
+      const selected = scope === "lcl" ? selectedLclCurrencies() : selectedFclCurrencies();
+      const existing = new Map([...container.querySelectorAll("input[data-roe-currency]")].map((input) => [input.dataset.roeCurrency, input.value]));
+      container.replaceChildren();
+      [...selected].filter((code) => !fixed.has(code)).sort(collator.compare).forEach((currency) => {
+        const label = document.createElement("label");
+        label.className = "field";
+        label.textContent = `1 SEK = ${currency}`;
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.step = "0.000001";
+        input.dataset.roeCurrency = currency;
+        const saved = existing.get(currency);
+        const rate = saved !== undefined ? saved : ratesFromState()[currency];
+        input.value = numberValue(rate) > 0 ? Number(rate).toFixed(6) : "";
+        const refresh = () => scope === "lcl" ? updateLclCalculation() : updateAllPreviews();
+        input.addEventListener("input", refresh);
+        input.addEventListener("change", refresh);
+        label.append(input);
+        container.append(label);
+      });
+    }
+
+    function renderRoeRateFields() {
+      renderAdditionalRoeRates("fcl");
+      renderAdditionalRoeRates("lcl");
+    }
+
+    function refreshCurrencyControls() {
+      populateAllCurrencySelects();
+      renderRoeRateFields();
     }
 
     function convert(amount, from, to) {
@@ -1699,44 +1865,61 @@
     }
 
     async function fetchRates() {
-      const status = $("roeStatus");
-      status.className = "roe-status loading";
-      status.innerHTML = `<span class="dot"></span><span>Hämtar aktuella kurser…</span>`;
-      $("refreshRates").disabled = true;
+      const statuses = [$("roeStatus"), $("lclRoeStatus")].filter(Boolean);
+      statuses.forEach((status) => {
+        status.className = "roe-status loading";
+        status.innerHTML = `<span class="dot"></span><span>Loading rates...</span>`;
+      });
+      [$("refreshRates"), $("lclRefreshRates")].filter(Boolean).forEach((button) => { button.disabled = true; });
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
       try {
-        const response = await fetch("https://api.frankfurter.dev/v2/rates?base=SEK&quotes=USD,EUR,NOK,DKK", {
+        const response = await fetch("https://api.frankfurter.dev/v2/rates?base=SEK", {
           cache: "no-store",
           signal: controller.signal
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const rows = await response.json();
-        const rates = Object.fromEntries(rows.map((row) => [row.quote, Number(row.rate)]));
-        const date = rows[0]?.date || "okänt datum";
-        if (!(rates.USD > 0) || !(rates.EUR > 0) || !(rates.NOK > 0) || !(rates.DKK > 0)) throw new Error("Kurssvaret saknar USD, EUR, NOK eller DKK");
+        if (!Array.isArray(rows) || !rows.length) throw new Error("The rate response was empty");
+        const rates = { SEK: 1 };
+        let date = "";
+        rows.forEach((row) => {
+          const currency = normaliseCurrencyCode(row?.quote);
+          const rate = numberValue(row?.rate);
+          if (currency && rate > 0) rates[currency] = rate;
+          if (String(row?.date || "") > date) date = String(row.date);
+        });
+        if (!(rates.USD > 0) || !(rates.EUR > 0) || !(rates.NOK > 0) || !(rates.DKK > 0)) {
+          throw new Error("The rate response is missing USD, EUR, NOK or DKK");
+        }
 
-        state.rates = { USD: rates.USD, EUR: rates.EUR, NOK: rates.NOK, DKK: rates.DKK, date };
+        state.rates = { ...rates, date: date || "unknown date" };
+        state.availableCurrencies = Object.keys(rates).filter(normaliseCurrencyCode).sort(collator.compare);
         $("sekUsd").value = rates.USD.toFixed(6);
         $("sekEur").value = rates.EUR.toFixed(6);
         $("sekNok").value = rates.NOK.toFixed(6);
         $("sekDkk").value = rates.DKK.toFixed(6);
         $("lclSekUsd").value = rates.USD.toFixed(6);
         $("lclSekEur").value = rates.EUR.toFixed(6);
-        $("lclRoeStatus").textContent = `Current rates loaded (${date}).`;
-        status.className = "roe-status ok";
-        status.innerHTML = `<span class="dot"></span><span>Kurser hämtade (${date})</span>`;
-        $("roeSource").textContent = `Källa: Frankfurter daily reference rates, kursdatum ${date}. Fälten kan justeras manuellt.`;
+        refreshCurrencyControls();
+        statuses.forEach((status) => {
+          status.className = "roe-status ok";
+          status.innerHTML = `<span class="dot"></span><span>Rates loaded${date ? ` (${date})` : ""}</span>`;
+        });
+        $("roeSource").textContent = `Source: Frankfurter daily reference rates${date ? `, rate date ${date}` : ""}. Fields can be adjusted manually.`;
+        $("lclRoeSource").textContent = `Source: Frankfurter daily reference rates${date ? `, rate date ${date}` : ""}. Fields can be adjusted manually.`;
       } catch (error) {
-        status.className = "roe-status error";
-        status.innerHTML = `<span class="dot"></span><span>Kunde inte hämta ROE. Ange kurser manuellt.</span>`;
-        $("roeSource").textContent = `Fel vid ROE-hämtning: ${error.message}`;
-        $("lclRoeStatus").textContent = "Could not load ROE. Enter the rates manually.";
-        $("lclRoeStatus").classList.add("status-error");
+        statuses.forEach((status) => {
+          status.className = "roe-status error";
+          status.innerHTML = `<span class="dot"></span><span>Could not load rates</span>`;
+        });
+        $("roeSource").textContent = `ROE loading error: ${error.message}. Enter rates manually.`;
+        $("lclRoeSource").textContent = `ROE loading error: ${error.message}. Enter rates manually.`;
       } finally {
         clearTimeout(timeoutId);
-        $("refreshRates").disabled = false;
+        [$("refreshRates"), $("lclRefreshRates")].filter(Boolean).forEach((button) => { button.disabled = false; });
+        renderRoeRateFields();
         updateAllPreviews();
         updateLclCalculation();
       }
@@ -1993,6 +2176,7 @@
     function setSelectValue(id, value, fallback) {
       const select = $(id);
       const wanted = String(value ?? "");
+      if (id === "targetCurrency" && normaliseCurrencyCode(wanted)) populateCurrencySelect(select, wanted);
       select.value = [...select.options].some((option) => option.value === wanted) ? wanted : fallback;
     }
 
@@ -2078,7 +2262,7 @@
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.3.0
+; Generated by BLU Auto Quote → AutoHotkey v8.4.0
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR | 1 SEK = ${$("sekNok").value} NOK | 1 SEK = ${$("sekDkk").value} DKK
 ; Selling currency: ${$("targetCurrency").value}
@@ -2242,7 +2426,7 @@ RunQuote() {
     ClickField("add equipment", ROW_DELAY)
     TypeField("equipment quantity", detail["quantity"], false, true)
     SelectField("kind of equipment", detail["equipmentSearch"])
-    TypeField("gross weight", "20000")
+    TypeField("gross weight", "25000")
     TypeField("description of goods", ${ahkString(FIXED.goodsDescription)}, false, true)
   }
 
@@ -2681,8 +2865,11 @@ RestoreClipboard(*) {
       state.lcl.costs = cloneLclCosts({ ...LCL_COST_DEFAULTS, ...costs });
       document.querySelectorAll("[data-lcl-charge][data-lcl-field]").forEach((input) => {
         const row = state.lcl.costs[input.dataset.lclCharge] ?? {};
-        input.value = row[input.dataset.lclField] ?? "";
+        const value = row[input.dataset.lclField] ?? "";
+        if (input.tagName === "SELECT" && input.dataset.lclField === "currency") populateCurrencySelect(input, value);
+        input.value = value;
       });
+      renderRoeRateFields();
     }
 
     function readLclCosts() {
@@ -2730,17 +2917,19 @@ RestoreClipboard(*) {
     }
 
     function lclRates() {
-      return { USD: numberValue($("lclSekUsd").value), EUR: numberValue($("lclSekEur").value) };
+      return ratesForScope("lcl");
     }
 
     function lclConvert(amount, from, to = "USD") {
       const value = decimalNumber(amount);
-      if (!Number.isFinite(value)) return NaN;
-      if (from === to) return value;
+      const source = normaliseCurrencyCode(from);
+      const target = normaliseCurrencyCode(to);
+      if (!Number.isFinite(value) || !source || !target) return NaN;
+      if (source === target) return value;
       const rates = lclRates();
-      if (!(rates.USD > 0) || !(rates.EUR > 0)) return NaN;
-      const sek = from === "SEK" ? value : value / rates[from];
-      return to === "SEK" ? sek : sek * rates[to];
+      const sek = source === "SEK" ? value : (rates[source] > 0 ? value / rates[source] : NaN);
+      if (!Number.isFinite(sek)) return NaN;
+      return target === "SEK" ? sek : (rates[target] > 0 ? sek * rates[target] : NaN);
     }
 
     function lclChargeCost(costs, key) {
@@ -3006,6 +3195,8 @@ RestoreClipboard(*) {
       setSelectValue("lclStackable", data.stackable, "STACKABLE");
       $("lclTransitDays").value = data.transitDays || "";
       $("lclProfitSek").value = data.profitSek || "7500";
+      mergeImportedRates(data.roeRates, data.roeDate);
+      refreshCurrencyControls();
       if (data.sekUsd) $("lclSekUsd").value = data.sekUsd;
       if (data.sekEur) $("lclSekEur").value = data.sekEur;
       $("lclIncludeWar").checked = Boolean(data.includeWar);
@@ -3052,7 +3243,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL AutoHotkey v8.3.0
+; Generated by BLU Auto Quote - LCL AutoHotkey v8.4.0
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -3769,7 +3960,7 @@ RestoreClipboard(*) {
     }
 
     // ==============================
-    // v8.3.0 FCL route/detail overrides
+    // v8.4.0 FCL route/detail overrides
     // ==============================
 
     function makeStableId(prefix = "id") {
@@ -3814,6 +4005,10 @@ RestoreClipboard(*) {
     function newRoute(overrides = {}) {
       const legacyCarrier = String(overrides.carrier || "MSC").trim().toUpperCase();
       const legacyTrucker = String(overrides.precarriageSupplier || "DANIA").trim().toUpperCase();
+      const collectionCode = upper(overrides.collectionCode || "");
+      const polCode = upper(overrides.polCode || "SEGOT");
+      const podCode = upper(overrides.podCode || "");
+      const explicitCountry = (key, fallback) => Object.prototype.hasOwnProperty.call(overrides, key) ? upper(overrides[key]) : fallback;
       const sourceEquipment = Array.isArray(overrides.equipment) && overrides.equipment.length
         ? overrides.equipment
         : [newEquipment({ carrier: legacyCarrier, precarriageSupplier: legacyTrucker })];
@@ -3821,15 +4016,18 @@ RestoreClipboard(*) {
         id: overrides.id || makeStableId("route"),
         collectionCity: overrides.collectionCity || "",
         collectionName: overrides.collectionName || overrides.collectionCity || "",
-        collectionCode: upper(overrides.collectionCode || ""),
+        collectionCode,
+        collectionCountry: explicitCountry("collectionCountry", countryCode(collectionCode) || "SE"),
         precarriageSupplier: legacyTrucker,
         transitDays: overrides.transitDays ?? "",
         includeWaitingTime: Boolean(overrides.includeWaitingTime),
         waitingHours: overrides.waitingHours ?? "1",
         polName: overrides.polName || "GOTHENBURG",
-        polCode: upper(overrides.polCode || "SEGOT"),
+        polCode,
+        polCountry: explicitCountry("polCountry", countryCode(polCode) || "SE"),
         podName: overrides.podName || "",
-        podCode: upper(overrides.podCode || ""),
+        podCode,
+        podCountry: explicitCountry("podCountry", countryCode(podCode)),
         freeDaysMode: overrides.freeDaysMode || "standard",
         freeDays: overrides.freeDays ?? "7",
         freeDaysType: overrides.freeDaysType || "detention",
@@ -3940,12 +4138,9 @@ RestoreClipboard(*) {
     function routePathParts(route) {
       const pol = routePol(route) || "POL";
       const pod = routePod(route) || "POD";
-      if (isFobIncoterm()) return [pol, pod];
+      if (!fclIncludesPrecarriage()) return [pol, pod];
       const collection = routeCollection(route) || "COLLECTION";
-      const parts = [collection];
-      if (pol && pol !== collection) parts.push(pol);
-      parts.push(pod);
-      return parts;
+      return [collection, pol, pod];
     }
 
     function routePath(route) {
@@ -4029,6 +4224,7 @@ RestoreClipboard(*) {
         id: makeStableId("route"),
         podName: clearDestination ? "" : source.podName,
         podCode: clearDestination ? "" : source.podCode,
+        podCountry: clearDestination ? "" : source.podCountry,
         transitDays: clearDestination ? "" : source.transitDays,
         customCharges: (source.customCharges || []).map((charge) => ({ ...charge, id: makeStableId("custom") })),
         equipment: source.equipment.map((equipment) => ({ ...equipment, id: makeStableId("eq") }))
@@ -4198,14 +4394,17 @@ RestoreClipboard(*) {
       route.collectionCity = $("collectionCity").value.trim();
       route.collectionName = textValue("collectionName") || route.collectionCity;
       route.collectionCode = upper(textValue("collectionCode"));
+      route.collectionCountry = locationCombos.collectionCountry.value;
       route.precarriageSupplier = $("precarriageSupplier").value;
       route.transitDays = $("transitDays").value;
       route.includeWaitingTime = $("includeWaitingTime").checked;
       route.waitingHours = $("waitingHours").value;
       route.polName = textValue("polName");
       route.polCode = upper(textValue("polCode"));
+      route.polCountry = locationCombos.polCountry.value;
       route.podName = textValue("podName");
       route.podCode = upper(textValue("podCode"));
+      route.podCountry = locationCombos.podCountry.value;
       route.freeDaysMode = $("freeDaysMode").value;
       route.freeDays = $("freeDays").value;
       route.freeDaysType = $("freeDaysType").value;
@@ -4227,8 +4426,11 @@ RestoreClipboard(*) {
 
       if (state.locations.size) {
         const countries = new Set([...state.locations.keys()].map(countryCode).filter(Boolean));
-        const swedishCodes = [...state.locations.keys()].filter((code) => countryCode(code) === "SE");
-        collectionCombo.setOptions(locationOptions(swedishCodes, false), route.collectionCode);
+        const collectionCountry = Object.prototype.hasOwnProperty.call(route, "collectionCountry") ? route.collectionCountry : (countryCode(route.collectionCode) || "SE");
+        route.collectionCountry = collectionCountry;
+        locationCombos.collectionCountry.setOptions(countryOptions(countries), collectionCountry);
+        const collectionCodes = [...state.locations.keys()].filter((code) => !collectionCountry || countryCode(code) === collectionCountry);
+        collectionCombo.setOptions(locationOptions(collectionCodes, false), route.collectionCode);
         if (route.collectionCode && collectionCombo.selectedOption()) {
           collectionCombo.value = route.collectionCode;
           collectionCombo.input.value = collectionCombo.selectedOption().label;
@@ -4239,9 +4441,13 @@ RestoreClipboard(*) {
         $("collectionName").value = route.collectionName || route.collectionCity || "";
         $("collectionCode").value = route.collectionCode || "";
 
-        locationCombos.polCountry.setOptions(countryOptions(countries), countryCode(route.polCode || "SEGOT"));
+        const polCountry = Object.prototype.hasOwnProperty.call(route, "polCountry") ? route.polCountry : (countryCode(route.polCode || "SEGOT") || "SE");
+        const podCountry = Object.prototype.hasOwnProperty.call(route, "podCountry") ? route.podCountry : countryCode(route.podCode);
+        route.polCountry = polCountry;
+        route.podCountry = podCountry;
+        locationCombos.polCountry.setOptions(countryOptions(countries), polCountry);
         updateLocationOptions("pol", route.polCode || "SEGOT");
-        locationCombos.podCountry.setOptions(countryOptions(countries), countryCode(route.podCode));
+        locationCombos.podCountry.setOptions(countryOptions(countries), podCountry);
         updateLocationOptions("pod", route.podCode);
       } else {
         collectionCombo.value = "";
@@ -4272,9 +4478,23 @@ RestoreClipboard(*) {
         route.collectionCode = code;
         route.collectionName = name;
         route.collectionCity = collectionCombo.input.value.trim();
+        route.collectionCountry = locationCombos.collectionCountry.value;
       }
       renderRouteTabs();
       updateAllPreviews();
+    }
+
+    function updateCollectionLocationOptions(preferredCode) {
+      if (!state.locations.size) return;
+      const country = locationCombos.collectionCountry.value;
+      const route = activeRoute();
+      if (route && !state.loadingRoute) route.collectionCountry = country;
+      const codes = [...state.locations.keys()].filter((code) => !country || countryCode(code) === country);
+      const current = preferredCode ?? collectionCombo.value;
+      const preferred = codes.includes(current) ? current : "";
+      collectionCombo.setOptions(locationOptions(codes, false), preferred);
+      if (!preferred) collectionCombo.input.value = "";
+      applyCollectionSelection();
     }
 
     function collectionCityValue() {
@@ -4303,6 +4523,8 @@ RestoreClipboard(*) {
       const countryCombo = locationCombos[`${kind}Country`];
       const locationCombo = locationCombos[kind];
       const country = countryCombo.value;
+      const route = activeRoute();
+      if (route && !state.loadingRoute) route[`${kind}Country`] = country;
       const codes = [...state.locations.keys()].filter((code) => !country || countryCode(code) === country);
       const current = preferredCode ?? locationCombo.value;
       let preferred = codes.includes(current) ? current : "";
@@ -4330,7 +4552,7 @@ RestoreClipboard(*) {
 
     function renderCustomChargeEditor(section, route, detailRow) {
       const list = section.querySelector(".custom-charge-list");
-      const addButton = section.querySelector(".add-custom-charge");
+      const addButton = section.closest(".equipment-card")?.querySelector(".add-custom-charge");
       const charges = customChargesForDetail(route, detailRow);
       list.replaceChildren();
       if (!charges.length) {
@@ -4377,12 +4599,16 @@ RestoreClipboard(*) {
         row.append(nameLabel, rateLabel, removeButton);
         list.append(row);
       });
-      addButton.onclick = () => {
+      if (addButton) addButton.onclick = () => {
         route.customCharges ||= [];
         route.customCharges.push(newCustomCharge({ detailRow }));
+        const firstIndex = route.equipment.findIndex((equipment, index) => detailRowNumber(equipment, index + 1) === detailRow);
         renderEquipment();
-        const inputs = document.querySelectorAll(`.equipment-card[data-index] .custom-charge-row input`);
-        inputs[inputs.length - 2]?.focus();
+        const card = document.querySelector(`.equipment-card[data-index="${firstIndex}"]`);
+        const advanced = card?.querySelector(".equipment-advanced");
+        if (advanced) advanced.open = true;
+        const rows = card?.querySelectorAll(".custom-charge-row");
+        rows?.[rows.length - 1]?.querySelector("input")?.focus();
         updateAllPreviews();
       };
     }
@@ -4392,14 +4618,20 @@ RestoreClipboard(*) {
       const current = PRE_CARRIAGE_CONFIG[upper(equipment.precarriageSupplier)]
         ? upper(equipment.precarriageSupplier)
         : "DANIA";
-      select.replaceChildren(...Object.keys(PRE_CARRIAGE_CONFIG).map((value) => {
+      const values = Object.keys(PRE_CARRIAGE_CONFIG).filter((value) => value !== "CARRIER" || equipment.includeStuff || current === "CARRIER");
+      select.replaceChildren(...values.map((value) => {
         const option = document.createElement("option");
         option.value = value;
-        option.textContent = value;
+        option.textContent = PRE_CARRIAGE_CONFIG[value].label || value;
         return option;
       }));
       select.value = current;
       equipment.precarriageSupplier = current;
+    }
+
+    function resolvedPrecarriageSupplier(equipment, carrier) {
+      const config = PRE_CARRIAGE_CONFIG[upper(equipment?.precarriageSupplier)] ?? PRE_CARRIAGE_CONFIG.DANIA;
+      return config.useCarrier ? carrier : config;
     }
 
     function reflectCarrierWithinDetail(route, sourceEquipment) {
@@ -4445,6 +4677,7 @@ RestoreClipboard(*) {
 
         card.querySelectorAll(".eq-input").forEach((input) => {
           const key = input.dataset.key;
+          if (input.tagName === "SELECT" && key.endsWith("Currency")) populateCurrencySelect(input, equipment[key]);
           if (input.type === "checkbox") input.checked = Boolean(equipment[key]);
           else input.value = equipment[key] ?? "";
           const sync = (eventType) => {
@@ -4484,6 +4717,7 @@ RestoreClipboard(*) {
             }
             if (key === "freightAmount" || key === "freightCurrency") syncRateFields(equipment, "freight");
             if (key === "precarriageAmount" || key === "precarriageCurrency") syncRateFields(equipment, "precarriage");
+            if (key.endsWith("Currency") || key === "includeOriginCharges" || key === "includeStuff") renderRoeRateFields();
             updateHeader();
             renderRouteTabs();
             updateAllPreviews();
@@ -4502,7 +4736,9 @@ RestoreClipboard(*) {
         });
 
         const customSection = card.querySelector(".custom-charge-section");
+        const addCustomButton = card.querySelector(".add-custom-charge");
         customSection.classList.toggle("hidden", !firstInDetail);
+        addCustomButton.classList.toggle("hidden", !firstInDetail);
         if (firstInDetail) renderCustomChargeEditor(customSection, route, group.detailRow);
 
         card.querySelector(".duplicate-equipment").addEventListener("click", () => {
@@ -4527,6 +4763,7 @@ RestoreClipboard(*) {
         list.appendChild(fragment);
       });
       $("activeRouteLabel").textContent = routeTabText(route, state.activeRouteIndex);
+      renderRoeRateFields();
       toggleIncotermFields(false);
     }
 
@@ -4728,7 +4965,7 @@ RestoreClipboard(*) {
       if (calc.includePrecarriage && calc.commonPrecarriage) {
         const row = calc.rows[0];
         const pickupLumpSum = row.includeStuff;
-        const trucker = PRE_CARRIAGE_CONFIG[upper(row.equipment.precarriageSupplier)] ?? PRE_CARRIAGE_CONFIG.DANIA;
+        const trucker = resolvedPrecarriageSupplier(row.equipment, carrier);
         const precarriageSupplier = pickupLumpSum ? trucker : (agent ?? trucker);
         const commonUnit = calc.hasMultipleTypes ? "CONTAINER" : row.equipment.type;
         charges.push({
@@ -4743,7 +4980,7 @@ RestoreClipboard(*) {
       } else if (calc.includePrecarriage) {
         calc.rows.forEach((row) => {
           const pickupLumpSum = row.includeStuff;
-          const trucker = PRE_CARRIAGE_CONFIG[upper(row.equipment.precarriageSupplier)] ?? PRE_CARRIAGE_CONFIG.DANIA;
+          const trucker = resolvedPrecarriageSupplier(row.equipment, carrier);
           const precarriageSupplier = pickupLumpSum ? trucker : (agent ?? trucker);
           const description = pickupLumpSum
             ? quoteText("fcl.charges.pickup", { COLLECTION: collection })
@@ -4854,6 +5091,10 @@ RestoreClipboard(*) {
       });
       if (!(numberValue($("sekUsd").value) > 0)) { $("sekUsd").classList.add("invalid"); errors.push("ROE SEK→USD is missing or invalid."); }
       if (!(numberValue($("sekEur").value) > 0)) { $("sekEur").classList.add("invalid"); errors.push("ROE SEK→EUR is missing or invalid."); }
+      const fclRates = getRatesFromInputs();
+      [...selectedFclCurrencies()].filter((currency) => !["SEK", "USD", "EUR"].includes(currency)).forEach((currency) => {
+        if (!(fclRates[currency] > 0)) errors.push(`ROE SEK→${currency} is missing or invalid.`);
+      });
       const selectedAgent = agentConfig();
       if (selectedAgent?.manualCosts) {
         const rateId = selectedAgent.costCurrency === "NOK" ? "sekNok" : "sekDkk";
@@ -4871,7 +5112,7 @@ RestoreClipboard(*) {
 
       state.routes.forEach((route, routeIndex) => {
         const prefix = `Route ${routeIndex + 1}`;
-        if (!fob && !routeCollection(route)) errors.push(`${prefix}: collection city is missing.`);
+        if (includePrecarriage && !routeCollection(route)) errors.push(`${prefix}: collection city is missing.`);
         if (String(route.transitDays ?? "").trim() && (!(numberValue(route.transitDays) >= 1) || !Number.isInteger(numberValue(route.transitDays)))) errors.push(`${prefix}: transit time must be a whole number of at least 1, or left blank for TBA.`);
         if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(route.polCode)) errors.push(`${prefix}: select a valid POL.`);
         if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(route.podCode)) errors.push(`${prefix}: select a valid POD.`);
@@ -4916,7 +5157,7 @@ RestoreClipboard(*) {
     function exportFormData() {
       syncActiveRouteFromForm();
       return {
-        version: 6,
+        version: 7,
         mode: "FCL",
         clientName: textValue("clientName"), attentionTo: textValue("attentionTo"), salesOperator: textValue("salesOperator"),
         validTo: $("validTo").value, paymentDays: $("paymentDays").value, incoterm: $("incoterm").value,
@@ -4925,8 +5166,8 @@ RestoreClipboard(*) {
         useAgent: $("useAgent").checked, agent: $("agent").value,
         agentHandlingAmount: $("agentHandlingAmount").value, agentCustomExportAmount: $("agentCustomExportAmount").value,
         targetCurrency: $("targetCurrency").value, profitSek: $("profitSek").value,
-        sekUsd: $("sekUsd").value, sekEur: $("sekEur").value, sekNok: $("sekNok").value, sekDkk: $("sekDkk").value, roeDate: state.rates.date || "",
-        exportQuote: $("exportQuote").checked,
+        sekUsd: $("sekUsd").value, sekEur: $("sekEur").value, sekNok: $("sekNok").value, sekDkk: $("sekDkk").value,
+        roeRates: serialisableRates("fcl"), roeDate: state.rates.date || "",
         routes: state.routes.map((route) => ({ ...route, equipment: route.equipment.map((equipment) => ({ ...equipment })) }))
       };
     }
@@ -4942,7 +5183,7 @@ RestoreClipboard(*) {
 
     function applyImportedData(data) {
       const version = Number(data?.version);
-      if (!data || ![1, 3, 4, 5, 6].includes(version)) throw new Error("Unsupported BLU quote data version.");
+      if (!data || ![1, 3, 4, 5, 6, 7].includes(version)) throw new Error("Unsupported BLU quote data version.");
       activateMode("fcl");
       $("clientName").value = data.clientName || "";
       $("attentionTo").value = data.attentionTo || "";
@@ -4956,12 +5197,14 @@ RestoreClipboard(*) {
       setSelectValue("agent", data.agent, "CHS");
       $("agentHandlingAmount").value = data.agentHandlingAmount ?? "";
       $("agentCustomExportAmount").value = data.agentCustomExportAmount ?? "";
+      mergeImportedRates(data.roeRates, data.roeDate);
+      refreshCurrencyControls();
       setSelectValue("targetCurrency", data.targetCurrency, "USD");
       $("profitSek").value = data.profitSek || "8000";
-      $("exportQuote").checked = Boolean(data.exportQuote);
       if (data.sekUsd) $("sekUsd").value = data.sekUsd;
       if (data.sekEur) $("sekEur").value = data.sekEur;
-      if (data.roeDate) state.rates.date = data.roeDate;
+      if (data.sekNok) $("sekNok").value = data.sekNok;
+      if (data.sekDkk) $("sekDkk").value = data.sekDkk;
 
       const legacyCarrier = upper(data.carrier) || "MSC";
       const hydrateRoute = (routeData = {}) => {
@@ -4981,7 +5224,7 @@ RestoreClipboard(*) {
         });
       };
 
-      if ([3, 4, 5, 6].includes(version) && Array.isArray(data.routes) && data.routes.length) {
+      if ([3, 4, 5, 6, 7].includes(version) && Array.isArray(data.routes) && data.routes.length) {
         state.routes = data.routes.map(hydrateRoute);
       } else {
         state.routes = [hydrateRoute({
@@ -5036,7 +5279,7 @@ RestoreClipboard(*) {
           const subtitle = quoteText("fcl.subject", { EQUIPMENT: equipmentGroupSummary(group.equipment), ROUTE: routePath(route) });
           const basisText = quoteText("common.detailBasis", { SUPPLIER: calc.carrierCode, INCOTERM: incoterm });
           const charges = createChargeMaps(route, group.equipment, calc).map((charge) => ahkMap(Object.entries(charge))).join(",\n            ");
-          const removePlor = incoterm === "FOB";
+          const removePlor = !fclIncludesPrecarriage();
           const incotermLocation = removePlor ? routePol(route) : routeCollection(route);
           const hasIncludedStuff = calc.rows.some((row) => row.includeStuff);
           detailMaps.push(`Map(\n          "subtitle", ${ahkString(subtitle)},\n          "basisText", ${ahkString(basisText)},\n          "carrier", ${ahkString(calc.carrierCode)},\n          "collection", ${ahkString(routeCollection(route))},\n          "collectionCode", ${ahkString(route.collectionCode)},\n          "polCode", ${ahkString(route.polCode)},\n          "podCode", ${ahkString(route.podCode)},\n          "removePlor", ${removePlor ? "true" : "false"},\n          "incotermLocation", ${ahkString(incotermLocation)},\n          "transitTime", ${ahkString(transitTimeText(route.transitDays))},\n          "including", ${ahkString(includingText(route, hasReefer))},\n          "excluding", ${ahkString(excludingText(hasReefer, incoterm))},\n          "remarks", ${ahkString(remarksText(route, calc.carrierCode, hasIncludedStuff))},\n          "charges", [\n            ${charges}\n          ]\n        )`);
@@ -5048,7 +5291,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.3.0
+; Generated by BLU Auto Quote → AutoHotkey v8.4.0
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR | 1 SEK = ${$("sekNok").value} NOK | 1 SEK = ${$("sekDkk").value} DKK
 ; Selling currency: ${$("targetCurrency").value}
@@ -5148,7 +5391,6 @@ quote := Map(
   "targetCurrency", ${ahkString($("targetCurrency").value.toLowerCase())},
   "paymentDays", ${ahkString($("paymentDays").value)},
   "incoterm", ${ahkString(incoterm.toLowerCase())},
-  "exportQuote", ${$("exportQuote").checked ? "true" : "false"},
   "cargoEquipment", [
         ${cargoEquipment}
   ],
@@ -5255,13 +5497,10 @@ RunQuote() {
     PasteRemarksField(detail["remarks"])
   }
 
-  if quote["exportQuote"]
-    ExportQuote()
-
   ToolTip
   RestoreClipboard()
   elapsed := FormatElapsed(A_TickCount - startTick)
-  resultText := quote["exportQuote"] ? "The BLU quote has been entered and the export sequence has completed." : "The BLU quote has been entered."
+  resultText := "The BLU quote has been entered."
   MsgBox resultText "\`n\`nTime: " elapsed "\`n\`nReview the quote before sending it.", "BLU Quote Automation", "Iconi"
 }
 
@@ -5468,16 +5707,6 @@ ClickInWindow(title, x, y, wait := 250) {
   Sleep wait
 }
 
-ExportQuote() {
-  Send "^s"
-  Sleep 2000
-  ClickInWindow("BLU - 2.13.15.0 - \\\\Remote", 80, 175)
-  ClickInWindow("", 79, 211)
-  Sleep 7000
-  ClickInWindow("Send Mail - \\\\Remote", 41, 738)
-  ClickInWindow("Question - \\\\Remote", 220, 109, 1000)
-}
-
 RestoreClipboard(*) {
   global SavedClipboard
   if IsObject(SavedClipboard) {
@@ -5498,7 +5727,8 @@ RestoreClipboard(*) {
       const fob = term === "FOB";
       const includePrecarriage = fclIncludesPrecarriage();
       $("fcaOnCarriageOption")?.classList.toggle("hidden", term !== "FCA");
-      $("collectionField")?.classList.toggle("hidden", fob);
+      $("collectionCountryField")?.classList.toggle("hidden", !includePrecarriage);
+      $("collectionField")?.classList.toggle("hidden", !includePrecarriage);
       $("waitingOption")?.classList.toggle("hidden", !includePrecarriage);
       document.querySelectorAll("#equipmentList .precarriage-field, #equipmentList .stuffing-field").forEach((element) => element.classList.toggle("hidden", !includePrecarriage));
       document.querySelectorAll("#equipmentList .equipment-card").forEach((card) => {
@@ -5507,9 +5737,10 @@ RestoreClipboard(*) {
         if (fields) fields.classList.toggle("hidden", !includePrecarriage || !equipment?.includeStuff);
       });
       if (!includePrecarriage) {
-        if (fob) $("collectionCity")?.classList.remove("invalid");
+        $("collectionCity")?.classList.remove("invalid");
         document.querySelectorAll('#equipmentList [data-key="precarriageAmount"], #equipmentList [data-key="precarriageCurrency"], #equipmentList [data-key="precarriageSupplier"], #equipmentList [data-key="stuffAmount"], #equipmentList [data-key="stuffCurrency"], #equipmentList [data-key="stuffSupplier"]').forEach((element) => element.classList.remove("invalid"));
       }
+      renderRoeRateFields();
       if (refresh) updateAllPreviews();
     }
 
@@ -5528,7 +5759,6 @@ RestoreClipboard(*) {
       $("agentHandlingAmount").value = "";
       $("agentCustomExportAmount").value = "";
       $("targetCurrency").value = "USD";
-      $("exportQuote").checked = false;
       state.routes = [newRoute()];
       state.activeRouteIndex = 0;
       state.equipment = activeRoute().equipment;
@@ -5626,6 +5856,7 @@ RestoreClipboard(*) {
       $("agent").addEventListener("change", toggleAgent);
       $("incoterm").addEventListener("change", () => { toggleIncotermFields(true); toggleAgent(); });
       $("includeOnCarriage").addEventListener("change", () => toggleIncotermFields(true));
+      $("targetCurrency").addEventListener("change", renderRoeRateFields);
       $("collectionCity").addEventListener("input", applyCollectionSelection);
       $("collectionCity").addEventListener("change", applyCollectionSelection);
       $("precarriageSupplier").addEventListener("change", () => { activeRoute().precarriageSupplier = $("precarriageSupplier").value; updateAllPreviews(); });
@@ -5637,13 +5868,13 @@ RestoreClipboard(*) {
     }
 
     // =====================================
-    // v8.3.0 Nordicon / LCL compatibility work
+    // v8.4.0 Nordicon / LCL compatibility work
     // =====================================
 
     function parseNordiconCharge(lines, pattern) {
       const line = lines.find((item) => pattern.test(item));
       if (!line) return null;
-      const currencyMatch = /(USD|EUR|SEK)\s*$/i.exec(line);
+      const currencyMatch = /([A-Z]{3})\s*$/i.exec(line);
       if (!currencyMatch) return null;
       const currency = currencyMatch[1].toUpperCase();
       const beforeCurrency = line.slice(0, currencyMatch.index).trimEnd();
@@ -5825,7 +6056,7 @@ RestoreClipboard(*) {
         const description = upper(row[descriptionColumn] || "");
         if (!description || /Rate of exchange|Conditions/i.test(description)) break;
         const currency = upper(row[currencyColumn] || "");
-        if (!/^(USD|EUR|SEK)$/.test(currency)) continue;
+        if (!/^[A-Z]{3}$/.test(currency)) continue;
         const total = decimalNumber(row[amountColumn]);
         const rate = decimalNumber(row[rateColumn]);
         if (!Number.isFinite(total)) continue;
@@ -5997,7 +6228,7 @@ RestoreClipboard(*) {
         podName: textValue("lclPodName"), podCode: upper(textValue("lclPodCode")), pallets: $("lclPallets").value,
         weight: $("lclWeight").value, volume: $("lclVolume").value, stackable: $("lclStackable").value,
         transitDays: $("lclTransitDays").value, profitSek: $("lclProfitSek").value, sekUsd: $("lclSekUsd").value, sekEur: $("lclSekEur").value,
-        roeDate: state.rates.date || "", includeWar: $("lclIncludeWar").checked, costs: readLclCosts(), quoteLoaded: state.lcl.quoteLoaded,
+        roeRates: serialisableRates("lcl"), roeDate: state.rates.date || "", includeWar: $("lclIncludeWar").checked, costs: readLclCosts(), quoteLoaded: state.lcl.quoteLoaded,
         extraCharges: (state.lcl.extraCharges || []).map((charge) => ({ ...charge }))
       };
     }
@@ -6110,7 +6341,7 @@ RestoreClipboard(*) {
 
 
     // =====================================
-    // v8.3.0 effective LCL / Nordicon overrides
+    // v8.4.0 effective LCL / Nordicon overrides
     // =====================================
 
     function newLclState(overrides = {}) {
@@ -6322,7 +6553,7 @@ RestoreClipboard(*) {
         const description = normaliseNordiconDescription(row[descriptionColumn] || "");
         if (!description || /Rate of exchange|Conditions/i.test(description)) break;
         const currency = upper(row[currencyColumn] || "");
-        if (!/^(USD|EUR|SEK)$/.test(currency)) continue;
+        if (!/^[A-Z]{3}$/.test(currency)) continue;
         const total = decimalNumber(row[amountColumn]);
         const rate = decimalNumber(row[rateColumn]);
         if (!Number.isFinite(total)) continue;
@@ -6520,6 +6751,7 @@ RestoreClipboard(*) {
         row.className = "lcl-extra-row";
         row.innerHTML = `<td><input data-lcl-extra-index="${index}" data-lcl-extra-field="name" value="${String(charge.name || "").replaceAll('"', '&quot;')}"></td><td><input data-lcl-extra-index="${index}" data-lcl-extra-field="total" type="number" step="0.01" value="${charge.total ?? ""}"></td><td><select data-lcl-extra-index="${index}" data-lcl-extra-field="currency"><option>USD</option><option>EUR</option><option>SEK</option></select></td><td>No margin</td>`;
         const currency = row.querySelector("select");
+        populateCurrencySelect(currency, charge.currency || "USD");
         currency.value = charge.currency || "USD";
         row.querySelectorAll("input, select").forEach((input) => {
           input.addEventListener("input", () => {
@@ -6542,6 +6774,7 @@ RestoreClipboard(*) {
         row.innerHTML = `<td colspan="4" class="small-note">${hiddenOrigin} inland surcharge ${hiddenOrigin === 1 ? "is" : "are"} excluded for FOB.</td>`;
         body.append(row);
       }
+      renderRoeRateFields();
     }
 
     function applyParsedNordiconQuote(parsed) {
@@ -6641,12 +6874,20 @@ RestoreClipboard(*) {
       if (!(numberValue($("lclSekUsd").value) > 0) || !(numberValue($("lclSekEur").value) > 0)) errors.push("Valid ROE for USD and EUR is required.");
       const costs = readLclCosts();
       const costKeys = ["ocean", "fuel", "eu", "handling", "isps", "customs", ...(lclIncludesOrigin() ? ["trucking", "terminal", "port"] : [])];
+      const lclRateMap = lclRates();
+      const requiredCurrencies = new Set(["USD", "EUR"]);
+      costKeys.forEach((key) => requiredCurrencies.add(upper(costs[key]?.currency)));
+      if ($("lclIncludeWar").checked) requiredCurrencies.add(upper(costs.war?.currency));
+      includedLclExtraCharges().forEach((charge) => requiredCurrencies.add(upper(charge.currency)));
+      [...requiredCurrencies].filter((currency) => normaliseCurrencyCode(currency) && !["SEK", "USD", "EUR"].includes(currency)).forEach((currency) => {
+        if (!(lclRateMap[currency] > 0)) errors.push(`ROE SEK→${currency} is missing or invalid.`);
+      });
       for (const key of costKeys) if (!(decimalNumber(costs[key].total) >= 0)) errors.push(`${key} buying total is missing or invalid.`);
       if ($("lclIncludeWar").checked && !(decimalNumber(costs.war.total) >= 0)) errors.push("War risk buying total is missing.");
       includedLclExtraCharges().forEach((charge, index) => {
         if (!normaliseNordiconDescription(charge.name)) errors.push(`Extra Nordicon charge ${index + 1} is missing a description.`);
         if (!(decimalNumber(charge.total) >= 0)) errors.push(`Extra Nordicon charge ${index + 1} has an invalid buying total.`);
-        if (!/^(USD|EUR|SEK)$/.test(upper(charge.currency))) errors.push(`Extra Nordicon charge ${index + 1} has an invalid currency.`);
+        if (!/^[A-Z]{3}$/.test(upper(charge.currency))) errors.push(`Extra Nordicon charge ${index + 1} has an invalid currency.`);
       });
       const calc = calculateLcl();
       if (calc?.negativeSelling) warnings.push("The selected profit produces a negative trucking or ocean selling rate.");
@@ -6656,7 +6897,7 @@ RestoreClipboard(*) {
 
     function exportLclData() {
       return {
-        version: 3, mode: "LCL",
+        version: 4, mode: "LCL",
         clientName: textValue("lclClientName"), attentionTo: textValue("lclAttentionTo"), salesOperator: textValue("lclSalesOperator"),
         validTo: $("lclValidTo").value, paymentDays: $("lclPaymentDays").value, incoterm: $("lclIncoterm").value,
         supplier: $("lclSupplier").value, collectionCity: $("lclCollectionCity").value.trim(), collectionName: textValue("lclCollectionName"), collectionCode: upper(textValue("lclCollectionCode")),
@@ -6664,13 +6905,13 @@ RestoreClipboard(*) {
         weight: $("lclWeight").value, volume: $("lclVolume").value, stackable: $("lclStackable").value,
         imoDetails: normaliseImoDetails($("lclImoDetails").value), directNonStack: Boolean(state.lcl.directNonStack),
         transitDays: $("lclTransitDays").value, profitSek: $("lclProfitSek").value, sekUsd: $("lclSekUsd").value, sekEur: $("lclSekEur").value,
-        roeDate: state.rates.date || "", includeWar: $("lclIncludeWar").checked, costs: readLclCosts(), quoteLoaded: state.lcl.quoteLoaded,
+        roeRates: serialisableRates("lcl"), roeDate: state.rates.date || "", includeWar: $("lclIncludeWar").checked, costs: readLclCosts(), quoteLoaded: state.lcl.quoteLoaded,
         extraCharges: (state.lcl.extraCharges || []).map((charge) => ({ ...charge }))
       };
     }
 
     function applyImportedLclData(data) {
-      if (!data || ![2, 3].includes(Number(data.version)) || data.mode !== "LCL") throw new Error("Unsupported LCL quote data version.");
+      if (!data || ![2, 3, 4].includes(Number(data.version)) || data.mode !== "LCL") throw new Error("Unsupported LCL quote data version.");
       activateMode("lcl");
       $("lclClientName").value = data.clientName || "";
       $("lclAttentionTo").value = data.attentionTo || "";
@@ -6686,6 +6927,8 @@ RestoreClipboard(*) {
       $("lclImoDetails").value = normaliseImoDetails(data.imoDetails || "");
       $("lclTransitDays").value = data.transitDays || "";
       $("lclProfitSek").value = data.profitSek || "7500";
+      mergeImportedRates(data.roeRates, data.roeDate);
+      refreshCurrencyControls();
       if (data.sekUsd) $("lclSekUsd").value = data.sekUsd;
       if (data.sekEur) $("lclSekEur").value = data.sekEur;
       $("lclIncludeWar").checked = Boolean(data.includeWar);
@@ -6833,7 +7076,10 @@ RestoreClipboard(*) {
       $("lclPane").querySelectorAll("input, select, textarea").forEach((input) => {
         if (["lclXlsxFile", "lclCollectionCity", "lclIncoterm", "lclImoDetails"].includes(input.id)) return;
         input.addEventListener("input", updateLclCalculation);
-        input.addEventListener("change", updateLclCalculation);
+        input.addEventListener("change", () => {
+          if (input.tagName === "SELECT" && input.dataset.lclField === "currency") renderRoeRateFields();
+          updateLclCalculation();
+        });
       });
     }
 
