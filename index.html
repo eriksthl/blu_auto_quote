@@ -288,7 +288,7 @@
     }
 
 
-    /* Version 8.4.0 split workspace */
+    /* Version 9.1.1 split workspace */
     main { width: min(1180px, calc(100% - 24px)); }
     .file-state { display: grid; gap: 4px; min-width: 285px; }
     .file-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 26px; }
@@ -370,7 +370,7 @@
       .location-title { grid-column: 1; }
     }
 
-    /* Version 8.4.0 compact LCL workspace */
+    /* Version 9.1.1 compact LCL workspace */
     #lclPane { max-width: none; margin: 0; }
     .lcl-workspace { display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 12px; align-items: start; }
     .lcl-left-stack, .lcl-right-stack { display: grid; gap: 12px; align-content: start; }
@@ -406,6 +406,26 @@
       .lcl-primary-actions .primary { grid-column: auto; }
     }
 
+    /* Version 9.1.1 layout refinements */
+    .mode-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .mode-toolbar .mode-tabs { margin-bottom: 12px; }
+    .mode-reset { min-height: 42px; padding: 7px 18px; white-space: nowrap; }
+    .profit-layout { display: block; }
+    .profit-main-row { display: grid; grid-template-columns: minmax(110px, .75fr) minmax(150px, 1fr) minmax(170px, 1.2fr) auto; gap: 8px; align-items: end; }
+    .profit-main-row .roe-status { min-height: 32px; padding: 6px 8px; border: 1px solid #bbb; background: #fafafa; font-size: 11px; display: flex; align-items: center; }
+    .profit-main-row .btn { min-height: 32px; align-self: end; white-space: nowrap; }
+    .profit-layout .roe-details { margin-top: 7px; }
+    .alexandria-port-field { grid-column: 1 / -1; }
+    .free-days-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .precarriage-waiting-host:empty { display: none; }
+    .precarriage-waiting-host .waiting-option { margin-top: 8px; padding-top: 8px; border-top: 1px solid #ccc; flex-wrap: wrap; }
+    .precarriage-waiting-host .waiting-hours { width: 105px; }
+    @media (max-width: 620px) {
+      .mode-toolbar { align-items: stretch; }
+      .mode-reset { min-width: 92px; }
+      .profit-main-row { grid-template-columns: 1fr 1fr; }
+    }
+
 </style>
 </head>
 <body>
@@ -414,7 +434,7 @@
     <header>
       <div>
         <h1>BLU Auto Quote</h1>
-        <div class="app-version">AHK Script Gen // Version 8.4.0</div>
+        <div class="app-version">AHK Script Gen // Version 9.1.1</div>
       </div>
       <div class="file-state">
         <div class="file-line"><span id="locStatus">Loading LocCodes.xlsx...</span><button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button></div>
@@ -424,10 +444,13 @@
       </div>
     </header>
 
-    <nav class="mode-tabs" aria-label="Quote type">
-      <button type="button" class="mode-tab active" data-mode="fcl">FCL</button>
-      <button type="button" class="mode-tab" data-mode="lcl">LCL</button>
-    </nav>
+    <div class="mode-toolbar">
+      <nav class="mode-tabs" aria-label="Quote type">
+        <button type="button" class="mode-tab active" data-mode="fcl">FCL</button>
+        <button type="button" class="mode-tab" data-mode="lcl">LCL</button>
+      </nav>
+      <button type="button" class="btn mode-reset" id="resetAllSettings" title="Reset all settings to startup defaults">Reset</button>
+    </div>
 
     <div id="fclPane" class="mode-pane">
       <div class="fcl-workspace">
@@ -496,31 +519,36 @@
                   <div class="location-title">POD</div>
                   <label class="field">Country<div id="podCountry" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
                   <label class="field">Location<div id="podLocation" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                  <label class="field alexandria-port-field hidden" id="alexandriaPortField">Alexandria port<select id="alexandriaPort"><option value="general" selected>General</option><option value="old-port">Old port</option><option value="el-dekheila">El Dekheila</option></select></label>
                 </div>
               </div>
               <input id="polName" type="hidden"><input id="polCode" type="hidden">
               <input id="podName" type="hidden"><input id="podCode" type="hidden">
 
-              <div class="grid three free-days-grid">
+              <div class="grid two free-days-grid">
                 <label class="field">Free days<select id="freeDaysMode"><option value="standard">Standard</option><option value="custom">Specify</option></select></label>
-                <label class="field custom-free hidden">Days<input id="freeDays" type="number" min="1" step="1" value="7"></label>
-                <label class="field custom-free hidden">Type<select id="freeDaysType"><option value="detention">detention</option><option value="merged">merged</option></select></label>
+                <label class="field free-days-type-field hidden">Type<select id="freeDaysType"><option value="detention">detention</option><option value="combined">combined</option><option value="demurrage">demurrage</option><option value="dd">D+D</option><option value="unspecified">unspecified</option></select></label>
+                <label class="field free-days-single-field hidden">Days<input id="freeDays" type="number" min="1" step="1" value="7"></label>
+                <label class="field free-days-dd-field hidden">Demurrage days<input id="freeDaysDemurrage" type="number" min="1" step="1" value="7"></label>
+                <label class="field free-days-dd-field hidden">Detention days<input id="freeDaysDetention" type="number" min="1" step="1" value="7"></label>
               </div>
 
               <details class="advanced-panel route-options-panel">
-                <summary>Waiting time and rate tools</summary>
+                <summary>Rate tools</summary>
                 <div class="advanced-panel-body">
                   <div class="route-rate-tools">
                     <label class="field">Get rates from<select id="rateSourceRoute"></select></label>
                     <button type="button" class="btn small" id="getRatesFromRoute">Copy buying rates</button>
                     <span id="routeRateStatus" class="small-note"></span>
                   </div>
-                  <div class="waiting-option" id="waitingOption">
-                    <label class="waiting-check"><input id="includeWaitingTime" type="checkbox"> Include free waiting time</label>
-                    <label class="field waiting-hours hidden" id="waitingHoursField">Hours<input id="waitingHours" type="number" min="0.5" step="0.5" value="1"></label>
-                  </div>
                 </div>
               </details>
+              <div id="waitingOptionParking" class="hidden">
+                <div class="waiting-option" id="waitingOption">
+                  <label class="waiting-check"><input id="includeWaitingTime" type="checkbox"> Include waiting time</label>
+                  <label class="field waiting-hours hidden" id="waitingHoursField">Hours<input id="waitingHours" type="number" min="0.5" step="0.5" value="1"></label>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -556,9 +584,11 @@
           <section class="section profit-panel">
             <div class="section-head"><h2>Profit</h2></div>
             <div class="section-body profit-layout">
-              <div class="grid two">
+              <div class="profit-main-row">
                 <label class="field">Selling currency<select id="targetCurrency"><option>USD</option><option>EUR</option></select></label>
                 <label class="field">Profit per detail <span class="hint">SEK</span><input id="profitSek" type="number" min="0" step="100" value="8000"></label>
+                <div id="roeStatus" class="roe-status loading" role="status" aria-live="polite"><span class="dot"></span><span>Loading rates...</span></div>
+                <button type="button" class="btn small" id="refreshRates">Refresh ROE</button>
               </div>
               <details class="compact-details roe-details">
                 <summary>ROE</summary>
@@ -573,10 +603,6 @@
                   <div id="additionalRoeRates" class="grid two roe-extra-rates"></div>
                 </div>
               </details>
-              <div class="roe-quick-line">
-                <div id="roeStatus" class="roe-status loading"><span class="dot"></span><span>Loading rates...</span></div>
-                <button type="button" class="btn small" id="refreshRates">Refresh ROE</button>
-              </div>
             </div>
           </section>
         </div>
@@ -753,8 +779,9 @@
             <div class="money-pair supplier-pair">
               <label class="field">Buying<input class="eq-input" data-key="precarriageAmount" type="number" min="0" step="0.01"></label>
               <label class="field currency-field">Currency<select class="eq-input" data-key="precarriageCurrency"><option>SEK</option><option>USD</option><option>EUR</option></select></label>
-              <label class="field supplier-field">Supplier<select class="eq-input" data-key="precarriageSupplier"><option>DANIA</option><option>SKARASLÄTTEN</option><option>PGF</option></select></label>
+              <label class="field supplier-field">Supplier<select class="eq-input" data-key="precarriageSupplier"><option>DANIA</option><option>SKARASLÄTTEN</option><option>PGF</option><option value="CARRIER">Transportören</option></select></label>
             </div>
+            <div class="precarriage-waiting-host"></div>
           </div>
           <div class="cost-block">
             <div class="cost-block-title">Ocean freight</div>
@@ -845,7 +872,7 @@
       "DANIA": { supplier: "Dania", supplierArrow: 0 },
       "SKARASLÄTTEN": { supplier: "skara", supplierArrow: 0 },
       "PGF": { supplier: "pgf", supplierArrow: 0 },
-      "CARRIER": { label: "CARRIER (selected carrier)", useCarrier: true }
+      "CARRIER": { label: "Transportören", useCarrier: true }
     });
 
     const STUFFING_SUPPLIER_CONFIG = Object.freeze({
@@ -946,7 +973,13 @@
       "lcl.excluding.destinationCharges", "lcl.excluding.fcaCustomExport", "lcl.excluding.fobOriginCharges",
       "lcl.remarks.carrier", "lcl.remarks.profitShare", "lcl.remarks.loadingTime", "lcl.remarks.additionalHsCodes", "lcl.remarks.directNonStack",
       "lcl.charges.inlandHaulage", "lcl.charges.oceanFreight", "lcl.charges.fuelContingency", "lcl.charges.solasFee", "lcl.charges.customsCheckMrn",
-      "lcl.nordiconTranslations.inrikes", "lcl.nordiconTranslations.tillagg"
+      "lcl.nordiconTranslations.inrikes", "lcl.nordiconTranslations.tillagg",
+      "common.projectImport", "common.internalCommentImport", "common.detailIncotermOnly", "common.subjectToNoOcean", "common.transitTimeImport",
+      "fcl.subjectImport", "fcl.freeDays.detention", "fcl.freeDays.combined", "fcl.freeDays.demurrage", "fcl.freeDays.unspecified", "fcl.freeDays.demurrageDetention",
+      "fcl.excluding.importVatDuty", "fcl.excluding.importCustomsClearance", "fcl.excluding.importOriginCharges", "fcl.remarks.waitingImport",
+      "fcl.charges.delivery", "fcl.charges.deliveryByEquipment", "fcl.charges.importTerminalHandling", "fcl.charges.importCustomsClearance",
+      "lcl.subjectImport", "lcl.excluding.importVatDuty", "lcl.excluding.importCustomsClearance", "lcl.excluding.importOriginCharges", "lcl.remarks.waitingImport",
+      "lcl.charges.delivery", "lcl.charges.terminalHandlingImport", "lcl.charges.lclServiceChargeImport", "lcl.charges.customsImportClearance"
     ]);
 
     function nestedValue(source, path) {
@@ -1256,6 +1289,24 @@
 
     function collectionCityValue() {
       return textValue("collectionName") || textValue("collectionCity");
+    }
+
+    function toggleAlexandriaPortField(refresh = true) {
+      const route = activeRoute();
+      const field = $("alexandriaPortField");
+      const select = $("alexandriaPort");
+      if (!field || !select || !route) return;
+      const visible = isAlexandriaRoute(route);
+      field.classList.toggle("hidden", !visible);
+      if (visible) {
+        const value = ["old-port", "el-dekheila"].includes(route.alexandriaPort) ? route.alexandriaPort : "general";
+        route.alexandriaPort = value;
+        select.value = value;
+      } else {
+        route.alexandriaPort = "general";
+        select.value = "general";
+      }
+      if (refresh) updateAllPreviews();
     }
 
     function applyLocationSelection(kind) {
@@ -2262,7 +2313,7 @@
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.4.0
+; Generated by BLU Auto Quote → AutoHotkey v9.1.1
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR | 1 SEK = ${$("sekNok").value} NOK | 1 SEK = ${$("sekDkk").value} DKK
 ; Selling currency: ${$("targetCurrency").value}
@@ -3243,7 +3294,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL AutoHotkey v8.4.0
+; Generated by BLU Auto Quote - LCL AutoHotkey v9.1.1
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -3960,7 +4011,7 @@ RestoreClipboard(*) {
     }
 
     // ==============================
-    // v8.4.0 FCL route/detail overrides
+    // v9.1.1 FCL route/detail overrides
     // ==============================
 
     function makeStableId(prefix = "id") {
@@ -4002,6 +4053,12 @@ RestoreClipboard(*) {
       };
     }
 
+    function normaliseFreeDaysType(value) {
+      const type = String(value || "detention").trim().toLowerCase();
+      if (type === "merged") return "combined";
+      return ["detention", "combined", "demurrage", "dd", "unspecified"].includes(type) ? type : "detention";
+    }
+
     function newRoute(overrides = {}) {
       const legacyCarrier = String(overrides.carrier || "MSC").trim().toUpperCase();
       const legacyTrucker = String(overrides.precarriageSupplier || "DANIA").trim().toUpperCase();
@@ -4028,9 +4085,12 @@ RestoreClipboard(*) {
         podName: overrides.podName || "",
         podCode,
         podCountry: explicitCountry("podCountry", countryCode(podCode)),
+        alexandriaPort: ["old-port", "el-dekheila"].includes(String(overrides.alexandriaPort || "").toLowerCase()) ? String(overrides.alexandriaPort).toLowerCase() : "general",
         freeDaysMode: overrides.freeDaysMode || "standard",
         freeDays: overrides.freeDays ?? "7",
-        freeDaysType: overrides.freeDaysType || "detention",
+        freeDaysType: normaliseFreeDaysType(overrides.freeDaysType),
+        freeDaysDemurrage: overrides.freeDaysDemurrage ?? overrides.freeDays ?? "7",
+        freeDaysDetention: overrides.freeDaysDetention ?? overrides.freeDays ?? "7",
         customCharges: Array.isArray(overrides.customCharges)
           ? overrides.customCharges.map((charge) => newCustomCharge(charge))
           : [],
@@ -4065,6 +4125,20 @@ RestoreClipboard(*) {
 
     function routePod(route) {
       return normalisedLocationName(route?.podName || "");
+    }
+
+    function isAlexandriaRoute(route) {
+      return normaliseSearch(routePod(route)).includes("alexandria");
+    }
+
+    function routeSubjectPod(route) {
+      const pod = routePod(route) || "POD";
+      if (!isAlexandriaRoute(route)) return pod;
+      const suffix = {
+        "old-port": "OLD PORT",
+        "el-dekheila": "EL DEKHEILA"
+      }[String(route?.alexandriaPort || "general").toLowerCase()] || "";
+      return suffix ? `${pod} ${suffix}` : pod;
     }
 
     function currentIncoterm() {
@@ -4137,7 +4211,7 @@ RestoreClipboard(*) {
 
     function routePathParts(route) {
       const pol = routePol(route) || "POL";
-      const pod = routePod(route) || "POD";
+      const pod = routeSubjectPod(route);
       if (!fclIncludesPrecarriage()) return [pol, pod];
       const collection = routeCollection(route) || "COLLECTION";
       return [collection, pol, pod];
@@ -4225,6 +4299,7 @@ RestoreClipboard(*) {
         podName: clearDestination ? "" : source.podName,
         podCode: clearDestination ? "" : source.podCode,
         podCountry: clearDestination ? "" : source.podCountry,
+        alexandriaPort: clearDestination ? "general" : source.alexandriaPort,
         transitDays: clearDestination ? "" : source.transitDays,
         customCharges: (source.customCharges || []).map((charge) => ({ ...charge, id: makeStableId("custom") })),
         equipment: source.equipment.map((equipment) => ({ ...equipment, id: makeStableId("eq") }))
@@ -4405,9 +4480,12 @@ RestoreClipboard(*) {
       route.podName = textValue("podName");
       route.podCode = upper(textValue("podCode"));
       route.podCountry = locationCombos.podCountry.value;
+      route.alexandriaPort = $("alexandriaPort").value || "general";
       route.freeDaysMode = $("freeDaysMode").value;
       route.freeDays = $("freeDays").value;
-      route.freeDaysType = $("freeDaysType").value;
+      route.freeDaysType = normaliseFreeDaysType($("freeDaysType").value);
+      route.freeDaysDemurrage = $("freeDaysDemurrage").value;
+      route.freeDaysDetention = $("freeDaysDetention").value;
     }
 
     function loadActiveRouteIntoForm() {
@@ -4422,7 +4500,10 @@ RestoreClipboard(*) {
       $("waitingHours").value = route.waitingHours ?? "1";
       $("freeDaysMode").value = route.freeDaysMode || "standard";
       $("freeDays").value = route.freeDays ?? "7";
-      $("freeDaysType").value = route.freeDaysType || "detention";
+      $("freeDaysType").value = normaliseFreeDaysType(route.freeDaysType);
+      $("freeDaysDemurrage").value = route.freeDaysDemurrage ?? "7";
+      $("freeDaysDetention").value = route.freeDaysDetention ?? "7";
+      $("alexandriaPort").value = route.alexandriaPort || "general";
 
       if (state.locations.size) {
         const countries = new Set([...state.locations.keys()].map(countryCode).filter(Boolean));
@@ -4461,6 +4542,7 @@ RestoreClipboard(*) {
       }
       renderEquipment();
       state.loadingRoute = false;
+      toggleAlexandriaPortField(false);
       toggleFreeDays();
       toggleIncotermFields(false);
       toggleWaitingTime();
@@ -4514,6 +4596,7 @@ RestoreClipboard(*) {
       }
       const stuffDefaultsChanged = kind === "pol" && route ? applyDefaultStuffSuppliers(route) : false;
       if (stuffDefaultsChanged && !state.loadingRoute) renderEquipment();
+      if (kind === "pod") toggleAlexandriaPortField(false);
       renderRouteTabs();
       updateAllPreviews();
     }
@@ -4618,7 +4701,7 @@ RestoreClipboard(*) {
       const current = PRE_CARRIAGE_CONFIG[upper(equipment.precarriageSupplier)]
         ? upper(equipment.precarriageSupplier)
         : "DANIA";
-      const values = Object.keys(PRE_CARRIAGE_CONFIG).filter((value) => value !== "CARRIER" || equipment.includeStuff || current === "CARRIER");
+      const values = Object.keys(PRE_CARRIAGE_CONFIG);
       select.replaceChildren(...values.map((value) => {
         const option = document.createElement("option");
         option.value = value;
@@ -4650,6 +4733,8 @@ RestoreClipboard(*) {
     function renderEquipment() {
       const route = activeRoute();
       applyDefaultStuffSuppliers(route);
+      const waitingOptionNode = $("waitingOption");
+      if (waitingOptionNode) waitingOptionNode.remove();
       const list = $("equipmentList");
       const groups = groupRouteEquipment(route);
       const groupByEquipment = new Map();
@@ -4661,6 +4746,9 @@ RestoreClipboard(*) {
         const fragment = $("equipmentTemplate").content.cloneNode(true);
         const card = fragment.querySelector(".equipment-card");
         card.dataset.index = index;
+        const waitingHost = card.querySelector(".precarriage-waiting-host");
+        if (index === 0 && waitingOptionNode && waitingHost) waitingHost.append(waitingOptionNode);
+        else waitingHost?.remove();
         card.querySelector(".equipment-title strong").textContent = `Equipment ${index + 1}`;
         const updateHeader = () => {
           const row = detailRowNumber(equipment, index + 1);
@@ -4705,7 +4793,10 @@ RestoreClipboard(*) {
             }
             if (key === "includeOriginCharges") syncOriginVisibility();
             if (key === "includeStuff") {
-              if (equipment.includeStuff && !equipment.stuffSupplier) equipment.stuffSupplier = defaultStuffSupplierForRoute(route);
+              if (equipment.includeStuff) {
+                if (!equipment.stuffSupplier) equipment.stuffSupplier = defaultStuffSupplierForRoute(route);
+                equipment.precarriageSupplier = "CARRIER";
+              }
               const supplierSelect = card.querySelector('[data-key="stuffSupplier"]');
               if (supplierSelect) supplierSelect.value = equipment.stuffSupplier || "";
               configurePrecarriageSupplierSelect(card.querySelector('[data-key="precarriageSupplier"]'), equipment);
@@ -4913,14 +5004,26 @@ RestoreClipboard(*) {
       updateSummary();
     }
 
+    function customFreeDaysText(route = activeRoute()) {
+      const type = normaliseFreeDaysType(route.freeDaysType);
+      if (type === "dd") {
+        const demurrage = formatPlainNumber(numberValue(route.freeDaysDemurrage)) || String(route.freeDaysDemurrage || "").trim();
+        const detention = formatPlainNumber(numberValue(route.freeDaysDetention)) || String(route.freeDaysDetention || "").trim();
+        return `${demurrage}+${detention} free days demurrage/detention at destination`;
+      }
+      const days = formatPlainNumber(numberValue(route.freeDays)) || String(route.freeDays || "").trim();
+      if (type === "unspecified") return `${days} free days at destination`;
+      return `${days} free days ${type} at destination`;
+    }
+
     function freeDaysText(route = activeRoute()) {
       if (route.freeDaysMode === "standard") return quoteText("fcl.freeDays.standard");
-      return quoteText("fcl.freeDays.custom", { FREE_DAYS: route.freeDays, FREE_DAYS_TYPE: route.freeDaysType });
+      return customFreeDaysText(route);
     }
 
     function includingText(route, hasReefer = false) {
       const lines = [];
-      if (route.freeDaysMode === "custom") lines.push(quoteText("fcl.including.customFreeDays", { FREE_DAYS: route.freeDays, FREE_DAYS_TYPE: route.freeDaysType }));
+      if (route.freeDaysMode === "custom") lines.push(customFreeDaysText(route));
       if (hasReefer) lines.push(quoteText("fcl.including.reeferMonitoring"));
       return lines.filter(Boolean).join("\n");
     }
@@ -5116,7 +5219,15 @@ RestoreClipboard(*) {
         if (String(route.transitDays ?? "").trim() && (!(numberValue(route.transitDays) >= 1) || !Number.isInteger(numberValue(route.transitDays)))) errors.push(`${prefix}: transit time must be a whole number of at least 1, or left blank for TBA.`);
         if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(route.polCode)) errors.push(`${prefix}: select a valid POL.`);
         if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(route.podCode)) errors.push(`${prefix}: select a valid POD.`);
-        if (route.freeDaysMode === "custom" && !(numberValue(route.freeDays) > 0)) errors.push(`${prefix}: number of free days is missing.`);
+        if (route.freeDaysMode === "custom") {
+          const type = normaliseFreeDaysType(route.freeDaysType);
+          if (type === "dd") {
+            if (!(numberValue(route.freeDaysDemurrage) > 0)) errors.push(`${prefix}: demurrage free days are missing.`);
+            if (!(numberValue(route.freeDaysDetention) > 0)) errors.push(`${prefix}: detention free days are missing.`);
+          } else if (!(numberValue(route.freeDays) > 0)) {
+            errors.push(`${prefix}: number of free days is missing.`);
+          }
+        }
         if (includePrecarriage && route.includeWaitingTime && !(numberValue(route.waitingHours) > 0)) errors.push(`${prefix}: included waiting time is missing.`);
         route.equipment.forEach((equipment, equipmentIndex) => {
           const eqPrefix = `${prefix}, equipment ${equipmentIndex + 1}`;
@@ -5157,7 +5268,7 @@ RestoreClipboard(*) {
     function exportFormData() {
       syncActiveRouteFromForm();
       return {
-        version: 7,
+        version: 8,
         mode: "FCL",
         clientName: textValue("clientName"), attentionTo: textValue("attentionTo"), salesOperator: textValue("salesOperator"),
         validTo: $("validTo").value, paymentDays: $("paymentDays").value, incoterm: $("incoterm").value,
@@ -5183,7 +5294,7 @@ RestoreClipboard(*) {
 
     function applyImportedData(data) {
       const version = Number(data?.version);
-      if (!data || ![1, 3, 4, 5, 6, 7].includes(version)) throw new Error("Unsupported BLU quote data version.");
+      if (!data || ![1, 3, 4, 5, 6, 7, 8].includes(version)) throw new Error("Unsupported BLU quote data version.");
       activateMode("fcl");
       $("clientName").value = data.clientName || "";
       $("attentionTo").value = data.attentionTo || "";
@@ -5224,7 +5335,7 @@ RestoreClipboard(*) {
         });
       };
 
-      if ([3, 4, 5, 6, 7].includes(version) && Array.isArray(data.routes) && data.routes.length) {
+      if ([3, 4, 5, 6, 7, 8].includes(version) && Array.isArray(data.routes) && data.routes.length) {
         state.routes = data.routes.map(hydrateRoute);
       } else {
         state.routes = [hydrateRoute({
@@ -5243,9 +5354,9 @@ RestoreClipboard(*) {
       $("scriptSection").open = false;
       $("copyScript").disabled = true;
       $("downloadScript").disabled = true;
-      toggleAgent();
       applyImportedLocations(data);
       loadActiveRouteIntoForm();
+      toggleAgent();
       toggleIncotermFields(false);
       showMessages({ errors: [], warnings: [] });
     }
@@ -5291,7 +5402,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v8.4.0
+; Generated by BLU Auto Quote → AutoHotkey v9.1.1
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR | 1 SEK = ${$("sekNok").value} NOK | 1 SEK = ${$("sekDkk").value} DKK
 ; Selling currency: ${$("targetCurrency").value}
@@ -5744,8 +5855,8 @@ RestoreClipboard(*) {
       if (refresh) updateAllPreviews();
     }
 
-    function resetForm() {
-      if (!confirm("Reset all FCL inputs and routes?")) return;
+    function resetForm(confirmReset = true, refreshRates = true) {
+      if (confirmReset && !confirm("Reset all FCL inputs and routes?")) return;
       $("clientName").value = "";
       $("attentionTo").value = "";
       $("salesOperator").value = "Erik Stahl";
@@ -5769,20 +5880,36 @@ RestoreClipboard(*) {
       $("copyScript").disabled = true;
       $("downloadScript").disabled = true;
       setDefaultValidity();
-      toggleAgent();
       loadActiveRouteIntoForm();
+      toggleAgent();
       toggleIncotermFields(false);
-      fetchRates();
+      if (refreshRates) fetchRates();
       showMessages({ errors: [], warnings: [] });
+    }
+
+    function resetAllSettings() {
+      if (!confirm("Reset all FCL and LCL settings to their startup defaults?")) return;
+      resetForm(false, false);
+      resetLclForm(false);
+      document.querySelectorAll("#fclPane details, #lclPane details").forEach((details) => { details.open = false; });
+      activateMode("fcl");
+      fetchRates();
     }
 
     function toggleFreeDays() {
       const custom = $("freeDaysMode").value === "custom";
-      document.querySelectorAll(".custom-free").forEach((element) => element.classList.toggle("hidden", !custom));
+      const type = normaliseFreeDaysType($("freeDaysType").value);
+      const dd = custom && type === "dd";
+      $("freeDaysType").value = type;
+      document.querySelectorAll(".free-days-type-field").forEach((element) => element.classList.toggle("hidden", !custom));
+      document.querySelectorAll(".free-days-single-field").forEach((element) => element.classList.toggle("hidden", !custom || dd));
+      document.querySelectorAll(".free-days-dd-field").forEach((element) => element.classList.toggle("hidden", !dd));
       if (!state.loadingRoute && activeRoute()) {
         activeRoute().freeDaysMode = $("freeDaysMode").value;
         activeRoute().freeDays = $("freeDays").value;
-        activeRoute().freeDaysType = $("freeDaysType").value;
+        activeRoute().freeDaysType = type;
+        activeRoute().freeDaysDemurrage = $("freeDaysDemurrage").value;
+        activeRoute().freeDaysDetention = $("freeDaysDetention").value;
       }
       updateAllPreviews();
     }
@@ -5847,9 +5974,13 @@ RestoreClipboard(*) {
       $("copyScript").addEventListener("click", copyScript);
       $("downloadScript").addEventListener("click", downloadScript);
       $("resetForm").addEventListener("click", resetForm);
+      $("resetAllSettings").addEventListener("click", resetAllSettings);
       $("freeDaysMode").addEventListener("change", toggleFreeDays);
       $("freeDays").addEventListener("input", () => { activeRoute().freeDays = $("freeDays").value; updateAllPreviews(); });
-      $("freeDaysType").addEventListener("change", () => { activeRoute().freeDaysType = $("freeDaysType").value; updateAllPreviews(); });
+      $("freeDaysType").addEventListener("change", toggleFreeDays);
+      $("freeDaysDemurrage").addEventListener("input", () => { activeRoute().freeDaysDemurrage = $("freeDaysDemurrage").value; updateAllPreviews(); });
+      $("freeDaysDetention").addEventListener("input", () => { activeRoute().freeDaysDetention = $("freeDaysDetention").value; updateAllPreviews(); });
+      $("alexandriaPort").addEventListener("change", () => { activeRoute().alexandriaPort = $("alexandriaPort").value; updateAllPreviews(); });
       $("includeWaitingTime").addEventListener("change", toggleWaitingTime);
       $("waitingHours").addEventListener("input", () => { activeRoute().waitingHours = $("waitingHours").value; updateAllPreviews(); });
       $("useAgent").addEventListener("change", toggleAgent);
@@ -5868,7 +5999,7 @@ RestoreClipboard(*) {
     }
 
     // =====================================
-    // v8.4.0 Nordicon / LCL compatibility work
+    // v9.1.1 Nordicon / LCL compatibility work
     // =====================================
 
     function parseNordiconCharge(lines, pattern) {
@@ -6341,7 +6472,7 @@ RestoreClipboard(*) {
 
 
     // =====================================
-    // v8.4.0 effective LCL / Nordicon overrides
+    // v9.1.1 effective LCL / Nordicon overrides
     // =====================================
 
     function newLclState(overrides = {}) {
@@ -6988,6 +7119,7 @@ RestoreClipboard(*) {
       $("lclSupplier").value = "NORDICON";
       $("lclStackable").value = "STACKABLE";
       state.lcl = newLclState();
+      state.pendingLclImport = null;
       setLclCosts(state.lcl.costs);
       renderLclExtraCosts();
       setDefaultLclValidity();
@@ -7082,6 +7214,2676 @@ RestoreClipboard(*) {
         });
       });
     }
+
+
+    // =====================================
+    // v9.1.1 import, Unicode and wording overrides
+    // =====================================
+
+    const V910_DIRECTION_EXPORT = "export";
+    const V910_DIRECTION_IMPORT = "import";
+    state.direction = state.direction === V910_DIRECTION_IMPORT ? V910_DIRECTION_IMPORT : V910_DIRECTION_EXPORT;
+
+    const v841 = {
+      setQuoteTextReady,
+      newEquipment,
+      newRoute,
+      initialiseLocationSelectors,
+      routePol,
+      routePod,
+      routeSubjectPod,
+      routePathParts,
+      buildSubject,
+      syncActiveRouteFromForm,
+      loadActiveRouteIntoForm,
+      renderEquipment,
+      calculateDetailGroup,
+      previewRows,
+      customFreeDaysText,
+      includingText,
+      excludingText,
+      remarksText,
+      createChargeMaps,
+      validateForm,
+      exportFormData,
+      applyImportedData,
+      generateAhk,
+      toggleIncotermFields,
+      updateSummary,
+      resetForm,
+      resetAllSettings,
+      newLclState,
+      parseNordiconQuote,
+      applyParsedNordiconQuote,
+      calculateLcl,
+      lclSubject,
+      lclExcludingText,
+      lclRemarksText,
+      lclCreateCharges,
+      renderLclExtraCosts,
+      updateLclCalculation,
+      validateLcl,
+      exportLclData,
+      applyImportedLclData,
+      generateLclAhk,
+      toggleLclIncotermFields,
+      resetLclForm,
+      bindEvents,
+      bindLclEvents
+    };
+
+    let lclPolComboV910 = null;
+
+    function isImportMode() {
+      return state.direction === V910_DIRECTION_IMPORT;
+    }
+
+    function boolAhk(value) {
+      return value ? "true" : "false";
+    }
+
+    function ceil10(value) {
+      return Math.ceil(Number(value) / 10) * 10;
+    }
+
+    function hasNumericValue(value) {
+      return String(value ?? "").trim() !== "" && Number.isFinite(decimalNumber(value));
+    }
+
+    function quoteTextOptional(path, replacements = {}, fallback = "") {
+      const template = nestedValue(state.quoteTexts, path);
+      if (typeof template !== "string") return fallback;
+      return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (match, key) => Object.prototype.hasOwnProperty.call(replacements, key) ? String(replacements[key]) : match);
+    }
+
+    function refreshImportWordingUiV910() {
+      const transit = quoteTextOptional("common.transitTimeImport", {}, "1-3 DAYS FROM VESSEL DISCHARGE");
+      ["fclImportTransitField", "lclImportTransitField"].forEach((id) => {
+        const value = $(id)?.querySelector(".fixed-import-transit");
+        if (value) value.textContent = transit;
+      });
+    }
+
+    setQuoteTextReady = function(data, sourceLabel) {
+      v841.setQuoteTextReady(data, sourceLabel);
+      refreshImportWordingUiV910();
+    };
+
+    function setSelectOptionsV910(select, options, preferredValue) {
+      if (!select) return;
+      const preferred = String(preferredValue ?? select.value ?? "");
+      select.replaceChildren(...options.map((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        return option;
+      }));
+      select.value = options.includes(preferred) ? preferred : options[0];
+    }
+
+    function displayLocationV910(code, name, fallback = "") {
+      if (upper(code) === "INENR") return "ENNORE CHENNAI";
+      return normalisedLocationName(name) || fallback;
+    }
+
+    function routeDelivery(route) {
+      return displayLocationV910(route?.collectionCode, route?.collectionName || route?.collectionCity, "DELIVERY");
+    }
+
+    function lclDelivery() {
+      return displayLocationV910(textValue("lclCollectionCode"), lclCollectionValue(), "DELIVERY");
+    }
+
+    function lclPolDisplayV910() {
+      return displayLocationV910(textValue("lclPolCode"), textValue("lclPolName"), "POL");
+    }
+
+    function lclPodDisplayV910() {
+      if (isImportMode()) return "GOTHENBURG";
+      return displayLocationV910(textValue("lclPodCode"), textValue("lclPodName"), "POD");
+    }
+
+    function setFixedLclImportPodV911() {
+      const code = "SEGOT";
+      const name = state.locations.get(code) || "GOTHENBURG";
+      if (state.locations.size) lclPodCombo.setOptions(locationOptions([...state.locations.keys()]), code);
+      lclPodCombo.value = code;
+      lclPodCombo.input.value = `${code} - ${name}`;
+      $("lclPodCode").value = code;
+      $("lclPodName").value = name;
+      lclPodCombo.setDisabled(true);
+    }
+
+    function installV910Ui() {
+      const style = document.createElement("style");
+      style.textContent = `
+        .direction-tabs { display:inline-flex; gap:4px; margin:0 0 12px; padding:3px; border:1px solid #999; background:#f4f4f4; }
+        .direction-tab { min-width:92px; padding:7px 18px; border:0; background:transparent; font:inherit; font-weight:700; cursor:pointer; }
+        .direction-tab.active { background:#222; color:#fff; box-shadow:0 0 0 1px #222; }
+        .mode-toolbar { flex-wrap:wrap; }
+        .mode-toolbar-groups { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .import-option-strip { display:flex; align-items:center; gap:14px; flex-wrap:wrap; grid-column:1 / -1; min-height:34px; padding:6px 8px; border:1px solid #bbb; background:#fafafa; }
+        .import-fixed-note { margin-top:7px; padding:6px 8px; border:1px solid #c7c7c7; background:#fff; color:#555; font-size:11px; }
+        .import-buying-only-note { color:#555; font-size:11px; }
+        .lcl-import-buying-row td:last-child { color:#555; font-size:11px; }
+        .fixed-import-transit { min-height:32px; margin-top:3px; padding:6px 8px; border:1px solid #777; background:#f7f7f7; font-weight:700; }
+        .cost-block.import-ocean-hidden { display:none; }
+        .import-only.hidden, .export-only.hidden { display:none !important; }
+        @media (max-width:620px) { .mode-toolbar-groups { width:100%; } .direction-tabs { margin-bottom:8px; } }
+      `;
+      document.head.append(style);
+
+      const toolbar = document.querySelector(".mode-toolbar");
+      const modeTabs = toolbar?.querySelector(".mode-tabs");
+      if (toolbar && modeTabs && !$("directionTabs")) {
+        const groups = document.createElement("div");
+        groups.className = "mode-toolbar-groups";
+        const direction = document.createElement("nav");
+        direction.id = "directionTabs";
+        direction.className = "direction-tabs";
+        direction.setAttribute("aria-label", "Shipment direction");
+        direction.innerHTML = `<button type="button" class="direction-tab active" data-direction="export">Export</button><button type="button" class="direction-tab" data-direction="import">Import</button>`;
+        toolbar.insertBefore(groups, modeTabs);
+        groups.append(modeTabs, direction);
+      }
+
+      const routeCore = document.querySelector("#fclPane .route-core-grid");
+      if (routeCore && !$("fclImportOptions")) {
+        const strip = document.createElement("div");
+        strip.id = "fclImportOptions";
+        strip.className = "import-option-strip import-only hidden";
+        strip.innerHTML = `
+          <label class="waiting-check"><input id="includeOceanFreight" type="checkbox"> Include ocean freight</label>
+          <label class="waiting-check"><input id="includeImportCustoms" type="checkbox"> Include customs import clearance</label>
+        `;
+        const fca = $("fcaOnCarriageOption");
+        routeCore.insertBefore(strip, fca || routeCore.children[2] || null);
+      }
+      const transitLabel = $("transitDays")?.closest("label");
+      if (transitLabel && !$("fclImportTransitField")) {
+        transitLabel.id = "fclExportTransitField";
+        const fixed = document.createElement("label");
+        fixed.id = "fclImportTransitField";
+        fixed.className = "field import-only hidden";
+        fixed.innerHTML = `Transit time<div class="fixed-import-transit">1-3 DAYS FROM VESSEL DISCHARGE</div>`;
+        transitLabel.after(fixed);
+      }
+      const polBox = $("polLocation")?.closest(".location-box");
+      if (polBox) polBox.id = "fclPolBox";
+      const podBox = $("podLocation")?.closest(".location-box");
+      if (podBox) podBox.id = "fclPodBox";
+
+      const lclNote = $("lclIncotermNote");
+      if (lclNote && !$("lclImportOptions")) {
+        const strip = document.createElement("div");
+        strip.id = "lclImportOptions";
+        strip.className = "import-option-strip import-only hidden";
+        strip.innerHTML = `
+          <label class="waiting-check"><input id="lclIncludeOceanFreight" type="checkbox"> Include ocean freight</label>
+          <label class="waiting-check"><input id="lclIncludeImportCustoms" type="checkbox"> Include customs import clearance</label>
+        `;
+        lclNote.after(strip);
+      }
+      const lclRouteGrid = document.querySelector(".lcl-route-grid");
+      if (lclRouteGrid) {
+        const fixedPol = [...lclRouteGrid.children].find((element) => element.querySelector?.(".fixed-value"));
+        if (fixedPol) fixedPol.id = "lclFixedPolField";
+        if (!$("lclImportPolField")) {
+          const field = document.createElement("label");
+          field.id = "lclImportPolField";
+          field.className = "field import-only hidden";
+          field.innerHTML = `POL<div id="lclPolLocation" class="combo"><input id="lclPolCity" autocomplete="off" disabled><div class="combo-menu hidden"></div></div><input id="lclPolName" type="hidden"><input id="lclPolCode" type="hidden">`;
+          if (fixedPol) fixedPol.after(field);
+          else lclRouteGrid.append(field);
+        }
+        const lclTransitLabel = $("lclTransitDays")?.closest("label");
+        if (lclTransitLabel && !$("lclImportTransitField")) {
+          lclTransitLabel.id = "lclExportTransitField";
+          const fixed = document.createElement("label");
+          fixed.id = "lclImportTransitField";
+          fixed.className = "field import-only hidden";
+          fixed.innerHTML = `Transit time<div class="fixed-import-transit">1-3 DAYS FROM VESSEL DISCHARGE</div>`;
+          lclTransitLabel.after(fixed);
+        }
+      }
+
+      const lclRows = document.querySelectorAll(".lcl-cost-table tbody:first-of-type tr");
+      const lclKeys = ["trucking", "ocean", "fuel", "eu", "war", "terminal", "port", "handling", "isps", "customs"];
+      lclRows.forEach((row, index) => { if (lclKeys[index]) row.dataset.lclCostRow = lclKeys[index]; });
+      const terminalRow = document.querySelector('[data-lcl-cost-row="terminal"]');
+      if (terminalRow && !document.querySelector('[data-lcl-cost-row="service"]')) {
+        const row = document.createElement("tr");
+        row.dataset.lclCostRow = "service";
+        row.className = "import-only hidden";
+        row.innerHTML = `<td>LCL service charge</td><td><input data-lcl-charge="service" data-lcl-field="total" type="number" step="0.01"></td><td><select data-lcl-charge="service" data-lcl-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>15 USD selling</td>`;
+        terminalRow.after(row);
+      }
+      const extraBody = $("lclExtraCostsBody");
+      if (extraBody && !$("lclImportBuyingOnlyBody")) {
+        const body = document.createElement("tbody");
+        body.id = "lclImportBuyingOnlyBody";
+        extraBody.after(body);
+      }
+
+      if (!lclPolComboV910 && $("lclPolLocation")) {
+        lclPolComboV910 = new SearchCombo($("lclPolLocation"), applyLclPolSelectionV910);
+      }
+    }
+
+    function applyLclPolSelectionV910() {
+      if (!lclPolComboV910) return;
+      const code = lclPolComboV910.value;
+      $("lclPolCode").value = code;
+      $("lclPolName").value = state.locations.get(code) ?? "";
+      if (state.lcl) {
+        state.lcl.polCode = code;
+        state.lcl.polName = state.locations.get(code) ?? "";
+      }
+      updateLclCalculation();
+    }
+
+    function setLclPolFromTextV910(name, preferredCode = "") {
+      const clean = String(name ?? "").trim();
+      const code = upper(preferredCode) || findLocationCodeByName(clean);
+      if (state.locations.size && lclPolComboV910) lclPolComboV910.setOptions(locationOptions([...state.locations.keys()]), code);
+      if (code && lclPolComboV910?.selectedOption()) {
+        lclPolComboV910.value = code;
+        lclPolComboV910.input.value = `${code} - ${state.locations.get(code)}`;
+        $("lclPolCode").value = code;
+        $("lclPolName").value = state.locations.get(code) ?? clean;
+      } else if (lclPolComboV910) {
+        lclPolComboV910.value = "";
+        lclPolComboV910.input.value = clean;
+        $("lclPolCode").value = "";
+        $("lclPolName").value = clean;
+      }
+      state.lcl.polCode = $("lclPolCode").value;
+      state.lcl.polName = $("lclPolName").value;
+    }
+
+    function setDefaultLclImportRouteV910(force = false) {
+      const hasDelivery = Boolean(textValue("lclCollectionCode") || textValue("lclCollectionName") || textValue("lclCollectionCity"));
+      setFixedLclImportPodV911();
+      if (!force && hasDelivery) return;
+      setLclPolFromTextV910("");
+    }
+
+    newEquipment = function(overrides = {}) {
+      return v841.newEquipment(overrides);
+    };
+
+    newRoute = function(overrides = {}) {
+      const route = v841.newRoute(overrides);
+      route.includeOceanFreight = Object.prototype.hasOwnProperty.call(overrides, "includeOceanFreight") ? Boolean(overrides.includeOceanFreight) : !isImportMode();
+      route.includeImportCustoms = Boolean(overrides.includeImportCustoms);
+      if (isImportMode()) {
+        const hasPol = Object.prototype.hasOwnProperty.call(overrides, "polCode") || Object.prototype.hasOwnProperty.call(overrides, "polName");
+        const hasPod = Object.prototype.hasOwnProperty.call(overrides, "podCode") || Object.prototype.hasOwnProperty.call(overrides, "podName");
+        if (hasPol) {
+          route.polCode = upper(overrides.polCode || "");
+          route.polName = overrides.polName || "";
+          route.polCountry = Object.prototype.hasOwnProperty.call(overrides, "polCountry") ? upper(overrides.polCountry || "") : countryCode(route.polCode);
+        }
+        if (hasPod) {
+          route.podCode = upper(overrides.podCode || "");
+          route.podName = overrides.podName || "";
+          route.podCountry = Object.prototype.hasOwnProperty.call(overrides, "podCountry") ? upper(overrides.podCountry || "") : countryCode(route.podCode);
+        }
+        if (!hasPol && !hasPod) {
+          route.polCode = "";
+          route.polName = "";
+          route.polCountry = "";
+          route.podCode = "SEGOT";
+          route.podName = "GOTHENBURG";
+          route.podCountry = "SE";
+        }
+        if (!route.collectionCountry) route.collectionCountry = "SE";
+      }
+      return route;
+    };
+
+    newLclState = function(overrides = {}) {
+      const base = v841.newLclState(overrides);
+      base.costs = cloneLclCosts({
+        ...LCL_COST_DEFAULTS,
+        service: { total: "", currency: "SEK", rate: "" },
+        ...(overrides.costs || {})
+      });
+      base.includeOceanFreight = Object.prototype.hasOwnProperty.call(overrides, "includeOceanFreight") ? Boolean(overrides.includeOceanFreight) : !isImportMode();
+      base.includeImportCustoms = Boolean(overrides.includeImportCustoms);
+      base.polName = overrides.polName || "";
+      base.polCode = upper(overrides.polCode || "");
+      base.importBuyingOnly = Array.isArray(overrides.importBuyingOnly) ? overrides.importBuyingOnly.map((row) => ({ ...row })) : [];
+      return base;
+    };
+
+    initialiseLocationSelectors = function() {
+      v841.initialiseLocationSelectors();
+      if (isImportMode()) setFixedLclImportPodV911();
+      else lclPodCombo.setDisabled(false);
+      if (!lclPolComboV910 || !state.locations.size) return;
+      lclPolComboV910.setOptions(locationOptions([...state.locations.keys()]), state.lcl.polCode || "");
+      lclPolComboV910.setDisabled(false);
+      if (state.lcl.polCode) applyLclPolSelectionV910();
+    };
+
+    routePol = function(route) {
+      return displayLocationV910(route?.polCode, route?.polName, "POL");
+    };
+
+    routePod = function(route) {
+      return displayLocationV910(route?.podCode, route?.podName, "POD");
+    };
+
+    routeSubjectPod = function(route) {
+      const pod = routePod(route) || "POD";
+      const rawName = normaliseSearch(route?.podName || "");
+      if (!rawName.includes("alexandria")) return pod;
+      const suffix = {
+        "old-port": "OLD PORT",
+        "el-dekheila": "EL DEKHEILA"
+      }[String(route?.alexandriaPort || "general").toLowerCase()] || "";
+      return suffix ? `${pod} ${suffix}` : pod;
+    };
+
+    routePathParts = function(route) {
+      if (!isImportMode()) return v841.routePathParts(route);
+      const pod = routeSubjectPod(route);
+      const delivery = routeDelivery(route);
+      return route.includeOceanFreight !== false ? [routePol(route), pod, delivery] : [pod, delivery];
+    };
+
+    buildSubject = function() {
+      if (!isImportMode()) return v841.buildSubject();
+      const routes = state.routes || [];
+      if (!routes.length) return "FCL";
+      const incoterm = currentIncoterm();
+      const equipmentSummaries = routes.map(routeEquipmentSummary);
+      const paths = routes.map(routePathParts);
+      const sameEquipment = equipmentSummaries.every((value) => value === equipmentSummaries[0]);
+      const commonPrefix = paths[0].slice(0, -1);
+      const samePrefix = paths.every((parts) => parts.length === paths[0].length && parts.slice(0, -1).every((value, index) => value === commonPrefix[index]));
+      if (sameEquipment && samePrefix) {
+        const destinations = paths.map((parts) => parts[parts.length - 1]).join(" / ");
+        return quoteText("fcl.subjectImport", { INCOTERM: incoterm, EQUIPMENT: equipmentSummaries[0], ROUTE: [...commonPrefix, destinations].join(" - ") });
+      }
+      return routes.map((route) => quoteText("fcl.subjectImport", { INCOTERM: incoterm, EQUIPMENT: routeEquipmentSummary(route), ROUTE: routePathParts(route).join(" - ") })).join(" / ");
+    };
+
+    fclIncludesPrecarriage = function() {
+      return isImportMode() ? true : (currentIncoterm() === "FOB" ? false : (currentIncoterm() === "FCA" ? ($("includeOnCarriage")?.checked ?? true) : true));
+    };
+
+    syncActiveRouteFromForm = function() {
+      v841.syncActiveRouteFromForm();
+      const route = activeRoute();
+      if (!route) return;
+      if ($("includeOceanFreight")) route.includeOceanFreight = $("includeOceanFreight").checked;
+      if ($("includeImportCustoms")) route.includeImportCustoms = $("includeImportCustoms").checked;
+    };
+
+    function setImportIncotermControlsV910(scope, term) {
+      const select = $(scope === "fcl" ? "incoterm" : "lclIncoterm");
+      setSelectOptionsV910(select, ["DAP", "DDP"], ["DAP", "DDP"].includes(term) ? term : "DAP");
+    }
+
+    function setExportIncotermControlsV910(scope, term) {
+      const select = $(scope === "fcl" ? "incoterm" : "lclIncoterm");
+      setSelectOptionsV910(select, ["EXW", "FCA", "FOB"], ["EXW", "FCA", "FOB"].includes(term) ? term : "EXW");
+    }
+
+    function configureDirectionUiV910() {
+      refreshImportWordingUiV910();
+      document.querySelectorAll(".direction-tab").forEach((button) => button.classList.toggle("active", button.dataset.direction === state.direction));
+      document.querySelectorAll(".import-only").forEach((element) => element.classList.toggle("hidden", !isImportMode()));
+      document.querySelectorAll(".export-only").forEach((element) => element.classList.toggle("hidden", isImportMode()));
+
+      if (isImportMode()) {
+        setImportIncotermControlsV910("fcl", $("incoterm")?.value);
+        setImportIncotermControlsV910("lcl", $("lclIncoterm")?.value);
+        $("targetCurrency").value = "USD";
+        $("targetCurrency").disabled = true;
+      } else {
+        setExportIncotermControlsV910("fcl", $("incoterm")?.value);
+        setExportIncotermControlsV910("lcl", $("lclIncoterm")?.value);
+        $("targetCurrency").disabled = false;
+      }
+      toggleIncotermFields(false);
+      toggleLclIncotermFields(false);
+      renderEquipment();
+      updateAllPreviews();
+      updateLclCalculation();
+    }
+
+    function activateDirectionV910(direction, resetDefaults = false) {
+      const wanted = direction === V910_DIRECTION_IMPORT ? V910_DIRECTION_IMPORT : V910_DIRECTION_EXPORT;
+      if (wanted === state.direction && !resetDefaults) return;
+      syncActiveRouteFromForm();
+      state.direction = wanted;
+      if (resetDefaults) {
+        if (wanted === V910_DIRECTION_IMPORT) {
+          setImportIncotermControlsV910("fcl", "DAP");
+          setImportIncotermControlsV910("lcl", "DAP");
+          $("profitSek").value = "3000";
+          $("lclProfitSek").value = "3000";
+          (state.routes || []).forEach((route) => {
+            const freshExportRoute = !route.collectionCode && !route.collectionName && !route.collectionCity && !route.podCode && !route.podName && (!route.polCode || upper(route.polCode) === "SEGOT");
+            if (freshExportRoute) {
+              route.polCode = "";
+              route.polName = "";
+              route.polCountry = "";
+              route.podCode = "SEGOT";
+              route.podName = "GOTHENBURG";
+              route.podCountry = "SE";
+            }
+            route.includeOceanFreight = false;
+            route.includeImportCustoms = false;
+          });
+          state.lcl.includeOceanFreight = false;
+          state.lcl.includeImportCustoms = false;
+          if ($("includeOceanFreight")) $("includeOceanFreight").checked = false;
+          if ($("lclIncludeOceanFreight")) $("lclIncludeOceanFreight").checked = false;
+          setDefaultLclImportRouteV910(false);
+        } else {
+          setExportIncotermControlsV910("fcl", "EXW");
+          setExportIncotermControlsV910("lcl", "EXW");
+          $("profitSek").value = "8000";
+          $("lclProfitSek").value = "7500";
+        }
+      }
+      loadActiveRouteIntoForm();
+      configureDirectionUiV910();
+    }
+
+    loadActiveRouteIntoForm = function() {
+      const routeBeforeLoad = activeRoute();
+      if (isImportMode() && routeBeforeLoad) {
+        if ($("includeOceanFreight")) $("includeOceanFreight").checked = routeBeforeLoad.includeOceanFreight !== false;
+        if ($("includeImportCustoms")) $("includeImportCustoms").checked = currentIncoterm() === "DDP" || Boolean(routeBeforeLoad.includeImportCustoms);
+      }
+      v841.loadActiveRouteIntoForm();
+      const route = activeRoute();
+      if (!route) return;
+      if ($("includeOceanFreight")) $("includeOceanFreight").checked = route.includeOceanFreight !== false;
+      if ($("includeImportCustoms")) $("includeImportCustoms").checked = currentIncoterm() === "DDP" || Boolean(route.includeImportCustoms);
+      toggleIncotermFields(false);
+    };
+
+    function applyFclDirectionUiV910() {
+      const route = activeRoute();
+      const includeOcean = route?.includeOceanFreight !== false;
+      const collectionCountryLabel = $("collectionCountryField");
+      const collectionLabel = $("collectionField");
+      if (collectionCountryLabel) collectionCountryLabel.firstChild.textContent = isImportMode() ? "Delivery country" : "Collection country";
+      if (collectionLabel) collectionLabel.firstChild.textContent = isImportMode() ? "Delivery city" : "Collection city";
+      document.querySelectorAll("#equipmentList .equipment-card").forEach((card) => {
+        const preTitle = card.querySelector(".precarriage-field .cost-block-title");
+        if (preTitle) preTitle.textContent = isImportMode() ? "Delivery" : "Precarriage";
+        const oceanBlock = card.querySelectorAll(".equipment-cost-grid > .cost-block")[1];
+        oceanBlock?.classList.toggle("import-ocean-hidden", isImportMode() && !includeOcean);
+        card.querySelectorAll(".origin-toggle, .stuff-toggle").forEach((input) => input.closest("label")?.classList.toggle("hidden", isImportMode()));
+        card.querySelector(".origin-fields")?.classList.toggle("hidden", isImportMode() || !activeRoute()?.equipment?.[Number(card.dataset.index)]?.includeOriginCharges);
+        card.querySelector(".stuffing-fields")?.classList.toggle("hidden", isImportMode() || !activeRoute()?.equipment?.[Number(card.dataset.index)]?.includeStuff);
+        const syncFreight = card.querySelector('[data-sync-kind="freight"]')?.closest("label");
+        if (syncFreight) syncFreight.classList.toggle("hidden", isImportMode() && !includeOcean);
+        const syncPre = card.querySelector('[data-sync-kind="precarriage"]')?.closest("label");
+        if (syncPre) syncPre.lastChild.textContent = isImportMode() ? " Keep delivery buying synced between routes" : " Keep precarriage buying synced between routes";
+        card.querySelector(".import-fixed-note")?.remove();
+      });
+    }
+
+    renderEquipment = function() {
+      v841.renderEquipment();
+      applyFclDirectionUiV910();
+    };
+
+    toggleIncotermFields = function(refresh = true) {
+      if (!isImportMode()) {
+        $("fclImportOptions")?.classList.add("hidden");
+        $("fclImportTransitField")?.classList.add("hidden");
+        $("fclExportTransitField")?.classList.remove("hidden");
+        $("fclPolBox")?.classList.remove("hidden");
+        document.querySelector(".free-days-grid")?.classList.remove("hidden");
+        v841.toggleIncotermFields(false);
+        applyFclDirectionUiV910();
+        if (refresh) updateAllPreviews();
+        return;
+      }
+      const route = activeRoute();
+      const term = currentIncoterm();
+      const includeOcean = $("includeOceanFreight")?.checked ?? route?.includeOceanFreight !== false;
+      if (route) {
+        route.includeOceanFreight = includeOcean;
+        if (term === "DDP") route.includeImportCustoms = true;
+        else route.includeImportCustoms = $("includeImportCustoms")?.checked ?? Boolean(route.includeImportCustoms);
+      }
+      $("fclImportOptions")?.classList.remove("hidden");
+      $("fclImportTransitField")?.classList.remove("hidden");
+      $("fclExportTransitField")?.classList.add("hidden");
+      $("fcaOnCarriageOption")?.classList.add("hidden");
+      $("collectionCountryField")?.classList.remove("hidden");
+      $("collectionField")?.classList.remove("hidden");
+      $("waitingOption")?.classList.remove("hidden");
+      $("fclPolBox")?.classList.toggle("hidden", !includeOcean);
+      document.querySelector(".free-days-grid")?.classList.toggle("hidden", !includeOcean);
+      if ($("includeImportCustoms")) {
+        $("includeImportCustoms").checked = term === "DDP" || Boolean(route?.includeImportCustoms);
+        $("includeImportCustoms").disabled = term === "DDP";
+      }
+      $("targetCurrency").value = "USD";
+      $("targetCurrency").disabled = true;
+      applyFclDirectionUiV910();
+      renderRoeRateFields();
+      if (refresh) updateAllPreviews();
+    };
+
+    customFreeDaysText = function(route = activeRoute()) {
+      const type = normaliseFreeDaysType(route.freeDaysType);
+      if (type === "dd") {
+        const demurrage = formatPlainNumber(numberValue(route.freeDaysDemurrage)) || String(route.freeDaysDemurrage || "").trim();
+        const detention = formatPlainNumber(numberValue(route.freeDaysDetention)) || String(route.freeDaysDetention || "").trim();
+        return quoteText("fcl.freeDays.demurrageDetention", { DEMURRAGE_DAYS: demurrage, DETENTION_DAYS: detention });
+      }
+      const days = formatPlainNumber(numberValue(route.freeDays)) || String(route.freeDays || "").trim();
+      const key = ["detention", "combined", "demurrage", "unspecified"].includes(type) ? type : "detention";
+      return quoteText(`fcl.freeDays.${key}`, { FREE_DAYS: days });
+    };
+
+    function calculateFclImportDetailGroupV910(route, equipment) {
+      const target = "USD";
+      const includeOcean = route.includeOceanFreight !== false;
+      const includeCustoms = currentIncoterm() === "DDP" || Boolean(route.includeImportCustoms);
+      const desiredProfitTarget = convert($("profitSek").value, "SEK", target);
+      const carrierCode = upper(equipment[0]?.carrier) || "MSC";
+      const carrier = CARRIER_CONFIG[carrierCode] ?? CARRIER_CONFIG.MSC;
+      const agent = agentConfig();
+      const forwardingFeeCost = agent?.manualCosts ? convert(agent.forwardingFeeAmount, agent.forwardingFeeCurrency, target) : 0;
+      const terminalCost = convert(3000, "SEK", target);
+      const terminalSelling = Number.isFinite(terminalCost) ? ceil10(terminalCost) : NaN;
+      const detailRow = detailRowNumber(equipment[0], 1);
+      const customCharges = customChargesForDetail(route, detailRow);
+      const customRates = customCharges.map((charge) => numberValue(charge.sellingRate));
+      const customSellingTotal = customRates.every(Number.isFinite) ? customRates.reduce((sum, value) => sum + value, 0) : NaN;
+      const rows = equipment.map((item) => {
+        const quantity = Math.max(1, Math.trunc(numberValue(item.quantity) || 0));
+        const deliveryCost = convert(item.precarriageAmount, item.precarriageCurrency, target);
+        const freightCost = includeOcean ? convert(item.freightAmount, item.freightCurrency, target) : 0;
+        return { equipment: item, quantity, deliveryCost, freightCost };
+      });
+      const values = [desiredProfitTarget, forwardingFeeCost, terminalCost, terminalSelling, customSellingTotal, ...rows.flatMap((row) => [row.deliveryCost, row.freightCost])];
+      if (!values.every(Number.isFinite)) return null;
+      const totalQuantity = rows.reduce((sum, row) => sum + row.quantity, 0);
+      const fixedProfit =
+        (terminalSelling - terminalCost) +
+        (75 - forwardingFeeCost) +
+        (includeCustoms ? 100 : 0) +
+        (50 * totalQuantity) +
+        customSellingTotal;
+      const remainingProfit = desiredProfitTarget - fixedProfit;
+      const deliveryMarkupPerContainer = (remainingProfit * (includeOcean ? 0.70 : 1)) / totalQuantity;
+      const freightMarkupPerContainer = includeOcean ? (remainingProfit * 0.30) / totalQuantity : 0;
+      rows.forEach((row) => {
+        row.deliverySelling = round5(row.deliveryCost + deliveryMarkupPerContainer);
+        row.freightSelling = includeOcean ? round5(row.freightCost + freightMarkupPerContainer) : 0;
+      });
+      const commonDelivery = rows.every((row) =>
+        Math.abs(row.deliveryCost - rows[0].deliveryCost) < 0.0001 &&
+        upper(row.equipment.precarriageCurrency) === upper(rows[0].equipment.precarriageCurrency) &&
+        upper(row.equipment.precarriageSupplier) === upper(rows[0].equipment.precarriageSupplier)
+      );
+      const actualProfit = rows.reduce((sum, row) => sum
+        + (row.deliverySelling - row.deliveryCost) * row.quantity
+        + (includeOcean ? (row.freightSelling - row.freightCost) * row.quantity : 0), 0)
+        + fixedProfit;
+      const hasMultipleTypes = new Set(rows.map((row) => row.equipment.type)).size > 1;
+      return {
+        target, includeOcean, includeCustoms, desiredProfitTarget, carrierCode, carrier,
+        forwardingFeeCost, terminalCost, terminalSelling, rows, totalQuantity,
+        commonDelivery, actualProfit, remainingProfit, detailRow, customCharges,
+        customSellingTotal, hasMultipleTypes,
+        negativeSelling: rows.some((row) => row.deliverySelling < 0 || (includeOcean && row.freightSelling < 0))
+      };
+    }
+
+    calculateDetailGroup = function(route, equipment) {
+      return isImportMode() ? calculateFclImportDetailGroupV910(route, equipment) : v841.calculateDetailGroup(route, equipment);
+    };
+
+    function previewFclImportRowsV910(route, group, calc) {
+      const rows = [
+        ["Terminal handling charge", calc.terminalCost, calc.terminalSelling, 1, calc.terminalSelling - calc.terminalCost],
+        ["Forwarding fee", calc.forwardingFeeCost, 75, 1, 75 - calc.forwardingFeeCost]
+      ];
+      if (calc.commonDelivery) {
+        const row = calc.rows[0];
+        const unit = calc.hasMultipleTypes ? "CONTAINER" : row.equipment.type;
+        rows.push(["Delivery (all containers)", row.deliveryCost * calc.totalQuantity, row.deliverySelling, calc.totalQuantity, (row.deliverySelling - row.deliveryCost) * calc.totalQuantity]);
+      } else {
+        calc.rows.forEach((row) => rows.push([`Delivery (${row.quantity}X${row.equipment.type})`, row.deliveryCost * row.quantity, row.deliverySelling, row.quantity, (row.deliverySelling - row.deliveryCost) * row.quantity]));
+      }
+      if (calc.includeOcean) calc.rows.forEach((row) => rows.push([`Ocean freight (${row.quantity}X${row.equipment.type})`, row.freightCost * row.quantity, row.freightSelling, row.quantity, (row.freightSelling - row.freightCost) * row.quantity]));
+      if (calc.includeCustoms) rows.push(["Customs import clearance", 0, 100, 1, 100]);
+      calc.customCharges.forEach((charge) => rows.push([charge.name || "Custom Other charge", 0, numberValue(charge.sellingRate), 1, numberValue(charge.sellingRate)]));
+      const profitUnit = calc.hasMultipleTypes ? "CONTAINER" : calc.rows[0].equipment.type;
+      rows.push([`Profit (${profitUnit})`, 0, 50, calc.totalQuantity, 50 * calc.totalQuantity]);
+      return `<table><thead><tr><th>Charge</th><th>Buying total in USD</th><th>Selling / unit</th><th>Qty</th><th>Profit total</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${row[0]}</td><td>${formatMoney(row[1], "USD", 2)}</td><td>${formatMoney(row[2], "USD")}</td><td>${row[3]}</td><td>${formatMoney(row[4], "USD", 2)}</td></tr>`).join("")}</tbody></table><div class="profit-line"><span>Calculated profit for detail ${group.detailRow}</span><span>${formatMoney(calc.actualProfit, "USD", 2)} <small>(${formatMoney(convert(calc.actualProfit, "USD", "SEK"), "SEK", 0)})</small></span></div>`;
+    }
+
+    previewRows = function(route, group, calc) {
+      return isImportMode() ? previewFclImportRowsV910(route, group, calc) : v841.previewRows(route, group, calc);
+    };
+
+    includingText = function(route, hasReefer = false) {
+      if (!isImportMode()) return v841.includingText(route, hasReefer);
+      const lines = [];
+      if (route.includeOceanFreight !== false && route.freeDaysMode === "custom") lines.push(customFreeDaysText(route));
+      if (hasReefer) lines.push(quoteText("fcl.including.reeferMonitoring"));
+      return lines.filter(Boolean).join("\n");
+    };
+
+    function fclImportExcludingTextV910(route) {
+      const lines = [quoteText("fcl.excluding.importVatDuty")];
+      const includeCustoms = currentIncoterm() === "DDP" || Boolean(route.includeImportCustoms);
+      if (!includeCustoms) lines.push(quoteText("fcl.excluding.importCustomsClearance"));
+      if (route.includeOceanFreight !== false) lines.push(quoteText("fcl.excluding.importOriginCharges"));
+      return lines.filter(Boolean).join("\n");
+    }
+
+    excludingText = function(hasReefer = false, incoterm = currentIncoterm()) {
+      return isImportMode() ? fclImportExcludingTextV910(activeRoute()) : v841.excludingText(hasReefer, incoterm);
+    };
+
+    remarksText = function(route = activeRoute(), carrierCode = "MSC", hasIncludedStuff = false) {
+      if (!isImportMode()) return v841.remarksText(route, carrierCode, hasIncludedStuff);
+      const lines = [quoteText("fcl.remarks.roe")];
+      if (route.includeOceanFreight !== false) lines.push(quoteText("fcl.remarks.carrierFreeDays", { CARRIER: upper(carrierCode), FREE_DAYS: freeDaysText(route) }));
+      lines.push(quoteText("fcl.remarks.profitShare"));
+      lines.push(quoteText("fcl.remarks.waitingImport", { POD: routeSubjectPod(route), DELIVERY: routeDelivery(route) }));
+      lines.push(quoteText("fcl.remarks.additionalHsCodes"));
+      return lines.filter(Boolean).join("\n\n");
+    };
+
+    function createFclImportChargeMapsV910(route, equipment, calc) {
+      const target = "USD";
+      const waitingText = route.includeWaitingTime
+        ? quoteText("fcl.charges.waitingIncluded", { HOURS: formatPlainNumber(numberValue(route.waitingHours)) })
+        : quoteText("fcl.charges.waitingNotIncluded");
+      const carrier = calc.carrier;
+      const agent = agentConfig();
+      const carrierSupplier = agent ?? carrier;
+      const terminalSupplier = calc.includeOcean ? carrier : null;
+      const charges = [{
+        type: "terminal handling charge",
+        description: quoteText("fcl.charges.importTerminalHandling"),
+        buyRate: "3000", buyCurrency: "SEK",
+        supplier: terminalSupplier?.supplier || "", supplierArrow: terminalSupplier?.supplierArrow || 0,
+        sellingRate: formatPlainNumber(calc.terminalSelling), sellingCurrency: target,
+        quantity: "1", quantityDescription: "CONSIGNMENT"
+      }, {
+        type: "forwarding fee", description: "",
+        buyRate: agent?.manualCosts ? formatPlainNumber(agent.forwardingFeeAmount) : "",
+        buyCurrency: agent?.manualCosts ? agent.forwardingFeeCurrency : "",
+        supplier: agent?.manualCosts ? agent.supplier : "",
+        supplierArrow: agent?.manualCosts ? agent.supplierArrow : 0,
+        sellingRate: "75", sellingCurrency: target, quantity: "1", quantityDescription: "CONSIGNMENT"
+      }];
+
+      if (calc.commonDelivery) {
+        const row = calc.rows[0];
+        const supplier = resolvedPrecarriageSupplier(row.equipment, carrier);
+        const commonUnit = calc.hasMultipleTypes ? "CONTAINER" : row.equipment.type;
+        charges.push({
+          type: "delivery",
+          description: quoteText("fcl.charges.delivery", { DELIVERY: routeDelivery(route), WAITING_TEXT: waitingText }),
+          buyRate: formatPlainNumber(numberValue(row.equipment.precarriageAmount) * calc.totalQuantity), buyCurrency: row.equipment.precarriageCurrency,
+          supplier: supplier.supplier, supplierArrow: supplier.supplierArrow,
+          sellingRate: formatPlainNumber(row.deliverySelling), sellingCurrency: target,
+          quantity: String(calc.totalQuantity), quantityDescription: commonUnit
+        });
+      } else {
+        calc.rows.forEach((row) => {
+          const supplier = resolvedPrecarriageSupplier(row.equipment, carrier);
+          charges.push({
+            type: "delivery",
+            description: quoteText("fcl.charges.deliveryByEquipment", { QUANTITY: row.quantity, EQUIPMENT: row.equipment.type, DELIVERY: routeDelivery(route), WAITING_TEXT: waitingText }),
+            buyRate: formatPlainNumber(numberValue(row.equipment.precarriageAmount) * row.quantity), buyCurrency: row.equipment.precarriageCurrency,
+            supplier: supplier.supplier, supplierArrow: supplier.supplierArrow,
+            sellingRate: formatPlainNumber(row.deliverySelling), sellingCurrency: target,
+            quantity: String(row.quantity), quantityDescription: row.equipment.type
+          });
+        });
+      }
+
+      if (calc.includeOcean) calc.rows.forEach((row) => charges.push({
+        type: "freight",
+        description: quoteText("fcl.charges.oceanFreightByEquipment", { QUANTITY: row.quantity, EQUIPMENT: row.equipment.type }),
+        buyRate: formatPlainNumber(numberValue(row.equipment.freightAmount) * row.quantity), buyCurrency: row.equipment.freightCurrency,
+        supplier: carrierSupplier.supplier, supplierArrow: carrierSupplier.supplierArrow,
+        sellingRate: formatPlainNumber(row.freightSelling), sellingCurrency: target,
+        quantity: String(row.quantity), quantityDescription: row.equipment.type
+      }));
+
+      if (calc.includeCustoms) charges.push({
+        type: "customs import clearance", description: quoteText("fcl.charges.importCustomsClearance"),
+        buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
+        sellingRate: "100", sellingCurrency: target, quantity: "1", quantityDescription: "CONSIGNMENT"
+      });
+      calc.customCharges.forEach((charge) => charges.push({
+        type: "other", description: String(charge.name || "").trim(),
+        buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
+        sellingRate: formatPlainNumber(numberValue(charge.sellingRate)), sellingCurrency: target,
+        quantity: "1", quantityDescription: "CONSIGNMENT"
+      }));
+      charges.push({
+        type: "profit", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
+        sellingRate: "50", sellingCurrency: target, quantity: String(calc.totalQuantity),
+        quantityDescription: calc.hasMultipleTypes ? "CONTAINER" : calc.rows[0].equipment.type
+      });
+      return charges;
+    }
+
+    createChargeMaps = function(route, equipment, calc) {
+      return isImportMode() ? createFclImportChargeMapsV910(route, equipment, calc) : v841.createChargeMaps(route, equipment, calc);
+    };
+
+    function validateFclImportV910() {
+      syncActiveRouteFromForm();
+      const errors = [];
+      const warnings = [];
+      $("fclPane").querySelectorAll(".invalid").forEach((element) => element.classList.remove("invalid"));
+      [["clientName", "Client name"], ["attentionTo", "Attention to"], ["salesOperator", "Sales operator"], ["validTo", "Valid to"], ["paymentDays", "Payment term days"]].forEach(([id, label]) => {
+        if (!String($(id).value).trim()) { $(id).classList.add("invalid"); errors.push(`${label} is missing.`); }
+      });
+      if (!(numberValue($("sekUsd").value) > 0)) { $("sekUsd").classList.add("invalid"); errors.push("ROE SEK→USD is missing or invalid."); }
+      if (!(numberValue($("profitSek").value) >= 0)) { $("profitSek").classList.add("invalid"); errors.push("Profit must be 0 or higher."); }
+      state.routes.forEach((route, routeIndex) => {
+        const prefix = `Route ${routeIndex + 1}`;
+        if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(upper(route.collectionCode))) errors.push(`${prefix}: select a valid delivery location.`);
+        if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(upper(route.podCode))) errors.push(`${prefix}: select a valid POD.`);
+        if (route.includeOceanFreight !== false && !/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(upper(route.polCode))) errors.push(`${prefix}: select a valid POL when ocean freight is included.`);
+        if (route.includeOceanFreight !== false && route.freeDaysMode === "custom") {
+          const type = normaliseFreeDaysType(route.freeDaysType);
+          if (type === "dd") {
+            if (!(numberValue(route.freeDaysDemurrage) > 0)) errors.push(`${prefix}: demurrage free days must be greater than 0.`);
+            if (!(numberValue(route.freeDaysDetention) > 0)) errors.push(`${prefix}: detention free days must be greater than 0.`);
+          } else if (!(numberValue(route.freeDays) > 0)) errors.push(`${prefix}: free days must be greater than 0.`);
+        }
+        route.equipment.forEach((equipment, index) => {
+          const label = `${prefix}, equipment ${index + 1}`;
+          if (!(numberValue(equipment.quantity) >= 1) || !Number.isInteger(numberValue(equipment.quantity))) errors.push(`${label}: quantity must be a whole number of at least 1.`);
+          if (!isFiniteNumber(equipment.precarriageAmount) || numberValue(equipment.precarriageAmount) < 0) errors.push(`${label}: delivery buying is missing or invalid.`);
+          if (route.includeOceanFreight !== false && (!isFiniteNumber(equipment.freightAmount) || numberValue(equipment.freightAmount) < 0)) errors.push(`${label}: ocean freight buying is missing or invalid.`);
+        });
+        groupRouteEquipment(route).forEach((group) => {
+          const carriers = new Set(group.equipment.map((equipment) => upper(equipment.carrier)));
+          if (route.includeOceanFreight !== false && carriers.size > 1) errors.push(`${prefix}, detail ${group.detailRow}: all equipment must use the same carrier.`);
+          const calc = calculateDetailGroup(route, group.equipment);
+          if (calc?.negativeSelling) warnings.push(`${prefix}, detail ${group.detailRow}: the calculation gives a negative selling rate.`);
+          if (calc && Math.abs(convert(calc.actualProfit, "USD", "SEK") - numberValue($("profitSek").value)) > 250) warnings.push(`${prefix}, detail ${group.detailRow}: rounding differs by more than 250 SEK from the requested profit.`);
+        });
+      });
+      return { errors: [...new Set(errors)], warnings: [...new Set(warnings)] };
+    }
+
+    validateForm = function() {
+      return isImportMode() ? validateFclImportV910() : v841.validateForm();
+    };
+
+    exportFormData = function() {
+      if (!isImportMode()) {
+        const data = v841.exportFormData();
+        data.direction = V910_DIRECTION_EXPORT;
+        data.appVersion = "9.1.1";
+        return data;
+      }
+      syncActiveRouteFromForm();
+      return {
+        version: 9, mode: "FCL", direction: V910_DIRECTION_IMPORT, appVersion: "9.1.1",
+        clientName: textValue("clientName"), attentionTo: textValue("attentionTo"), salesOperator: textValue("salesOperator"),
+        validTo: $("validTo").value, paymentDays: $("paymentDays").value, incoterm: $("incoterm").value,
+        useAgent: $("useAgent").checked, agent: $("agent").value,
+        agentHandlingAmount: $("agentHandlingAmount").value, agentCustomExportAmount: $("agentCustomExportAmount").value,
+        targetCurrency: "USD", profitSek: $("profitSek").value,
+        sekUsd: $("sekUsd").value, sekEur: $("sekEur").value, sekNok: $("sekNok").value, sekDkk: $("sekDkk").value,
+        roeRates: serialisableRates("fcl"), roeDate: state.rates.date || "",
+        routes: state.routes.map((route) => ({ ...route, equipment: route.equipment.map((equipment) => ({ ...equipment })) }))
+      };
+    };
+
+    applyImportedData = function(data) {
+      if (data?.direction !== V910_DIRECTION_IMPORT) {
+        state.direction = V910_DIRECTION_EXPORT;
+        v841.applyImportedData(data);
+        configureDirectionUiV910();
+        return;
+      }
+      if (!data || Number(data.version) !== 9 || data.mode !== "FCL") throw new Error("Unsupported FCL import quote data version.");
+      state.direction = V910_DIRECTION_IMPORT;
+      activateMode("fcl");
+      $("clientName").value = data.clientName || "";
+      $("attentionTo").value = data.attentionTo || "";
+      setSelectValue("salesOperator", data.salesOperator, "Erik Stahl");
+      $("validTo").value = data.validTo || "";
+      $("paymentDays").value = data.paymentDays || "30";
+      setImportIncotermControlsV910("fcl", data.incoterm || "DAP");
+      $("useAgent").checked = Boolean(data.useAgent);
+      setSelectValue("agent", data.agent, "CHS");
+      $("agentHandlingAmount").value = data.agentHandlingAmount ?? "";
+      $("agentCustomExportAmount").value = data.agentCustomExportAmount ?? "";
+      mergeImportedRates(data.roeRates, data.roeDate);
+      refreshCurrencyControls();
+      $("targetCurrency").value = "USD";
+      $("targetCurrency").disabled = true;
+      $("profitSek").value = data.profitSek || "3000";
+      if (data.sekUsd) $("sekUsd").value = data.sekUsd;
+      if (data.sekEur) $("sekEur").value = data.sekEur;
+      if (data.sekNok) $("sekNok").value = data.sekNok;
+      if (data.sekDkk) $("sekDkk").value = data.sekDkk;
+      state.routes = Array.isArray(data.routes) && data.routes.length
+        ? data.routes.map((route) => newRoute(route))
+        : [newRoute({ includeOceanFreight: false })];
+      state.activeRouteIndex = 0;
+      state.equipment = activeRoute().equipment;
+      state.generatedScript = "";
+      state.pendingImport = null;
+      $("scriptOutput").value = "";
+      $("scriptSection").open = false;
+      $("copyScript").disabled = true;
+      $("downloadScript").disabled = true;
+      loadActiveRouteIntoForm();
+      toggleAgent();
+      configureDirectionUiV910();
+      showMessages({ errors: [], warnings: [] });
+    };
+
+    function unicodeSafeAhkV910(script) {
+      let output = String(script || "")
+        .replaceAll("v8.4.1", "v9.1.1")
+        .replaceAll("Version 8.4.1", "Version 9.1.1");
+      const replacement = `TypeField(name, value, pressEnter := false, clearFirst := false) {
+  global FIELD_DELAY, MENU_ENTER_DELAY, MENU_AFTER_DELAY
+  ClickField(name)
+  if RegExMatch(String(value), "[^\\x00-\\x7F]") {
+    PasteCurrent(value, clearFirst)
+    if pressEnter {
+      Sleep MENU_ENTER_DELAY
+      Send "{Enter}"
+      Sleep MENU_AFTER_DELAY
+    }
+    return
+  }
+  if clearFirst {
+    Send "^a"
+    Sleep 80
+  }
+  if pressEnter {
+    SlowType(value)
+    Sleep MENU_ENTER_DELAY
+    Send "{Enter}"
+    Sleep MENU_AFTER_DELAY
+  } else {
+    SendText String(value)
+    Sleep FIELD_DELAY
+  }
+}
+
+PasteCurrent(value, clearFirst := false) {
+  global FIELD_DELAY
+  if clearFirst {
+    Send "^a"
+    Sleep 100
+    Send "{Backspace}"
+    Sleep 80
+  }
+  A_Clipboard := String(value)
+  if !ClipWait(1)
+    throw Error("Clipboard did not become ready.")
+  Send "^v"
+  Sleep FIELD_DELAY + 180
+}
+
+PasteField(`;
+      output = output.replace(/TypeField\(name, value, pressEnter := false, clearFirst := false\) \{[\s\S]*?\n\}\n\nPasteField\(/, replacement);
+      output = output
+        .replaceAll("SendText StrUpper(clientName)", "PasteCurrent(StrUpper(clientName))")
+        .replaceAll("SendText basisText", "PasteCurrent(basisText)")
+        .replaceAll('SendText "Based on " carrier " (" StrUpper(incoterm) ")"', 'PasteCurrent("Based on " carrier " (" StrUpper(incoterm) ")")');
+      return output;
+    }
+
+    function generateFclImportAhkV910() {
+      syncActiveRouteFromForm();
+      const subject = buildSubject();
+      const client = textValue("clientName");
+      const attention = textValue("attentionTo");
+      const incoterm = currentIncoterm();
+      const roeDate = state.rates.date || "manual rate";
+      const importDataBlock = metadataBlock(exportFormData());
+      const cargoEquipment = cargoEquipmentForQuote().map((equipment) => `Map("quantity", ${equipment.quantity}, "type", ${ahkString(equipment.type)}, "equipmentSearch", ${ahkString(equipment.equipmentSearch)})`).join(",\n        ");
+      const detailMaps = [];
+      state.routes.forEach((route) => {
+        groupRouteEquipment(route).forEach((group) => {
+          const calc = calculateDetailGroup(route, group.equipment);
+          const equipmentText = equipmentGroupSummary(group.equipment);
+          const subtitle = quoteText("fcl.subjectImport", { INCOTERM: incoterm, EQUIPMENT: equipmentText, ROUTE: routePathParts(route).join(" - ") });
+          const basisText = route.includeOceanFreight !== false
+            ? quoteText("common.detailBasis", { SUPPLIER: calc.carrierCode, INCOTERM: incoterm })
+            : quoteText("common.detailIncotermOnly", { INCOTERM: incoterm });
+          const charges = createChargeMaps(route, group.equipment, calc).map((charge) => ahkMap(Object.entries(charge))).join(",\n            ");
+          detailMaps.push(`Map(
+          "subtitle", ${ahkString(subtitle)},
+          "basisText", ${ahkString(basisText)},
+          "hasOcean", ${boolAhk(route.includeOceanFreight !== false)},
+          "polCode", ${ahkString(upper(route.polCode))},
+          "podCode", ${ahkString(upper(route.podCode))},
+          "deliveryCode", ${ahkString(upper(route.collectionCode))},
+          "deliveryName", ${ahkString(routeDelivery(route))},
+          "including", ${ahkString(includingText(route, false))},
+          "excluding", ${ahkString(fclImportExcludingTextV910(route))},
+          "subjectTo", ${ahkString(route.includeOceanFreight !== false ? quoteText("common.subjectTo") : quoteText("common.subjectToNoOcean"))},
+          "remarks", ${ahkString(remarksText(route, calc.carrierCode, false))},
+          "charges", [
+            ${charges}
+          ]
+        )`);
+        });
+      });
+
+      return `#Requires AutoHotkey v2.0
+#SingleInstance Force
+#Warn
+
+; Generated by BLU Auto Quote - FCL Import AutoHotkey v9.1.1
+; ROE date/source: ${roeDate} / Frankfurter (or manual override)
+; 1 SEK = ${$("sekUsd").value} USD
+; Desired profit: ${$("profitSek").value} SEK per detail
+${importDataBlock}
+
+SetTitleMatchMode 2
+CoordMode "Mouse", "Screen"
+SendMode "Event"
+SetKeyDelay 25, 20
+SetMouseDelay 40
+
+BLU_WINDOW := "BLU ahk_exe wfica32.exe"
+CLICK_DELAY := ${FIXED.clickDelay}
+FIELD_DELAY := ${FIXED.fieldDelay}
+MENU_KEY_DELAY := ${FIXED.menuKeyDelay}
+MENU_ENTER_DELAY := ${FIXED.menuEnterDelay}
+SUPPLIER_ENTER_DELAY := ${FIXED.supplierEnterDelay}
+MENU_AFTER_DELAY := ${FIXED.menuAfterDelay}
+ROW_DELAY := ${FIXED.rowDelay}
+TAB_DELAY := ${FIXED.tabDelay}
+
+Running := false
+SavedClipboard := ""
+
+C := Map(
+  "Project", [383, 231],
+  "Internal comment", [383, 255],
+  "client", [382, 313],
+  "address", [385, 346],
+  "Attention to", [376, 602],
+  "Subject", [384, 649],
+  "Salution", [385, 671],
+  "Cover letter", [396, 698],
+  "Display costs", [374, 738],
+  "YearMonth", [364, 763],
+  "Sales operator", [365, 789],
+  "inquiry type", [839, 741],
+  "target currency", [1026, 743],
+  "events target currency", [1117, 818],
+  "Valid to date", [1019, 288],
+  "cargo tab", [293, 204],
+  "add equipment", [982, 235],
+  "equipment quantity", [365, 365],
+  "kind of equipment", [364, 392],
+  "gross weight", [380, 510],
+  "description of goods", [380, 664],
+  "details tab", [338, 202],
+  "create new detail", [969, 235],
+  "detail subtitle", [367, 356],
+  "detail short description", [368, 385],
+  "plor loc code", [490, 491],
+  "polout loc code", [488, 507],
+  "podin loc code", [495, 525],
+  "plod loc code", [497, 545],
+  "plor mot", [817, 488],
+  "polout/podin mot", [790, 504],
+  "transit time", [367, 758],
+  "including", [1281, 466],
+  "excluding", [1275, 549],
+  "subject to", [1281, 632],
+  "terms of payment days", [1286, 707],
+  "service type", [1296, 758],
+  "incoterm", [1296, 783],
+  "incoterm location", [1294, 807],
+  "scroll point1", [1905, 393],
+  "scroll point2", [1903, 686],
+  "add new charge", [966, 250],
+  "charge type", [430, 446],
+  "charge description", [431, 469],
+  "charge buying rate", [776, 594],
+  "buying rate currency", [890, 593],
+  "supplier", [1009, 593],
+  "charge selling rate", [723, 517],
+  "selling rate currency", [892, 444],
+  "charge per", [737, 542],
+  "charge quantity", [888, 543],
+  "charge quantity description", [943, 543],
+  "delete route point", [983, 517],
+  "charges remarks", [880, 690]
+)
+
+quote := Map(
+  "project", ${ahkString(quoteText("common.projectImport"))},
+  "internalComment", ${ahkString(quoteText("common.internalCommentImport"))},
+  "clientCode", ${ahkString(quoteText("common.clientCode"))},
+  "clientName", ${ahkString(client)},
+  "attentionTo", ${ahkString(attention)},
+  "salutation", ${ahkString(quoteText("common.salutation", { ATTENTION: attention }))},
+  "coverLetter", ${ahkString(quoteText("common.coverLetter"))},
+  "salesOperator", ${ahkString(textValue("salesOperator"))},
+  "subject", ${ahkString(subject)},
+  "validTo", ${ahkString(formattedValidTo())},
+  "targetCurrency", "usd",
+  "paymentDays", ${ahkString($("paymentDays").value)},
+  "incoterm", ${ahkString(incoterm.toLowerCase())},
+  "incotermLocation", ${ahkString(routeDelivery(state.routes[0]))},
+  "transitTime", ${ahkString(quoteText("common.transitTimeImport"))},
+  "cargo", [
+        ${cargoEquipment}
+  ],
+  "details", [
+        ${detailMaps.join(",\n        ")}
+  ]
+)
+
+OnExit RestoreClipboard
+
+F8:: {
+  global Running
+  if Running
+    return
+  Running := true
+  try RunQuote()
+  catch Error as err
+    MsgBox "Automation stopped with an error:" Chr(10) Chr(10) err.Message, "BLU FCL Import Automation", "Iconx"
+  finally {
+    ToolTip
+    RestoreClipboard()
+    Running := false
+  }
+}
+
+F9::Pause -1
+Esc::ExitApp
+
+RunQuote() {
+  global SavedClipboard, quote, FIELD_DELAY, MENU_ENTER_DELAY, TAB_DELAY, ROW_DELAY
+  startTick := A_TickCount
+  CheckEnvironment()
+  ActivateBlu()
+  SavedClipboard := ClipboardAll()
+
+  ToolTip "BLU automation: import quote fields"
+  TypeField("Project", quote["project"], true)
+  TypeField("Internal comment", quote["internalComment"])
+  TypeField("client", quote["clientCode"], true)
+  TypeField("address", StrUpper(quote["clientName"]), false, true)
+  TypeField("Attention to", quote["attentionTo"])
+  TypeField("Subject", quote["subject"])
+  TypeField("Salution", quote["salutation"])
+  TypeField("Cover letter", quote["coverLetter"])
+
+  ClickField("Display costs")
+  SendText "c"
+  Sleep 180
+  SendText "c"
+  Sleep 180
+  Send "{Enter}"
+  Sleep FIELD_DELAY
+
+  TypeField("YearMonth", FormatTime(, "yyMM"))
+  TypeField("Sales operator", quote["salesOperator"])
+  SelectField("inquiry type", "f")
+  SelectField("target currency", quote["targetCurrency"])
+  ClickField("events target currency")
+  TypeField("Valid to date", quote["validTo"], true)
+
+  ToolTip "BLU automation: cargo"
+  ClickField("cargo tab", TAB_DELAY)
+  for cargo in quote["cargo"] {
+    ClickField("add equipment", ROW_DELAY)
+    TypeField("equipment quantity", cargo["quantity"], false, true)
+    SelectField("kind of equipment", cargo["equipmentSearch"])
+    TypeField("gross weight", ${ahkString(quoteText("common.grossWeight"))})
+    TypeField("description of goods", ${ahkString(quoteText("fcl.cargoDescription"))}, false, true)
+  }
+
+  ToolTip "BLU automation: import details and charges"
+  ClickField("details tab", TAB_DELAY)
+  for index, detail in quote["details"] {
+    if index > 1
+      ScrollDetailUp()
+    ClickField("create new detail", ROW_DELAY)
+    TypeField("detail subtitle", detail["subtitle"])
+    TypeImportDetailDescription(quote["clientName"], detail["basisText"])
+    ConfigureImportRoute(detail)
+    TypeField("transit time", quote["transitTime"])
+    if detail["including"] != ""
+      PasteField("including", detail["including"], true)
+    PasteField("excluding", detail["excluding"], true)
+    PasteField("subject to", detail["subjectTo"], true)
+    TypeField("terms of payment days", quote["paymentDays"])
+    SelectField("service type", "f")
+    SelectField("incoterm", quote["incoterm"])
+    TypeField("incoterm location", detail["deliveryName"])
+    ScrollDetailDown()
+    for charge in detail["charges"]
+      FillCharge(charge)
+    PasteRemarksField(detail["remarks"])
+  }
+
+  ToolTip
+  RestoreClipboard()
+  elapsed := FormatElapsed(A_TickCount - startTick)
+  MsgBox "The BLU FCL import quote has been entered." Chr(10) Chr(10) "Time: " elapsed Chr(10) Chr(10) "Review the quote before saving or sending it.", "BLU FCL Import Automation", "Iconi"
+}
+
+ConfigureImportRoute(detail) {
+  global MENU_ENTER_DELAY
+  if detail["hasOcean"] {
+    SelectField("polout loc code", detail["polCode"])
+    SelectField("podin loc code", detail["podCode"])
+    SelectField("plod loc code", detail["deliveryCode"])
+    ClickField("plor loc code")
+    ClickField("delete route point", MENU_ENTER_DELAY)
+    DoubleSelectField("plor mot", "v")
+    DoubleSelectField("polout/podin mot", "t")
+  } else {
+    SelectField("polout loc code", detail["podCode"])
+    SelectField("podin loc code", detail["deliveryCode"])
+    ClickField("plod loc code")
+    ClickField("delete route point", MENU_ENTER_DELAY)
+    ClickField("plor loc code")
+    ClickField("delete route point", MENU_ENTER_DELAY)
+    DoubleSelectField("plor mot", "t")
+  }
+}
+
+FormatElapsed(milliseconds) {
+  totalSeconds := Floor(milliseconds / 1000)
+  minutes := Floor(totalSeconds / 60)
+  seconds := Mod(totalSeconds, 60)
+  return minutes > 0 ? minutes " min " seconds " sec" : seconds " sec"
+}
+
+CheckEnvironment() {
+  if A_ScreenWidth != 1920 || A_ScreenHeight != 1080
+    throw Error("This script requires 1920 x 1080. Current resolution: " A_ScreenWidth " x " A_ScreenHeight)
+  if A_ScreenDPI != 96
+    throw Error("This script requires Windows scaling 100% (96 DPI). Current DPI: " A_ScreenDPI)
+}
+
+ActivateBlu() {
+  global BLU_WINDOW
+  if !WinExist(BLU_WINDOW)
+    throw Error("Could not find the BLU Citrix window (wfica32.exe).")
+  WinActivate BLU_WINDOW
+  WinMaximize BLU_WINDOW
+  if !WinWaitActive(BLU_WINDOW, , 6)
+    throw Error("BLU could not be activated.")
+  Sleep 600
+}
+
+ClickField(name, wait := 0) {
+  global C, CLICK_DELAY
+  xy := C[name]
+  Click xy[1], xy[2]
+  Sleep wait > 0 ? wait : CLICK_DELAY
+}
+
+SlowType(value) {
+  global MENU_KEY_DELAY
+  for character in StrSplit(String(value)) {
+    SendText character
+    Sleep MENU_KEY_DELAY
+  }
+}
+
+TypeField(name, value, pressEnter := false, clearFirst := false) {
+  global FIELD_DELAY, MENU_ENTER_DELAY, MENU_AFTER_DELAY
+  ClickField(name)
+  if RegExMatch(String(value), "[^\\x00-\\x7F]") {
+    PasteCurrent(value, clearFirst)
+    if pressEnter {
+      Sleep MENU_ENTER_DELAY
+      Send "{Enter}"
+      Sleep MENU_AFTER_DELAY
+    }
+    return
+  }
+  if clearFirst {
+    Send "^a"
+    Sleep 80
+  }
+  if pressEnter {
+    SlowType(value)
+    Sleep MENU_ENTER_DELAY
+    Send "{Enter}"
+    Sleep MENU_AFTER_DELAY
+  } else {
+    SendText String(value)
+    Sleep FIELD_DELAY
+  }
+}
+
+PasteCurrent(value, clearFirst := false) {
+  global FIELD_DELAY
+  if clearFirst {
+    Send "^a"
+    Sleep 100
+    Send "{Backspace}"
+    Sleep 80
+  }
+  A_Clipboard := String(value)
+  if !ClipWait(1)
+    throw Error("Clipboard did not become ready.")
+  Send "^v"
+  Sleep FIELD_DELAY + 180
+}
+
+PasteField(name, value, clearFirst := false) {
+  ClickField(name)
+  PasteCurrent(value, clearFirst)
+}
+
+PasteRemarksField(value) {
+  global FIELD_DELAY
+  ClickField("charges remarks", 350)
+  ClickField("charges remarks", 180)
+  PasteCurrent(value, true)
+  Sleep FIELD_DELAY + 170
+  Send "{Tab}"
+  Sleep 200
+}
+
+SelectField(name, value, arrowOffset := 0) {
+  global MENU_ENTER_DELAY, MENU_AFTER_DELAY
+  ClickField(name)
+  SlowType(value)
+  Sleep MENU_ENTER_DELAY
+  if arrowOffset != 0 {
+    key := arrowOffset > 0 ? "{Down}" : "{Up}"
+    Loop Abs(arrowOffset) {
+      Send key
+      Sleep 350
+    }
+  }
+  Send "{Enter}"
+  Sleep MENU_AFTER_DELAY
+}
+
+SelectSupplierField(value, arrowOffset := 0) {
+  global SUPPLIER_ENTER_DELAY, MENU_AFTER_DELAY
+  ClickField("supplier")
+  SendText String(value)
+  Sleep SUPPLIER_ENTER_DELAY
+  if arrowOffset != 0 {
+    key := arrowOffset > 0 ? "{Down}" : "{Up}"
+    Loop Abs(arrowOffset) {
+      Send key
+      Sleep 200
+    }
+  }
+  Send "{Enter}"
+  Sleep MENU_AFTER_DELAY
+}
+
+TypePriceField(name, value) {
+  TypeField(name, StrReplace(String(value), ".", ","))
+}
+
+DoubleSelectField(name, value) {
+  global C, MENU_ENTER_DELAY, MENU_AFTER_DELAY
+  xy := C[name]
+  Click xy[1], xy[2]
+  Sleep 90
+  Click xy[1], xy[2]
+  Sleep 220
+  SlowType(value)
+  Sleep MENU_ENTER_DELAY
+  Send "{Enter}"
+  Sleep MENU_AFTER_DELAY
+}
+
+TypeImportDetailDescription(clientName, basisText) {
+  global FIELD_DELAY
+  ClickField("detail short description", 250)
+  PasteCurrent(StrUpper(clientName), true)
+  Sleep 250
+  Send "{Enter}"
+  Sleep 350
+  PasteCurrent(basisText)
+  Sleep FIELD_DELAY + 200
+  Send "{Tab}"
+  Sleep 180
+}
+
+ScrollDetailDown() {
+  global C, TAB_DELAY
+  a := C["scroll point1"], b := C["scroll point2"]
+  MouseClickDrag "Left", a[1], a[2], b[1], b[2], 8
+  Sleep TAB_DELAY
+}
+
+ScrollDetailUp() {
+  global C, TAB_DELAY
+  a := C["scroll point1"], b := C["scroll point2"]
+  MouseClickDrag "Left", b[1], b[2], a[1], a[2], 8
+  Sleep TAB_DELAY
+}
+
+FillCharge(charge) {
+  global ROW_DELAY
+  ClickField("add new charge", ROW_DELAY)
+  SelectField("charge type", charge["type"])
+  if charge["description"] != ""
+    PasteField("charge description", charge["description"], true)
+  if charge["buyRate"] != ""
+    TypePriceField("charge buying rate", charge["buyRate"])
+  if charge["buyCurrency"] != ""
+    SelectField("buying rate currency", StrLower(charge["buyCurrency"]))
+  if charge["supplier"] != ""
+    SelectSupplierField(charge["supplier"], charge.Has("supplierArrow") ? charge["supplierArrow"] : 0)
+  TypePriceField("charge selling rate", charge["sellingRate"])
+  SelectField("selling rate currency", StrLower(charge["sellingCurrency"]))
+  SelectField("charge per", "q")
+  TypeField("charge quantity", charge["quantity"])
+  TypeField("charge quantity description", charge["quantityDescription"])
+}
+
+RestoreClipboard(*) {
+  global SavedClipboard
+  if IsObject(SavedClipboard) {
+    A_Clipboard := SavedClipboard
+    SavedClipboard := ""
+  }
+}
+`;
+    }
+
+    generateAhk = function() {
+      const script = isImportMode() ? generateFclImportAhkV910() : v841.generateAhk();
+      return unicodeSafeAhkV910(script);
+    };
+
+    function stripNordiconMarkdownV910(value) {
+      return String(value ?? "")
+        .replace(/\\([+\-])/g, "$1")
+        .replace(/\*\*/g, "")
+        .replace(/\[(.*?)\]\([^)]*\)/g, "$1")
+        .replace(/&nbsp;|\u00a0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function parseNordiconPlainChargeV910(line) {
+      const clean = stripNordiconMarkdownV910(line);
+      const currencyMatch = /([A-Z]{3})\s*$/i.exec(clean);
+      if (!currencyMatch) return null;
+      const currency = upper(currencyMatch[1]);
+      const beforeCurrency = clean.slice(0, currencyMatch.index).trimEnd();
+      const tokens = [...beforeCurrency.matchAll(/\d+(?:[.,]\d+)?/g)];
+      if (!tokens.length) return null;
+      const last = tokens[tokens.length - 1];
+      let totalText = last[0];
+      let totalStart = last.index;
+      if (tokens.length > 1) {
+        const previous = tokens[tokens.length - 2];
+        const between = beforeCurrency.slice(previous.index + previous[0].length, last.index);
+        const looksLikeGroupedThousands = /^\s+$/.test(between) && /^\d{1,3}$/.test(previous[0]) && /^\d{3}$/.test(last[0]);
+        // A normal Nordicon plain-text charge row has five numeric columns. Do not
+        // combine the MIN and TOTAL columns (for example 50 + 100) by mistake.
+        if (looksLikeGroupedThousands && (tokens.length <= 2 || tokens.length >= 6)) {
+          totalText = previous[0] + last[0];
+          totalStart = previous.index;
+        }
+      }
+      const total = decimalNumber(totalText);
+      const beforeTotal = beforeCurrency.slice(0, totalStart);
+      const numbers = [...beforeTotal.matchAll(/\d+(?:[.,]\d+)?/g)].map((match) => decimalNumber(match[0]));
+      const rate = numbers.length >= 2 ? numbers[numbers.length - 2] : NaN;
+      return {
+        total: Number.isFinite(total) ? formatPlainNumber(total) : "",
+        currency,
+        rate: Number.isFinite(rate) ? formatPlainNumber(rate) : "",
+        sourceLine: clean
+      };
+    }
+
+    function nordiconImportTableRowsV910(text) {
+      const rows = [];
+      const lines = String(text || "").replace(/\r/g, "").split("\n");
+      lines.forEach((raw) => {
+        const trimmed = raw.trim();
+        if (!trimmed) return;
+        if (trimmed.includes("|") && /^\|/.test(trimmed)) {
+          const cells = trimmed.split("|").slice(1, -1).map(stripNordiconMarkdownV910);
+          if (cells.length < 2 || /DESCRIPTION/i.test(cells[0]) || /^[-: ]+$/.test(cells[0])) return;
+          const totalCell = cells[cells.length - 1];
+          const totalMatch = /([\d\s.,]+)\s*([A-Z]{3})$/i.exec(totalCell);
+          if (!totalMatch) return;
+          const description = normaliseNordiconDescription(cells[0]);
+          const total = decimalNumber(totalMatch[1]);
+          const currency = upper(totalMatch[2]);
+          const numericCells = cells.slice(1, -1).map((cell) => decimalNumber(cell)).filter(Number.isFinite);
+          const rate = numericCells.length >= 3 ? numericCells[numericCells.length - 2] : NaN;
+          if (description && Number.isFinite(total)) rows.push({ description, total: formatPlainNumber(total), currency, rate: Number.isFinite(rate) ? formatPlainNumber(rate) : "", sourceLine: stripNordiconMarkdownV910(trimmed) });
+          return;
+        }
+        const line = stripNordiconMarkdownV910(trimmed);
+        if (!/\b(?:USD|EUR|SEK|NOK|DKK)\s*$/i.test(line)) return;
+        const parsed = parseNordiconPlainChargeV910(line);
+        const description = nordiconChargeDescription(line);
+        if (parsed && description) rows.push({ description: normaliseNordiconDescription(description), total: parsed.total, currency: parsed.currency, rate: parsed.rate, sourceLine: line });
+      });
+      const unique = new Map();
+      rows.forEach((row) => unique.set(`${row.description}|${row.total}|${row.currency}`, row));
+      return [...unique.values()];
+    }
+
+    function nordiconLabelValueV910(text, label) {
+      const lines = String(text || "").replace(/\r/g, "").split("\n").map(stripNordiconMarkdownV910);
+      const pattern = new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:?\\s*(.*)$`, "i");
+      for (let index = 0; index < lines.length; index += 1) {
+        const match = pattern.exec(lines[index]);
+        if (!match) continue;
+        if (match[1] && !/^(Ship|Routing|Inland|No of|Type|Weight|Volume|Add dims|IMO|Port remarks)$/i.test(match[1])) return match[1].trim();
+        for (let offset = 1; offset <= 3 && index + offset < lines.length; offset += 1) {
+          const candidate = lines[index + offset].trim();
+          if (!candidate || /^(Ship from|Ship to|Routing|Inland delivery in Sweden|No of pcs|Type|Weight|Volume|Add dims|IMO|Port remarks)$/i.test(candidate)) continue;
+          return candidate;
+        }
+      }
+      return "";
+    }
+
+
+    function nordiconFormNumberV910(text, label) {
+      const lines = String(text || "").replace(/\r/g, "").split("\n").map(stripNordiconMarkdownV910);
+      const exact = new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:?\\s*(?:([\\d.,]+)(?:\\s*(?:KG|KGS|CBM|M3))?)?$`, "i");
+      for (let index = 0; index < lines.length; index += 1) {
+        const match = exact.exec(lines[index]);
+        if (!match) continue;
+        if (match[1]) return match[1];
+        for (let offset = 1; offset <= 4 && index + offset < lines.length; offset += 1) {
+          const candidate = lines[index + offset].trim();
+          if (!candidate) continue;
+          if (/^(No of pcs|Type|Weight|Volume|Add dims|IMO|Port remarks)$/i.test(candidate)) break;
+          const number = /^([\d.,]+)(?:\s*(?:KG|KGS|CBM|M3))?$/i.exec(candidate);
+          if (number) return number[1];
+          break;
+        }
+        return "";
+      }
+      return "";
+    }
+
+    function nordiconSchedulePortsV910(text) {
+      const raw = String(text || "").replace(/\r/g, "");
+      const start = raw.search(/Sailing schedule/i);
+      if (start < 0) return { pol: "", pod: "" };
+      const section = raw.slice(start, start + 5000);
+      const lines = section.split("\n");
+      for (const line of lines) {
+        if (!line.trim().startsWith("|")) continue;
+        const cells = line.trim().split("|").slice(1, -1).map(stripNordiconMarkdownV910);
+        if (cells.length < 2) continue;
+        const first = cells[0], second = cells[1];
+        if (!first || !second || /From port|To port|---|DESCRIPTION/i.test(`${first} ${second}`)) continue;
+        if (/^[A-Z][A-Z .'-]{2,}$/i.test(first) && /^[A-Z][A-Z .'-]{2,}$/i.test(second)) return { pol: first, pod: second };
+      }
+      const plain = section.split("\n").map(stripNordiconMarkdownV910).filter(Boolean);
+      const header = plain.findIndex((line) => /From port.*To port/i.test(line));
+      if (header >= 0 && plain[header + 1]) {
+        const parts = plain[header + 1].split(/\s{2,}|\t+/).filter(Boolean);
+        if (parts.length >= 2) return { pol: parts[0], pod: parts[1] };
+      }
+      return { pol: "", pod: "" };
+    }
+
+    function combineNordiconImportRowsV910(first, second) {
+      if (!first && !second) return null;
+      if (!first) return { ...second, rate: "" };
+      if (!second) return { ...first, rate: "" };
+      if (first.currency !== second.currency) throw new Error("Inland haulage and fuel surcharge use different currencies and cannot be combined automatically.");
+      return { total: formatPlainNumber(decimalNumber(first.total) + decimalNumber(second.total)), currency: first.currency, rate: "" };
+    }
+
+    function parseNordiconImportQuoteV910(text) {
+      const cleanText = String(text ?? "").replace(/\r/g, "");
+      if (!/Nordicon/i.test(cleanText) && !/INPASSERINGSAVGIFT|INLAND HAULAGE|TERMINALAVGIFT/i.test(cleanText)) throw new Error("The pasted text does not look like a Nordicon import quote.");
+      const rows = nordiconImportTableRowsV910(cleanText);
+      const find = (pattern) => rows.find((row) => pattern.test(row.description));
+      const ocean = find(/^OCEAN FREIGHT\b/);
+      const eu = find(/^ETS SURCHARGE\b/);
+      const terminal = find(/^TERMINALAVGIFT\b|^TERMINAL HANDLING\b/);
+      const service = find(/^LCL SERVICE CHARGE\b/);
+      const isps = find(/^ISPS SURCHARGE\b|^ISPS\b/);
+      const inland = find(/^INLAND HAULAGE\b/);
+      const inlandFuel = find(/^FUEL SURCHARGE(?:\s+INLAND)?\b/);
+      const delivery = combineNordiconImportRowsV910(inland, inlandFuel);
+      if (!delivery) throw new Error("Could not find inland haulage/delivery in the Nordicon import charge table.");
+      const buyingOnly = [
+        find(/^INPASSERINGSAVGIFT\b/),
+        find(/^TULLAGERDEKLARATION\b/),
+        find(/^EXPEDITIONSAVGIFT\b/)
+      ].filter(Boolean).map((row) => ({ name: row.description, total: row.total, currency: row.currency }));
+      const validity = /Validity\s*:?\s*(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})/i.exec(stripNordiconMarkdownV910(cleanText.replace(/\n/g, " ")));
+      const schedule = nordiconSchedulePortsV910(cleanText);
+      const includeOceanFreight = Boolean(ocean);
+      let pol = nordiconLabelValueV910(cleanText, "Ship from") || schedule.pol;
+      let pod = nordiconLabelValueV910(cleanText, "Ship to") || schedule.pod;
+      if (!includeOceanFreight) {
+        pol = "";
+        pod = pod || "GOTHENBURG";
+      }
+      const inlandDescription = inland?.description || "";
+      const deliveryFromCharge = /\(([^)]+)\)/.exec(inlandDescription)?.[1] || "";
+      const deliveryCity = nordiconLabelValueV910(cleanText, "Selected city") || deliveryFromCharge || nordiconCollectionFromText(cleanText);
+      const costs = cloneLclCosts({
+        ...LCL_COST_DEFAULTS,
+        service: { total: "", currency: "SEK", rate: "" }
+      });
+      costs.trucking = { ...costs.trucking, ...delivery };
+      if (ocean) costs.ocean = { ...costs.ocean, ...ocean };
+      if (eu) costs.eu = { ...costs.eu, ...eu };
+      if (terminal) costs.terminal = { ...costs.terminal, ...terminal };
+      if (service) costs.service = { ...costs.service, ...service };
+      if (isps) costs.isps = { ...costs.isps, ...isps };
+      const formEnd = cleanText.search(/Switch to Renewable Fuels|\n---\n|\nTrucking costs are based/i);
+      const formText = formEnd > 0 ? cleanText.slice(0, formEnd) : cleanText.slice(0, 5000);
+      const pallets = nordiconFormNumberV910(formText, "No of pcs");
+      const weight = nordiconFormNumberV910(formText, "Weight");
+      const volume = nordiconFormNumberV910(formText, "Volume");
+      return {
+        validTo: validity?.[2] || "",
+        pol: stripNordiconMarkdownV910(pol),
+        pod: stripNordiconMarkdownV910(pod),
+        delivery: stripNordiconMarkdownV910(deliveryCity),
+        pallets, weight, volume,
+        imoDetails: nordiconImoFromText(cleanText),
+        includeOceanFreight,
+        includeWar: false,
+        costs,
+        importBuyingOnly: buyingOnly,
+        extraCharges: [],
+        directNonStack: nordiconDirectNonStack(cleanText),
+        source: includeOceanFreight ? "Nordicon import quote with ocean freight" : "Nordicon import quote without ocean freight"
+      };
+    }
+
+    parseNordiconQuote = function(text) {
+      return isImportMode() ? parseNordiconImportQuoteV910(text) : v841.parseNordiconQuote(text);
+    };
+
+    function renderLclImportBuyingOnlyV910() {
+      const body = $("lclImportBuyingOnlyBody");
+      if (!body) return;
+      body.replaceChildren();
+      if (!isImportMode()) return;
+      (state.lcl.importBuyingOnly || []).forEach((charge, index) => {
+        const row = document.createElement("tr");
+        row.className = "lcl-import-buying-row";
+        row.innerHTML = `<td><input data-lcl-import-buying-index="${index}" data-field="name" value="${String(charge.name || "").replaceAll('"', '&quot;')}"></td><td><input data-lcl-import-buying-index="${index}" data-field="total" type="number" step="0.01" value="${charge.total ?? ""}"></td><td><select data-lcl-import-buying-index="${index}" data-field="currency"><option>SEK</option><option>USD</option><option>EUR</option></select></td><td>Buying only · right side</td>`;
+        const currency = row.querySelector("select");
+        populateCurrencySelect(currency, charge.currency || "SEK");
+        currency.value = charge.currency || "SEK";
+        row.querySelectorAll("input, select").forEach((input) => {
+          const sync = () => {
+            state.lcl.importBuyingOnly[index][input.dataset.field] = input.value;
+            updateLclCalculation();
+          };
+          input.addEventListener("input", sync);
+          input.addEventListener("change", sync);
+        });
+        body.append(row);
+      });
+    }
+
+    applyParsedNordiconQuote = function(parsed) {
+      if (!isImportMode()) {
+        v841.applyParsedNordiconQuote(parsed);
+        return;
+      }
+      state.lcl.quoteLoaded = true;
+      state.lcl.quoteLabel = parsed.source || "Nordicon import quote";
+      state.lcl.includeOceanFreight = Boolean(parsed.includeOceanFreight);
+      state.lcl.includeImportCustoms = lclIncoterm() === "DDP";
+      state.lcl.importBuyingOnly = Array.isArray(parsed.importBuyingOnly) ? parsed.importBuyingOnly.map((row) => ({ ...row })) : [];
+      state.lcl.extraCharges = [];
+      state.lcl.directNonStack = Boolean(parsed.directNonStack);
+      state.lcl.imoDetails = normaliseImoDetails(parsed.imoDetails || "");
+      $("lclSupplier").value = "NORDICON";
+      if (parsed.validTo) $("lclValidTo").value = parsed.validTo;
+      if (parsed.pallets) $("lclPallets").value = parsed.pallets;
+      if (parsed.weight) $("lclWeight").value = String(parsed.weight).replace(",", ".");
+      if (parsed.volume) $("lclVolume").value = String(parsed.volume).replace(",", ".");
+      $("lclImoDetails").value = state.lcl.imoDetails;
+      $("lclIncludeWar").checked = false;
+      $("lclIncludeOceanFreight").checked = state.lcl.includeOceanFreight;
+      if (parsed.delivery) setLclCollectionFromText(parsed.delivery);
+      setFixedLclImportPodV911();
+      if (state.lcl.includeOceanFreight && parsed.pol) setLclPolFromTextV910(parsed.pol);
+      else setLclPolFromTextV910("");
+      setLclCosts(parsed.costs);
+      renderLclExtraCosts();
+      renderLclImportBuyingOnlyV910();
+      $("lclQuotePaste").value = "";
+      $("lclPasteWrap").classList.add("hidden");
+      $("lclQuoteLoaded").classList.remove("hidden");
+      $("lclQuoteLoadedTitle").textContent = parsed.source || "Nordicon import quote";
+      const routeLabel = state.lcl.includeOceanFreight
+        ? `${normalisedLocationName(parsed.pol || "POL")} → GOTHENBURG → ${normalisedLocationName(parsed.delivery || "DELIVERY")}`
+        : `GOTHENBURG → ${normalisedLocationName(parsed.delivery || "DELIVERY")}`;
+      const cargoBits = [parsed.pallets ? `${parsed.pallets} pallets` : "", parsed.weight ? `${parsed.weight} kg` : "", parsed.volume ? `${parsed.volume} cbm` : ""].filter(Boolean).join(" · ");
+      $("lclQuoteLoadedInfo").textContent = `${routeLabel}${cargoBits ? ` · ${cargoBits}` : ""}${state.lcl.imoDetails ? " · IMO" : ""}`;
+      $("lclParseMessage").textContent = (!parsed.pallets || !parsed.weight || !parsed.volume)
+        ? "Quote charges and route were loaded. Enter any cargo values that were not present in the pasted text."
+        : "Import quote data extracted successfully.";
+      $("lclParseMessage").classList.remove("status-error");
+      toggleLclIncotermFields(false);
+      updateLclCalculation();
+    };
+
+    function lclImportHasCostV910(costs, key) {
+      return hasNumericValue(costs?.[key]?.total);
+    }
+
+    function calculateLclImportV910() {
+      const costs = readLclCosts();
+      const volume = decimalNumber($("lclVolume").value);
+      const weightKg = decimalNumber($("lclWeight").value);
+      const weightTon = weightKg / 1000;
+      const volumeBased = volume >= 1;
+      const weightBased = weightTon >= 1;
+      const includeOcean = Boolean(state.lcl.includeOceanFreight);
+      const includeCustoms = lclIncoterm() === "DDP" || Boolean(state.lcl.includeImportCustoms);
+      const desiredProfit = lclConvert($("lclProfitSek").value, "SEK", "USD");
+      const deliveryCost = lclChargeCost(costs, "trucking");
+      const oceanCost = includeOcean ? lclChargeCost(costs, "ocean") : 0;
+      const euIncluded = includeOcean && lclImportHasCostV910(costs, "eu");
+      const terminalIncluded = includeOcean && lclImportHasCostV910(costs, "terminal");
+      const serviceIncluded = includeOcean && lclImportHasCostV910(costs, "service");
+      const ispsIncluded = includeOcean && lclImportHasCostV910(costs, "isps");
+      const euCost = euIncluded ? lclChargeCost(costs, "eu") : 0;
+      const terminalCost = terminalIncluded ? lclChargeCost(costs, "terminal") : 0;
+      const serviceCost = serviceIncluded ? lclChargeCost(costs, "service") : 0;
+      const ispsCost = ispsIncluded ? lclChargeCost(costs, "isps") : 0;
+      const buyingOnly = (state.lcl.importBuyingOnly || []).map((charge) => ({ ...charge, usdCost: lclConvert(charge.total, charge.currency, "USD") }));
+      const values = [volume, weightKg, desiredProfit, deliveryCost, oceanCost, euCost, terminalCost, serviceCost, ispsCost, ...buyingOnly.map((charge) => charge.usdCost)];
+      if (!values.every(Number.isFinite) || volume <= 0 || weightKg <= 0) return null;
+
+      const euSelling = euIncluded ? lclNoMarginRate(costs, "eu", volumeBased, volume) : 0;
+      const euSellingTotal = euIncluded ? (volumeBased ? euSelling * volume : euSelling) : 0;
+      const terminalSelling = terminalIncluded ? 50 : 0;
+      const terminalSellingTotal = terminalIncluded ? (weightBased ? terminalSelling * weightTon : terminalSelling) : 0;
+      const serviceSelling = serviceIncluded ? 15 : 0;
+      const ispsSelling = ispsIncluded ? 4 : 0;
+      const forwardingSelling = 75;
+      const customsSelling = includeCustoms ? 100 : 0;
+      const profitSelling = 50;
+      const buyingOnlyCost = buyingOnly.reduce((sum, charge) => sum + charge.usdCost, 0);
+
+      const fixedProfit =
+        (euSellingTotal - euCost) +
+        (terminalSellingTotal - terminalCost) +
+        (serviceSelling - serviceCost) +
+        (ispsSelling - ispsCost) +
+        forwardingSelling + customsSelling + profitSelling - buyingOnlyCost;
+      const remaining = desiredProfit - fixedProfit;
+      const deliverySelling = round5(deliveryCost + remaining * (includeOcean ? 0.70 : 1));
+      const oceanMarkup = includeOcean ? remaining * 0.30 : 0;
+      const oceanSelling = includeOcean ? (volumeBased ? round5((oceanCost + oceanMarkup) / volume) : round5(oceanCost + oceanMarkup)) : 0;
+      const oceanSellingTotal = includeOcean ? (volumeBased ? oceanSelling * volume : oceanSelling) : 0;
+      const actualProfit = (deliverySelling - deliveryCost) + (includeOcean ? oceanSellingTotal - oceanCost : 0) + fixedProfit;
+      return {
+        costs, volume, weightKg, weightTon, volumeBased, weightBased,
+        includeOcean, includeCustoms, desiredProfit, deliveryCost, deliverySelling,
+        oceanCost, oceanSelling, euIncluded, euCost, euSelling,
+        terminalIncluded, terminalCost, terminalSelling,
+        serviceIncluded, serviceCost, serviceSelling,
+        ispsIncluded, ispsCost, ispsSelling,
+        forwardingSelling, customsSelling, profitSelling, buyingOnly, buyingOnlyCost,
+        actualProfit, remaining,
+        negativeSelling: deliverySelling < 0 || (includeOcean && oceanSelling < 0)
+      };
+    }
+
+    calculateLcl = function() {
+      return isImportMode() ? calculateLclImportV910() : v841.calculateLcl();
+    };
+
+    lclSubject = function() {
+      if (!isImportMode()) {
+        const pod = lclPodDisplayV910();
+        const replacements = { POD: pod, STACKABLE: $("lclStackable").value };
+        if (lclIsFob()) return quoteText("lcl.subjectFob", replacements);
+        replacements.COLLECTION = displayLocationV910(textValue("lclCollectionCode"), lclCollectionValue(), "COLLECTION");
+        return quoteText("lcl.subject", replacements);
+      }
+      const parts = state.lcl.includeOceanFreight
+        ? [lclPolDisplayV910(), lclPodDisplayV910(), lclDelivery()]
+        : [lclPodDisplayV910(), lclDelivery()];
+      return quoteText("lcl.subjectImport", { INCOTERM: lclIncoterm(), ROUTE: parts.join(" - "), STACKABLE: $("lclStackable").value });
+    };
+
+    function lclImportExcludingTextV910() {
+      const lines = [quoteText("lcl.excluding.importVatDuty")];
+      if (!(lclIncoterm() === "DDP" || state.lcl.includeImportCustoms)) lines.push(quoteText("lcl.excluding.importCustomsClearance"));
+      if (state.lcl.includeOceanFreight) lines.push(quoteText("lcl.excluding.importOriginCharges"));
+      return lines.filter(Boolean).join("\n");
+    }
+
+    lclExcludingText = function() {
+      return isImportMode() ? lclImportExcludingTextV910() : v841.lclExcludingText();
+    };
+
+    lclRemarksText = function() {
+      if (!isImportMode()) return v841.lclRemarksText();
+      const remarks = [];
+      if (state.lcl.includeOceanFreight) remarks.push(quoteText("lcl.remarks.carrier", { SUPPLIER: lclSupplierConfig().display.toUpperCase() }));
+      remarks.push(quoteText("lcl.remarks.profitShare"));
+      remarks.push(quoteText("lcl.remarks.waitingImport", { DELIVERY: lclDelivery() }));
+      remarks.push(quoteText("lcl.remarks.additionalHsCodes"));
+      if (state.lcl.directNonStack) remarks.push(quoteText("lcl.remarks.directNonStack"));
+      return remarks.filter(Boolean).join("\n\n");
+    };
+
+    function lclCreateImportChargesV910(calc) {
+      const supplier = lclSupplierConfig();
+      const costs = calc.costs;
+      const source = (key) => ({
+        buyRate: formatPlainNumber(decimalNumber(costs[key].total)),
+        buyCurrency: costs[key].currency,
+        supplier: supplier.supplier,
+        supplierArrow: supplier.supplierArrow
+      });
+      const volumePer = calc.volumeBased ? "v" : "";
+      const weightPer = calc.weightBased ? "w" : "";
+      const charges = [{
+        type: "delivery", description: quoteText("lcl.charges.delivery", { DELIVERY: lclDelivery() }),
+        ...source("trucking"), sellingRate: formatPlainNumber(calc.deliverySelling), sellingCurrency: "USD", per: "", weightUnit: ""
+      }];
+      if (calc.includeOcean) charges.push({
+        type: "freight", description: quoteText("lcl.charges.oceanFreight"),
+        ...source("ocean"), sellingRate: formatPlainNumber(calc.oceanSelling), sellingCurrency: "USD", per: volumePer, weightUnit: ""
+      });
+      if (calc.euIncluded) charges.push({
+        type: "eu", description: "", ...source("eu"),
+        sellingRate: formatPlainNumber(calc.euSelling), sellingCurrency: "USD", per: volumePer, weightUnit: ""
+      });
+      if (calc.terminalIncluded) charges.push({
+        type: "terminal handling charge", description: quoteText("lcl.charges.terminalHandlingImport"), ...source("terminal"),
+        sellingRate: "50", sellingCurrency: "USD", per: weightPer, weightUnit: weightPer ? "t" : ""
+      });
+      if (calc.serviceIncluded) charges.push({
+        type: "lcl service charge", description: quoteText("lcl.charges.lclServiceChargeImport"), ...source("service"),
+        sellingRate: "15", sellingCurrency: "USD", per: "", weightUnit: ""
+      });
+      if (calc.ispsIncluded) charges.push({
+        type: "isps", description: "", ...source("isps"),
+        sellingRate: "4", sellingCurrency: "USD", per: "", weightUnit: ""
+      });
+      charges.push({
+        type: "forwarding fee", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
+        sellingRate: "75", sellingCurrency: "USD", per: "", weightUnit: ""
+      });
+      if (calc.includeCustoms) charges.push({
+        type: "customs import clearance", description: quoteText("lcl.charges.customsImportClearance"),
+        buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
+        sellingRate: "100", sellingCurrency: "USD", per: "", weightUnit: ""
+      });
+      charges.push({
+        type: "profit", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
+        sellingRate: "50", sellingCurrency: "USD", per: "", weightUnit: ""
+      });
+      return charges;
+    }
+
+    lclCreateCharges = function(calc) {
+      return isImportMode() ? lclCreateImportChargesV910(calc) : v841.lclCreateCharges(calc);
+    };
+
+    renderLclExtraCosts = function() {
+      if (!isImportMode()) {
+        v841.renderLclExtraCosts();
+        renderLclImportBuyingOnlyV910();
+        return;
+      }
+      $("lclExtraCostsBody")?.replaceChildren();
+      renderLclImportBuyingOnlyV910();
+    };
+
+    updateLclCalculation = function() {
+      if (!isImportMode()) {
+        v841.updateLclCalculation();
+        return;
+      }
+      const calc = calculateLcl();
+      const box = $("lclCalculation");
+      if (!box) return;
+      if (!calc) {
+        box.innerHTML = `<div class="small-note" style="padding:12px">Paste a Nordicon import quote or enter the buying costs manually.</div>`;
+        return;
+      }
+      const rows = [["Delivery", calc.deliveryCost, calc.deliverySelling, calc.deliverySelling - calc.deliveryCost]];
+      if (calc.includeOcean) rows.push(["Ocean freight", calc.oceanCost, calc.oceanSelling, (calc.volumeBased ? calc.oceanSelling * calc.volume : calc.oceanSelling) - calc.oceanCost]);
+      if (calc.euIncluded) rows.push(["EU ETS", calc.euCost, calc.euSelling, (calc.volumeBased ? calc.euSelling * calc.volume : calc.euSelling) - calc.euCost]);
+      if (calc.terminalIncluded) rows.push(["Terminal handling", calc.terminalCost, calc.terminalSelling, (calc.weightBased ? calc.terminalSelling * calc.weightTon : calc.terminalSelling) - calc.terminalCost]);
+      if (calc.serviceIncluded) rows.push(["LCL service charge", calc.serviceCost, calc.serviceSelling, calc.serviceSelling - calc.serviceCost]);
+      if (calc.ispsIncluded) rows.push(["ISPS", calc.ispsCost, calc.ispsSelling, calc.ispsSelling - calc.ispsCost]);
+      rows.push(["Forwarding fee", 0, 75, 75]);
+      if (calc.includeCustoms) rows.push(["Customs import clearance", 0, 100, 100]);
+      calc.buyingOnly.forEach((charge) => rows.push([`${normaliseNordiconDescription(charge.name)} (buying only)`, charge.usdCost, 0, -charge.usdCost]));
+      rows.push(["Profit", 0, 50, 50]);
+      box.innerHTML = `<table><thead><tr><th>Charge</th><th>Buying total USD</th><th>Selling rate USD</th><th>Profit total USD</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${row[0]}</td><td>${formatMoney(row[1], "USD", 2)}</td><td>${formatMoney(row[2], "USD", 2)}</td><td>${formatMoney(row[3], "USD", 2)}</td></tr>`).join("")}</tbody></table><div class="profit-line"><span>Calculated profit</span><span>${formatMoney(calc.actualProfit, "USD", 2)} <small>(${formatMoney(lclConvert(calc.actualProfit, "USD", "SEK"), "SEK", 0)})</small></span></div>`;
+    };
+
+    function configureLclCostRowsV910() {
+      const includeOcean = Boolean(state.lcl.includeOceanFreight);
+      document.querySelectorAll("[data-lcl-cost-row]").forEach((row) => {
+        const key = row.dataset.lclCostRow;
+        if (!isImportMode()) {
+          row.classList.toggle("hidden", key === "service");
+          return;
+        }
+        const visible = key === "trucking" || (includeOcean && ["ocean", "eu", "terminal", "service", "isps"].includes(key));
+        row.classList.toggle("hidden", !visible);
+        const labelCell = row.querySelector("td:first-child");
+        if (labelCell && key === "trucking") labelCell.textContent = "Delivery incl. inland fuel";
+        if (labelCell && key === "terminal") labelCell.textContent = "TERMINALAVGIFT";
+      });
+      if (!isImportMode()) {
+        const trucking = document.querySelector('[data-lcl-cost-row="trucking"] td:first-child');
+        const terminal = document.querySelector('[data-lcl-cost-row="terminal"] td:first-child');
+        if (trucking) trucking.textContent = "Trucking incl. inland fuel";
+        if (terminal) terminal.textContent = "Terminal handling";
+      }
+    }
+
+    toggleLclIncotermFields = function(update = true) {
+      if (!isImportMode()) {
+        $("lclImportOptions")?.classList.add("hidden");
+        $("lclImportPolField")?.classList.add("hidden");
+        $("lclFixedPolField")?.classList.remove("hidden");
+        $("lclImportTransitField")?.classList.add("hidden");
+        $("lclExportTransitField")?.classList.remove("hidden");
+        $("lclOpenXlsx")?.classList.remove("hidden");
+        v841.toggleLclIncotermFields(false);
+        lclPodCombo.setDisabled(!state.locations.size);
+        configureLclCostRowsV910();
+        if (update) updateLclCalculation();
+        return;
+      }
+      const term = lclIncoterm();
+      setFixedLclImportPodV911();
+      state.lcl.includeOceanFreight = $("lclIncludeOceanFreight")?.checked ?? Boolean(state.lcl.includeOceanFreight);
+      if (term === "DDP") state.lcl.includeImportCustoms = true;
+      else state.lcl.includeImportCustoms = $("lclIncludeImportCustoms")?.checked ?? Boolean(state.lcl.includeImportCustoms);
+      $("lclImportOptions")?.classList.remove("hidden");
+      $("lclCollectionField")?.classList.remove("hidden");
+      if ($("lclCollectionField")) $("lclCollectionField").firstChild.textContent = "Delivery city";
+      $("lclFixedPolField")?.classList.add("hidden");
+      $("lclImportPolField")?.classList.toggle("hidden", !state.lcl.includeOceanFreight);
+      $("lclImportTransitField")?.classList.remove("hidden");
+      $("lclExportTransitField")?.classList.add("hidden");
+      $("lclOpenXlsx")?.classList.add("hidden");
+      if ($("lclIncludeImportCustoms")) {
+        $("lclIncludeImportCustoms").checked = term === "DDP" || Boolean(state.lcl.includeImportCustoms);
+        $("lclIncludeImportCustoms").disabled = term === "DDP";
+      }
+      const note = $("lclIncotermNote");
+      if (note) note.textContent = `${term}: import delivery to ${lclDelivery() || "delivery location"}${state.lcl.includeOceanFreight ? ", including ocean freight" : ", without ocean freight"}.`;
+      configureLclCostRowsV910();
+      renderLclExtraCosts();
+      if (update) updateLclCalculation();
+    };
+
+    function validateLclImportV910() {
+      const errors = [];
+      const warnings = [];
+      $("lclPane").querySelectorAll(".invalid").forEach((element) => element.classList.remove("invalid"));
+      const required = [
+        ["lclClientName", "Client name"], ["lclAttentionTo", "Attention to"], ["lclSalesOperator", "Sales operator"],
+        ["lclValidTo", "Validity"], ["lclCollectionCity", "Delivery city"], ["lclPodCity", "POD"],
+        ["lclPallets", "Pallet quantity"], ["lclWeight", "Weight"], ["lclVolume", "Volume"]
+      ];
+      required.forEach(([id, label]) => {
+        if (!String($(id).value).trim()) { $(id).classList.add("invalid"); errors.push(`${label} is missing.`); }
+      });
+      if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(textValue("lclCollectionCode"))) errors.push("Select a valid delivery location from LocCodes.xlsx.");
+      if (!/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(textValue("lclPodCode"))) errors.push("Select a valid POD from LocCodes.xlsx.");
+      if (state.lcl.includeOceanFreight && !/^[A-Za-z]{2}[A-Za-z0-9]{3}$/.test(textValue("lclPolCode"))) errors.push("Select a valid POL when ocean freight is included.");
+      if (!(decimalNumber($("lclPallets").value) >= 1) || !Number.isInteger(decimalNumber($("lclPallets").value))) errors.push("Pallet quantity must be a whole number of at least 1.");
+      if (!(decimalNumber($("lclWeight").value) > 0)) errors.push("Weight must be greater than 0.");
+      if (!(decimalNumber($("lclVolume").value) > 0)) errors.push("Volume must be greater than 0.");
+      if (!(numberValue($("lclSekUsd").value) > 0) || !(numberValue($("lclSekEur").value) > 0)) errors.push("Valid ROE for USD and EUR is required.");
+      const costs = readLclCosts();
+      if (!(decimalNumber(costs.trucking?.total) >= 0)) errors.push("Delivery buying total is missing or invalid.");
+      if (state.lcl.includeOceanFreight && !(decimalNumber(costs.ocean?.total) >= 0)) errors.push("Ocean freight buying total is missing or invalid.");
+      ["eu", "terminal", "service", "isps"].forEach((key) => {
+        if (String(costs[key]?.total ?? "").trim() && !(decimalNumber(costs[key].total) >= 0)) errors.push(`${key} buying total is invalid.`);
+      });
+      (state.lcl.importBuyingOnly || []).forEach((charge, index) => {
+        if (!normaliseNordiconDescription(charge.name)) errors.push(`Buying-only import charge ${index + 1} is missing a description.`);
+        if (!(decimalNumber(charge.total) >= 0)) errors.push(`Buying-only import charge ${index + 1} has an invalid total.`);
+        if (!normaliseCurrencyCode(charge.currency)) errors.push(`Buying-only import charge ${index + 1} has an invalid currency.`);
+      });
+      const calc = calculateLcl();
+      if (calc?.negativeSelling) warnings.push("The selected profit produces a negative delivery or ocean selling rate.");
+      if (calc && Math.abs(lclConvert(calc.actualProfit, "USD", "SEK") - decimalNumber($("lclProfitSek").value)) > 250) warnings.push("Rounding gives more than 250 SEK deviation from the requested profit.");
+      return { errors: [...new Set(errors)], warnings: [...new Set(warnings)] };
+    }
+
+    validateLcl = function() {
+      return isImportMode() ? validateLclImportV910() : v841.validateLcl();
+    };
+
+    exportLclData = function() {
+      if (!isImportMode()) {
+        const data = v841.exportLclData();
+        data.direction = V910_DIRECTION_EXPORT;
+        data.appVersion = "9.1.1";
+        return data;
+      }
+      return {
+        version: 9, mode: "LCL", direction: V910_DIRECTION_IMPORT, appVersion: "9.1.1",
+        clientName: textValue("lclClientName"), attentionTo: textValue("lclAttentionTo"), salesOperator: textValue("lclSalesOperator"),
+        validTo: $("lclValidTo").value, paymentDays: $("lclPaymentDays").value, incoterm: $("lclIncoterm").value,
+        supplier: $("lclSupplier").value,
+        deliveryCity: $("lclCollectionCity").value.trim(), deliveryName: textValue("lclCollectionName"), deliveryCode: upper(textValue("lclCollectionCode")),
+        polName: textValue("lclPolName"), polCode: upper(textValue("lclPolCode")),
+        podName: textValue("lclPodName"), podCode: upper(textValue("lclPodCode")),
+        pallets: $("lclPallets").value, weight: $("lclWeight").value, volume: $("lclVolume").value, stackable: $("lclStackable").value,
+        imoDetails: normaliseImoDetails($("lclImoDetails").value), directNonStack: Boolean(state.lcl.directNonStack),
+        profitSek: $("lclProfitSek").value, sekUsd: $("lclSekUsd").value, sekEur: $("lclSekEur").value,
+        roeRates: serialisableRates("lcl"), roeDate: state.rates.date || "",
+        includeOceanFreight: Boolean(state.lcl.includeOceanFreight), includeImportCustoms: Boolean(state.lcl.includeImportCustoms),
+        costs: readLclCosts(), importBuyingOnly: (state.lcl.importBuyingOnly || []).map((charge) => ({ ...charge })), quoteLoaded: state.lcl.quoteLoaded
+      };
+    };
+
+    applyImportedLclData = function(data) {
+      if (data?.direction !== V910_DIRECTION_IMPORT) {
+        state.direction = V910_DIRECTION_EXPORT;
+        const legacyData = Number(data?.version) === 9 ? { ...data, version: 4 } : data;
+        v841.applyImportedLclData(legacyData);
+        configureDirectionUiV910();
+        return;
+      }
+      if (!data || Number(data.version) !== 9 || data.mode !== "LCL") throw new Error("Unsupported LCL import quote data version.");
+      state.direction = V910_DIRECTION_IMPORT;
+      activateMode("lcl");
+      $("lclClientName").value = data.clientName || "";
+      $("lclAttentionTo").value = data.attentionTo || "";
+      setSelectValue("lclSalesOperator", data.salesOperator, "Erik Stahl");
+      $("lclValidTo").value = data.validTo || "";
+      $("lclPaymentDays").value = data.paymentDays || "30";
+      setImportIncotermControlsV910("lcl", data.incoterm || "DAP");
+      setSelectValue("lclSupplier", data.supplier, "NORDICON");
+      $("lclPallets").value = data.pallets || "";
+      $("lclWeight").value = data.weight || "";
+      $("lclVolume").value = data.volume || "";
+      setSelectValue("lclStackable", data.stackable, "STACKABLE");
+      $("lclImoDetails").value = normaliseImoDetails(data.imoDetails || "");
+      $("lclProfitSek").value = data.profitSek || "3000";
+      mergeImportedRates(data.roeRates, data.roeDate);
+      refreshCurrencyControls();
+      if (data.sekUsd) $("lclSekUsd").value = data.sekUsd;
+      if (data.sekEur) $("lclSekEur").value = data.sekEur;
+      state.lcl = newLclState({
+        quoteLoaded: Boolean(data.quoteLoaded), directNonStack: Boolean(data.directNonStack), imoDetails: data.imoDetails || "",
+        includeOceanFreight: Boolean(data.includeOceanFreight), includeImportCustoms: Boolean(data.includeImportCustoms),
+        polName: data.polName || "", polCode: data.polCode || "", costs: data.costs || {}, importBuyingOnly: data.importBuyingOnly || []
+      });
+      setLclCosts(state.lcl.costs);
+      if (state.locations.size) {
+        setLclCollectionFromText(data.deliveryName || data.deliveryCity || "");
+        if (data.deliveryCode) {
+          const swedishCodes = [...state.locations.keys()].filter((code) => countryCode(code) === "SE");
+          lclCollectionCombo.setOptions(locationOptions(swedishCodes, false), upper(data.deliveryCode));
+          applyLclCollectionSelection();
+        }
+        setFixedLclImportPodV911();
+        setLclPolFromTextV910(data.polName || "", data.polCode || "");
+      } else {
+        $("lclCollectionCity").value = data.deliveryCity || data.deliveryName || "";
+        $("lclCollectionName").value = data.deliveryName || data.deliveryCity || "";
+        $("lclCollectionCode").value = data.deliveryCode || "";
+        setFixedLclImportPodV911();
+        $("lclPolName").value = data.polName || "";
+        $("lclPolCode").value = data.polCode || "";
+      }
+      $("lclIncludeOceanFreight").checked = state.lcl.includeOceanFreight;
+      $("lclIncludeImportCustoms").checked = lclIncoterm() === "DDP" || state.lcl.includeImportCustoms;
+      renderLclExtraCosts();
+      if (state.lcl.quoteLoaded) {
+        $("lclPasteWrap").classList.add("hidden");
+        $("lclQuoteLoaded").classList.remove("hidden");
+        $("lclQuoteLoadedTitle").textContent = "Nordicon import quote";
+        $("lclQuoteLoadedInfo").textContent = `${lclSubject()} · ${data.pallets || "?"} pallets · ${data.weight || "?"} kg · ${data.volume || "?"} cbm`;
+      } else {
+        $("lclPasteWrap").classList.remove("hidden");
+        $("lclQuoteLoaded").classList.add("hidden");
+      }
+      state.lcl.generatedScript = "";
+      $("lclScriptOutput").value = "";
+      $("lclScriptSection").open = false;
+      $("lclCopyScript").disabled = true;
+      $("lclDownloadScript").disabled = true;
+      configureDirectionUiV910();
+      showLclMessages({ errors: [], warnings: [] });
+    };
+
+    function generateLclImportAhkV910() {
+      const calc = calculateLcl();
+      const supplier = lclSupplierConfig();
+      const subject = lclSubject();
+      const client = textValue("lclClientName");
+      const attention = textValue("lclAttentionTo");
+      const incoterm = lclIncoterm();
+      const basisText = state.lcl.includeOceanFreight
+        ? quoteText("common.detailBasis", { SUPPLIER: supplier.display, INCOTERM: incoterm })
+        : quoteText("common.detailIncotermOnly", { INCOTERM: incoterm });
+      const charges = lclCreateCharges(calc).map((charge) => ahkMap(Object.entries(charge))).join(",\n      ");
+      const buyingOnly = calc.buyingOnly.map((charge) => ahkMap([
+        ["type", "other"], ["description", normaliseNordiconDescription(charge.name)],
+        ["buyRate", formatPlainNumber(decimalNumber(charge.total))], ["buyCurrency", charge.currency],
+        ["supplier", supplier.supplier], ["supplierArrow", supplier.supplierArrow]
+      ])).join(",\n      ");
+      const metadata = metadataBlock(exportLclData());
+      const cargoDescription = lclCargoDescription();
+      const volumeText = formatBluDecimal($("lclVolume").value);
+      const stackable = $("lclStackable").value === "STACKABLE";
+      const subjectTo = state.lcl.includeOceanFreight ? quoteText("common.subjectTo") : quoteText("common.subjectToNoOcean");
+
+      return `#Requires AutoHotkey v2.0
+#SingleInstance Force
+#Warn
+
+; Generated by BLU Auto Quote - LCL Import AutoHotkey v9.1.1
+; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
+; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
+; Desired profit: ${$("lclProfitSek").value} SEK
+${metadata}
+
+SetTitleMatchMode 2
+CoordMode "Mouse", "Screen"
+SendMode "Event"
+SetKeyDelay 25, 20
+SetMouseDelay 40
+
+BLU_WINDOW := "BLU ahk_exe wfica32.exe"
+CLICK_DELAY := ${FIXED.clickDelay}
+FIELD_DELAY := ${FIXED.fieldDelay}
+MENU_KEY_DELAY := ${FIXED.menuKeyDelay}
+MENU_ENTER_DELAY := ${FIXED.menuEnterDelay}
+SUPPLIER_ENTER_DELAY := ${FIXED.supplierEnterDelay}
+MENU_AFTER_DELAY := ${FIXED.menuAfterDelay}
+ROW_DELAY := ${FIXED.rowDelay}
+TAB_DELAY := ${FIXED.tabDelay}
+
+Running := false
+SavedClipboard := ""
+
+C := Map(
+  "Project", [383, 231],
+  "Internal comment", [383, 255],
+  "client", [382, 313],
+  "address", [385, 346],
+  "Attention to", [376, 602],
+  "Subject", [384, 649],
+  "Salution", [385, 671],
+  "Cover letter", [396, 698],
+  "Display costs", [374, 738],
+  "YearMonth", [364, 763],
+  "Sales operator", [365, 789],
+  "inquiry type", [839, 741],
+  "target currency", [1026, 743],
+  "events target currency", [1117, 818],
+  "Valid to date", [1019, 288],
+  "cargo tab", [293, 204],
+  "add equipment", [982, 235],
+  "equipment quantity", [365, 365],
+  "kind of equipment", [364, 392],
+  "gross weight", [380, 510],
+  "cargo volume", [365, 536],
+  "use weight per cargo", [894, 512],
+  "use volume per cargo", [894, 537],
+  "description of goods", [380, 664],
+  "stackable box", [357, 766],
+  "details tab", [338, 202],
+  "create new detail", [969, 235],
+  "detail subtitle", [367, 356],
+  "detail short description", [368, 385],
+  "plor loc code", [490, 491],
+  "polout loc code", [488, 507],
+  "podin loc code", [495, 525],
+  "plod loc code", [497, 545],
+  "plor mot", [817, 488],
+  "polout/podin mot", [790, 504],
+  "delete route point", [983, 517],
+  "transit time", [367, 758],
+  "excluding", [1275, 549],
+  "subject to", [1281, 632],
+  "terms of payment days", [1286, 707],
+  "service type", [1296, 758],
+  "incoterm", [1296, 783],
+  "incoterm location", [1294, 807],
+  "scroll point1", [1905, 393],
+  "scroll point2", [1903, 686],
+  "add new charge", [966, 250],
+  "charge type", [430, 446],
+  "charge description", [431, 469],
+  "charge buying rate", [776, 594],
+  "buying rate currency", [890, 593],
+  "supplier", [1009, 593],
+  "charge selling rate", [723, 517],
+  "selling rate currency", [892, 444],
+  "charge per", [737, 542],
+  "weight unit", [939, 543],
+  "charges remarks", [880, 690],
+  "add buying rate right side", [1840, 249],
+  "charge type right side", [1379, 446],
+  "charge description right side", [1383, 472],
+  "buying rate right side", [1651, 516],
+  "buying rate right side currency", [1764, 444],
+  "supplier right side", [1623, 594]
+)
+
+quote := Map(
+  "project", ${ahkString(quoteText("common.projectImport"))},
+  "internalComment", ${ahkString(quoteText("common.internalCommentImport"))},
+  "clientCode", ${ahkString(quoteText("common.clientCode"))},
+  "clientName", ${ahkString(client)},
+  "attentionTo", ${ahkString(attention)},
+  "salutation", ${ahkString(quoteText("common.salutation", { ATTENTION: attention }))},
+  "coverLetter", ${ahkString(quoteText("common.coverLetter"))},
+  "salesOperator", ${ahkString(textValue("lclSalesOperator"))},
+  "subject", ${ahkString(subject)},
+  "validTo", ${ahkString(lclFormattedValidTo())},
+  "paymentDays", ${ahkString($("lclPaymentDays").value)},
+  "incoterm", ${ahkString(incoterm.toLowerCase())},
+  "deliveryCode", ${ahkString(upper(textValue("lclCollectionCode")))},
+  "deliveryName", ${ahkString(lclDelivery())},
+  "polCode", ${ahkString(upper(textValue("lclPolCode")))},
+  "podCode", ${ahkString(upper(textValue("lclPodCode")))},
+  "hasOcean", ${boolAhk(state.lcl.includeOceanFreight)},
+  "transitTime", ${ahkString(quoteText("common.transitTimeImport"))},
+  "basisText", ${ahkString(basisText)},
+  "subtitle", ${ahkString(subject)},
+  "pallets", ${ahkString($("lclPallets").value)},
+  "weight", ${ahkString(formatPlainNumber(decimalNumber($("lclWeight").value)))},
+  "volume", ${ahkString(volumeText)},
+  "cargoDescription", ${ahkString(cargoDescription)},
+  "stackable", ${stackable ? "true" : "false"},
+  "excluding", ${ahkString(lclImportExcludingTextV910())},
+  "subjectTo", ${ahkString(subjectTo)},
+  "remarks", ${ahkString(lclRemarksText())},
+  "charges", [
+      ${charges}
+  ],
+  "buyingOnly", [
+      ${buyingOnly}
+  ]
+)
+
+OnExit RestoreClipboard
+
+F8:: {
+  global Running
+  if Running
+    return
+  Running := true
+  try RunQuote()
+  catch Error as err
+    MsgBox "Automation stopped with an error:" Chr(10) Chr(10) err.Message, "BLU LCL Import Automation", "Iconx"
+  finally {
+    ToolTip
+    RestoreClipboard()
+    Running := false
+  }
+}
+
+F9::Pause -1
+Esc::ExitApp
+
+RunQuote() {
+  global SavedClipboard, quote, FIELD_DELAY, TAB_DELAY, ROW_DELAY
+  startTick := A_TickCount
+  CheckEnvironment()
+  ActivateBlu()
+  SavedClipboard := ClipboardAll()
+
+  ToolTip "BLU automation: import quote fields"
+  TypeField("Project", quote["project"], true)
+  TypeField("Internal comment", quote["internalComment"])
+  TypeField("client", quote["clientCode"], true)
+  TypeField("address", StrUpper(quote["clientName"]), false, true)
+  TypeField("Attention to", quote["attentionTo"])
+  TypeField("Subject", quote["subject"])
+  TypeField("Salution", quote["salutation"])
+  TypeField("Cover letter", quote["coverLetter"])
+
+  ClickField("Display costs")
+  SendText "c"
+  Sleep 180
+  SendText "c"
+  Sleep 180
+  Send "{Enter}"
+  Sleep FIELD_DELAY
+  TypeField("YearMonth", FormatTime(, "yyMM"))
+  TypeField("Sales operator", quote["salesOperator"])
+  SelectField("inquiry type", "f")
+  SelectField("target currency", "usd")
+  ClickField("events target currency")
+  TypeField("Valid to date", quote["validTo"], true)
+
+  ToolTip "BLU automation: LCL cargo"
+  ClickField("cargo tab", TAB_DELAY)
+  ClickField("add equipment", ROW_DELAY)
+  TypeField("equipment quantity", quote["pallets"], false, true)
+  SelectField("kind of equipment", "pe")
+  TypeField("gross weight", quote["weight"], false, true)
+  TypeField("cargo volume", quote["volume"], false, true)
+  ClickField("use weight per cargo")
+  ClickField("use volume per cargo")
+  TypeField("description of goods", quote["cargoDescription"], false, true)
+  if quote["stackable"]
+    ClickField("stackable box")
+
+  ToolTip "BLU automation: LCL import detail"
+  ClickField("details tab", TAB_DELAY)
+  ClickField("create new detail", ROW_DELAY)
+  TypeField("detail subtitle", quote["subtitle"])
+  TypeImportDetailDescription(quote["clientName"], quote["basisText"])
+  ConfigureImportRoute(quote)
+  TypeField("transit time", quote["transitTime"])
+  PasteField("excluding", quote["excluding"], true)
+  PasteField("subject to", quote["subjectTo"], true)
+  TypeField("terms of payment days", quote["paymentDays"])
+  SelectField("service type", "lcl/lcl")
+  SelectField("incoterm", quote["incoterm"])
+  TypeField("incoterm location", quote["deliveryName"])
+  ScrollDetailDown()
+
+  for charge in quote["charges"]
+    FillLclCharge(charge)
+  for buying in quote["buyingOnly"]
+    FillBuyingOnlyRight(buying)
+  PasteRemarksField(quote["remarks"])
+
+  ToolTip
+  RestoreClipboard()
+  elapsed := FormatElapsed(A_TickCount - startTick)
+  MsgBox "The BLU LCL import quote has been entered." Chr(10) Chr(10) "Time: " elapsed Chr(10) Chr(10) "Review the quote before saving or sending it.", "BLU LCL Import Automation", "Iconi"
+}
+
+ConfigureImportRoute(detail) {
+  global MENU_ENTER_DELAY
+  if detail["hasOcean"] {
+    SelectField("polout loc code", detail["polCode"])
+    SelectField("podin loc code", detail["podCode"])
+    SelectField("plod loc code", detail["deliveryCode"])
+    ClickField("plor loc code")
+    ClickField("delete route point", MENU_ENTER_DELAY)
+    DoubleSelectField("plor mot", "v")
+    DoubleSelectField("polout/podin mot", "t")
+  } else {
+    SelectField("polout loc code", detail["podCode"])
+    SelectField("podin loc code", detail["deliveryCode"])
+    ClickField("plod loc code")
+    ClickField("delete route point", MENU_ENTER_DELAY)
+    ClickField("plor loc code")
+    ClickField("delete route point", MENU_ENTER_DELAY)
+    DoubleSelectField("plor mot", "t")
+  }
+}
+
+FormatElapsed(milliseconds) {
+  totalSeconds := Floor(milliseconds / 1000)
+  minutes := Floor(totalSeconds / 60)
+  seconds := Mod(totalSeconds, 60)
+  return minutes > 0 ? minutes " min " seconds " sec" : seconds " sec"
+}
+
+CheckEnvironment() {
+  if A_ScreenWidth != 1920 || A_ScreenHeight != 1080
+    throw Error("This script requires 1920 x 1080. Current resolution: " A_ScreenWidth " x " A_ScreenHeight)
+  if A_ScreenDPI != 96
+    throw Error("This script requires Windows scaling 100% (96 DPI). Current DPI: " A_ScreenDPI)
+}
+
+ActivateBlu() {
+  global BLU_WINDOW
+  if !WinExist(BLU_WINDOW)
+    throw Error("Could not find the BLU Citrix window (wfica32.exe).")
+  WinActivate BLU_WINDOW
+  WinMaximize BLU_WINDOW
+  if !WinWaitActive(BLU_WINDOW, , 6)
+    throw Error("BLU could not be activated.")
+  Sleep 600
+}
+
+ClickField(name, wait := 0) {
+  global C, CLICK_DELAY
+  xy := C[name]
+  Click xy[1], xy[2]
+  Sleep wait > 0 ? wait : CLICK_DELAY
+}
+
+SlowType(value) {
+  global MENU_KEY_DELAY
+  for character in StrSplit(String(value)) {
+    SendText character
+    Sleep MENU_KEY_DELAY
+  }
+}
+
+TypeField(name, value, pressEnter := false, clearFirst := false) {
+  global FIELD_DELAY, MENU_ENTER_DELAY, MENU_AFTER_DELAY
+  ClickField(name)
+  if RegExMatch(String(value), "[^\\x00-\\x7F]") {
+    PasteCurrent(value, clearFirst)
+    if pressEnter {
+      Sleep MENU_ENTER_DELAY
+      Send "{Enter}"
+      Sleep MENU_AFTER_DELAY
+    }
+    return
+  }
+  if clearFirst {
+    Send "^a"
+    Sleep 80
+  }
+  if pressEnter {
+    SlowType(value)
+    Sleep MENU_ENTER_DELAY
+    Send "{Enter}"
+    Sleep MENU_AFTER_DELAY
+  } else {
+    SendText String(value)
+    Sleep FIELD_DELAY
+  }
+}
+
+PasteCurrent(value, clearFirst := false) {
+  global FIELD_DELAY
+  if clearFirst {
+    Send "^a"
+    Sleep 100
+    Send "{Backspace}"
+    Sleep 80
+  }
+  A_Clipboard := String(value)
+  if !ClipWait(1)
+    throw Error("Clipboard did not become ready.")
+  Send "^v"
+  Sleep FIELD_DELAY + 180
+}
+
+PasteField(name, value, clearFirst := false) {
+  ClickField(name)
+  PasteCurrent(value, clearFirst)
+}
+
+PasteRemarksField(value) {
+  global FIELD_DELAY
+  ClickField("charges remarks", 350)
+  ClickField("charges remarks", 180)
+  PasteCurrent(value, true)
+  Sleep FIELD_DELAY + 170
+  Send "{Tab}"
+  Sleep 200
+}
+
+SelectField(name, value, arrowOffset := 0) {
+  global MENU_ENTER_DELAY, MENU_AFTER_DELAY
+  ClickField(name)
+  SlowType(value)
+  Sleep MENU_ENTER_DELAY
+  if arrowOffset != 0 {
+    key := arrowOffset > 0 ? "{Down}" : "{Up}"
+    Loop Abs(arrowOffset) {
+      Send key
+      Sleep 350
+    }
+  }
+  Send "{Enter}"
+  Sleep MENU_AFTER_DELAY
+}
+
+SelectSupplierAt(name, value, arrowOffset := 0) {
+  global SUPPLIER_ENTER_DELAY, MENU_AFTER_DELAY
+  ClickField(name)
+  SendText String(value)
+  Sleep SUPPLIER_ENTER_DELAY
+  if arrowOffset != 0 {
+    key := arrowOffset > 0 ? "{Down}" : "{Up}"
+    Loop Abs(arrowOffset) {
+      Send key
+      Sleep 200
+    }
+  }
+  Send "{Enter}"
+  Sleep MENU_AFTER_DELAY
+}
+
+TypePriceField(name, value) {
+  TypeField(name, StrReplace(String(value), ".", ","))
+}
+
+DoubleSelectField(name, value) {
+  global C, MENU_ENTER_DELAY, MENU_AFTER_DELAY
+  xy := C[name]
+  Click xy[1], xy[2]
+  Sleep 90
+  Click xy[1], xy[2]
+  Sleep 220
+  SlowType(value)
+  Sleep MENU_ENTER_DELAY
+  Send "{Enter}"
+  Sleep MENU_AFTER_DELAY
+}
+
+TypeImportDetailDescription(clientName, basisText) {
+  global FIELD_DELAY
+  ClickField("detail short description", 250)
+  PasteCurrent(StrUpper(clientName), true)
+  Sleep 250
+  Send "{Enter}"
+  Sleep 350
+  PasteCurrent(basisText)
+  Sleep FIELD_DELAY + 200
+  Send "{Tab}"
+  Sleep 180
+}
+
+ScrollDetailDown() {
+  global C, TAB_DELAY
+  a := C["scroll point1"], b := C["scroll point2"]
+  MouseClickDrag "Left", a[1], a[2], b[1], b[2], 8
+  Sleep TAB_DELAY
+}
+
+FillLclCharge(charge) {
+  global ROW_DELAY, FIELD_DELAY
+  ClickField("add new charge", ROW_DELAY)
+  SelectField("charge type", charge["type"])
+  if charge["description"] != ""
+    PasteField("charge description", charge["description"], true)
+  if charge["buyRate"] != ""
+    TypePriceField("charge buying rate", charge["buyRate"])
+  if charge["buyCurrency"] != ""
+    SelectField("buying rate currency", StrLower(charge["buyCurrency"]))
+  if charge["supplier"] != ""
+    SelectSupplierAt("supplier", charge["supplier"], charge["supplierArrow"])
+  TypePriceField("charge selling rate", charge["sellingRate"])
+  SelectField("selling rate currency", "usd")
+  if charge["per"] != "" {
+    SelectField("charge per", charge["per"])
+    if charge["per"] = "w" {
+      Send "{Tab}"
+      Sleep 150
+      SelectField("weight unit", "t")
+    }
+  }
+  Sleep FIELD_DELAY
+}
+
+FillBuyingOnlyRight(charge) {
+  global ROW_DELAY
+  ClickField("add buying rate right side", ROW_DELAY)
+  SelectField("charge type right side", charge["type"])
+  if charge["description"] != ""
+    PasteField("charge description right side", charge["description"], true)
+  TypePriceField("buying rate right side", charge["buyRate"])
+  SelectField("buying rate right side currency", StrLower(charge["buyCurrency"]))
+  SelectSupplierAt("supplier right side", charge["supplier"], charge["supplierArrow"])
+}
+
+RestoreClipboard(*) {
+  global SavedClipboard
+  if IsObject(SavedClipboard) {
+    A_Clipboard := SavedClipboard
+    SavedClipboard := ""
+  }
+}
+`;
+    }
+
+    generateLclAhk = function() {
+      const script = isImportMode() ? generateLclImportAhkV910() : v841.generateLclAhk();
+      return unicodeSafeAhkV910(script);
+    };
+
+    const selectedLclCurrenciesV841 = selectedLclCurrencies;
+    selectedLclCurrencies = function() {
+      const codes = selectedLclCurrenciesV841();
+      if (isImportMode()) {
+        (state.lcl.importBuyingOnly || []).forEach((charge) => {
+          const code = normaliseCurrencyCode(charge.currency);
+          if (code) codes.add(code);
+        });
+      }
+      return codes;
+    };
+
+    updateSummary = function() {
+      v841.updateSummary();
+      if (!isImportMode()) return;
+      const oceanCarriers = [...new Set((state.routes || []).flatMap((route) => route.includeOceanFreight === false ? [] : (route.equipment || []).map((equipment) => upper(equipment.carrier)).filter(Boolean)))];
+      if ($("summaryCarrier")) $("summaryCarrier").textContent = oceanCarriers.length === 1 ? oceanCarriers[0] : (oceanCarriers.length ? "Mixed" : "Not included");
+      if ($("summaryCurrency")) $("summaryCurrency").textContent = "USD";
+    };
+
+    const routeTabTextV841 = routeTabText;
+    routeTabText = function(route, index) {
+      if (!isImportMode()) return routeTabTextV841(route, index);
+      return `Route ${index + 1}: ${routeDelivery(route) || "NEW ROUTE"}`;
+    };
+
+    resetForm = function(confirmReset = true, refreshRates = true) {
+      if (!isImportMode()) {
+        v841.resetForm(confirmReset, refreshRates);
+        return;
+      }
+      if (confirmReset && !confirm("Reset all FCL import inputs and routes?")) return;
+      v841.resetForm(false, false);
+      setImportIncotermControlsV910("fcl", "DAP");
+      $("profitSek").value = "3000";
+      state.routes = [newRoute({ includeOceanFreight: false, includeImportCustoms: false })];
+      state.activeRouteIndex = 0;
+      state.equipment = activeRoute().equipment;
+      $("targetCurrency").value = "USD";
+      $("targetCurrency").disabled = true;
+      loadActiveRouteIntoForm();
+      configureDirectionUiV910();
+      if (refreshRates) fetchRates();
+    };
+
+    resetLclForm = function(confirmReset = true) {
+      if (!isImportMode()) {
+        v841.resetLclForm(confirmReset);
+        return;
+      }
+      if (confirmReset && !confirm("Reset all LCL import inputs?")) return;
+      v841.resetLclForm(false);
+      state.lcl = newLclState({ includeOceanFreight: false, includeImportCustoms: false });
+      setImportIncotermControlsV910("lcl", "DAP");
+      $("lclProfitSek").value = "3000";
+      setLclCosts(state.lcl.costs);
+      setDefaultLclImportRouteV910(true);
+      $("lclIncludeOceanFreight").checked = false;
+      $("lclIncludeImportCustoms").checked = false;
+      renderLclExtraCosts();
+      configureDirectionUiV910();
+    };
+
+    resetAllSettings = function() {
+      if (!confirm("Reset all FCL and LCL settings to their startup defaults?")) return;
+      state.direction = V910_DIRECTION_EXPORT;
+      setExportIncotermControlsV910("fcl", "EXW");
+      setExportIncotermControlsV910("lcl", "EXW");
+      v841.resetForm(false, false);
+      v841.resetLclForm(false);
+      document.querySelectorAll("#fclPane details, #lclPane details").forEach((details) => { details.open = false; });
+      activateMode("fcl");
+      configureDirectionUiV910();
+      fetchRates();
+    };
+
+    bindEvents = function() {
+      v841.bindEvents();
+      document.querySelectorAll(".direction-tab").forEach((button) => button.addEventListener("click", () => activateDirectionV910(button.dataset.direction, true)));
+      $("includeOceanFreight")?.addEventListener("change", () => {
+        activeRoute().includeOceanFreight = $("includeOceanFreight").checked;
+        toggleIncotermFields(true);
+        renderEquipment();
+      });
+      $("includeImportCustoms")?.addEventListener("change", () => {
+        activeRoute().includeImportCustoms = $("includeImportCustoms").checked;
+        updateAllPreviews();
+      });
+      $("incoterm")?.addEventListener("change", () => {
+        if (isImportMode() && currentIncoterm() === "DDP") activeRoute().includeImportCustoms = true;
+        toggleIncotermFields(true);
+      });
+    };
+
+    bindLclEvents = function() {
+      v841.bindLclEvents();
+      $("lclIncludeOceanFreight")?.addEventListener("change", () => {
+        state.lcl.includeOceanFreight = $("lclIncludeOceanFreight").checked;
+        toggleLclIncotermFields(true);
+      });
+      $("lclIncludeImportCustoms")?.addEventListener("change", () => {
+        state.lcl.includeImportCustoms = $("lclIncludeImportCustoms").checked;
+        updateLclCalculation();
+      });
+      $("lclIncoterm")?.addEventListener("change", () => {
+        if (isImportMode() && lclIncoterm() === "DDP") state.lcl.includeImportCustoms = true;
+        toggleLclIncotermFields(true);
+      });
+    };
+
+    // Install v9.1.1 controls and migrate the initial LCL state before startup.
+    installV910Ui();
+    state.lcl = newLclState({ ...state.lcl, costs: state.lcl.costs || {} });
+
 
     // Initialise the new multi-route model before the existing startup calls run.
     state.routes = [newRoute({ equipment: state.equipment })];
