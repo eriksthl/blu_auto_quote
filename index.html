@@ -288,7 +288,7 @@
     }
 
 
-    /* Version 9.1.2 split workspace */
+    /* Version 9.2.1 split workspace */
     main { width: min(1180px, calc(100% - 24px)); }
     .file-state { display: grid; gap: 4px; min-width: 285px; }
     .file-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 26px; }
@@ -370,7 +370,7 @@
       .location-title { grid-column: 1; }
     }
 
-    /* Version 9.1.2 compact LCL workspace */
+    /* Version 9.2.1 compact LCL workspace */
     #lclPane { max-width: none; margin: 0; }
     .lcl-workspace { display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 12px; align-items: start; }
     .lcl-left-stack, .lcl-right-stack { display: grid; gap: 12px; align-content: start; }
@@ -406,7 +406,7 @@
       .lcl-primary-actions .primary { grid-column: auto; }
     }
 
-    /* Version 9.1.2 layout refinements */
+    /* Version 9.2.1 layout refinements */
     .mode-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .mode-toolbar .mode-tabs { margin-bottom: 12px; }
     .mode-reset { min-height: 42px; padding: 7px 18px; white-space: nowrap; }
@@ -438,6 +438,25 @@
       .profit-main-row { grid-template-columns: 1fr 1fr; }
     }
 
+
+    /* Version 9.2.1 interface refinements */
+    .mode-toolbar { justify-content: flex-start; }
+    .mode-toolbar .mode-reset { display: none !important; }
+    #collectionCountryField, .route-country-field { display: none !important; }
+    .payment-agent-panel { margin-top: 10px; }
+    .payment-agent-title { padding: 7px 9px; border-bottom: 1px solid #bbb; background: #f4f4f4; color: #555; font-size: 12px; font-weight: 700; }
+    .payment-agent-row { display: grid; grid-template-columns: minmax(110px, .8fr) minmax(0, 1.2fr); gap: 10px; align-items: end; }
+    .agent-supplier-cell { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: end; min-width: 0; }
+    .agent-supplier-cell .waiting-check { align-self: end; white-space: nowrap; }
+    .agent-supplier-cell #agentField { min-width: 0; }
+    .freight-free-days-host:empty { display: none; }
+    .freight-free-days-host .free-days-grid { margin-top: 8px; padding-top: 8px; border-top: 1px solid #ccc; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .app-footer { margin-top: 14px; padding: 12px 4px 2px; border-top: 1px solid #bbb; color: #666; font-size: 11px; text-align: center; }
+    @media (max-width: 620px) {
+      .payment-agent-row, .agent-supplier-cell, .freight-free-days-host .free-days-grid { grid-template-columns: 1fr; }
+      .agent-supplier-cell .waiting-check { white-space: normal; }
+    }
+
 </style>
 </head>
 <body>
@@ -446,7 +465,7 @@
     <header>
       <div>
         <h1>BLU Auto Quote</h1>
-        <div class="app-version">AHK Script Gen // Version 9.1.2</div>
+        <div class="app-version">AHK Script Gen // Version 9.2.1</div>
       </div>
       <div class="file-state">
         <div class="file-line"><span id="locStatus">Loading LocCodes.xlsx...</span><button id="openLocFile" class="btn small hidden" type="button">Select LocCodes.xlsx</button></div>
@@ -461,7 +480,7 @@
         <button type="button" class="mode-tab active" data-mode="fcl">FCL</button>
         <button type="button" class="mode-tab" data-mode="lcl">LCL</button>
       </nav>
-      <button type="button" class="btn mode-reset" id="resetAllSettings" title="Reset all settings to startup defaults">Reset</button>
+      <button type="button" class="btn mode-reset hidden" id="resetAllSettings" title="Reset all settings to startup defaults" aria-hidden="true" tabindex="-1">Reset</button>
     </div>
 
     <div id="fclPane" class="mode-pane">
@@ -476,16 +495,16 @@
                 <label class="field">Sales operator<select id="salesOperator" data-required><option>Christoffer Josefsson</option><option selected>Erik Stahl</option><option>Hilma Stahl</option><option>Malin Noren</option><option>Malin Stahl</option><option>Markus Odenstam</option><option>Martin Soderberg</option><option>Par Kjellstrand</option><option>Sakar Mustafa</option><option>Sven Karlund</option><option>Teo Sjogren</option></select></label>
                 <label class="field">Valid to<input id="validTo" data-required type="date"></label>
               </div>
-              <details class="advanced-panel">
-                <summary>Payment and agent</summary>
+              <div class="advanced-panel payment-agent-panel">
+                <div class="payment-agent-title">Payment &amp; agent</div>
                 <div class="advanced-panel-body">
-                  <div class="grid two">
+                  <div class="payment-agent-row">
                     <label class="field">Payment term days<input id="paymentDays" data-required type="number" min="0" step="1" value="30"></label>
+                    <div class="agent-supplier-cell">
+                      <label class="waiting-check"><input id="useAgent" type="checkbox"> Agent supplier</label>
+                      <label class="field hidden" id="agentField">Supplier<select id="agent"><option>CHS</option><option>SR GROUP</option><option>N.A. NISSEN</option></select></label>
+                    </div>
                     <label class="field hidden">Legacy carrier<select id="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
-                  </div>
-                  <div class="option-row">
-                    <label class="waiting-check"><input id="useAgent" type="checkbox"> AGENT</label>
-                    <label class="field hidden compact-select" id="agentField">Agent<select id="agent"><option>CHS</option><option>SR GROUP</option><option>N.A. NISSEN</option></select></label>
                   </div>
                   <div id="agentManualFields" class="grid two agent-manual-fields hidden">
                     <label class="field"><span id="agentHandlingLabel">Handling buying</span><input id="agentHandlingAmount" type="number" min="0" step="0.01"></label>
@@ -493,7 +512,7 @@
                     <div id="agentCostNote" class="small-note span-two"></div>
                   </div>
                 </div>
-              </details>
+              </div>
             </div>
           </section>
 
@@ -513,9 +532,9 @@
 
               <div class="grid two route-core-grid">
                 <label class="field">Incoterm<select id="incoterm" data-required><option>EXW</option><option>FCA</option><option>FOB</option></select></label>
-                <label class="field">Transit time <span class="hint">blank = TBA</span><input id="transitDays" type="number" min="1" step="1"></label>
+                <label class="field">Transit time<input id="transitDays" type="number" min="1" step="1"></label>
                 <label class="waiting-check span-two hidden" id="fcaOnCarriageOption"><input id="includeOnCarriage" type="checkbox" checked> Include precarriage</label>
-                <label class="field" id="collectionCountryField">Collection country<div id="collectionCountry" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                <label class="field route-country-field hidden" id="collectionCountryField" aria-hidden="true">Collection country<div id="collectionCountry" class="combo"><input type="text" autocomplete="off" disabled tabindex="-1"><div class="combo-menu hidden"></div></div></label>
                 <label class="field" id="collectionField">Collection city<div id="collectionLocation" class="combo"><input id="collectionCity" autocomplete="off"><div class="combo-menu hidden"></div></div></label>
                 <label class="field hidden">Legacy precarriage supplier<select id="precarriageSupplier"><option>DANIA</option><option>SKARASLÄTTEN</option><option>PGF</option></select></label>
               </div>
@@ -524,12 +543,12 @@
               <div class="route-grid compact-route-grid">
                 <div class="location-box">
                   <div class="location-title">POL</div>
-                  <label class="field">Country<div id="polCountry" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                  <label class="field route-country-field hidden" aria-hidden="true">Country<div id="polCountry" class="combo"><input type="text" autocomplete="off" disabled tabindex="-1"><div class="combo-menu hidden"></div></div></label>
                   <label class="field">Location<div id="polLocation" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
                 </div>
                 <div class="location-box">
                   <div class="location-title">POD</div>
-                  <label class="field">Country<div id="podCountry" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
+                  <label class="field route-country-field hidden" aria-hidden="true">Country<div id="podCountry" class="combo"><input type="text" autocomplete="off" disabled tabindex="-1"><div class="combo-menu hidden"></div></div></label>
                   <label class="field">Location<div id="podLocation" class="combo"><input type="text" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
                   <label class="field alexandria-port-field hidden" id="alexandriaPortField">Alexandria port<select id="alexandriaPort"><option value="general" selected>General</option><option value="old-port">Old port</option><option value="el-dekheila">El Dekheila</option></select></label>
                 </div>
@@ -662,7 +681,7 @@
                 <label class="field" id="lclCollectionField">Collection city<div id="lclCollectionLocation" class="combo"><input id="lclCollectionCity" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
                 <label class="field">POD<div id="lclPodLocation" class="combo"><input id="lclPodCity" autocomplete="off" disabled><div class="combo-menu hidden"></div></div></label>
                 <label class="field">POL<div class="fixed-value">SEGOT - GOTHENBURG</div></label>
-                <label class="field">Transit time <span class="hint">blank = TBA</span><input id="lclTransitDays" type="number" min="1" step="1"></label>
+                <label class="field">Transit time<input id="lclTransitDays" type="number" min="1" step="1"></label>
               </div>
               <input id="lclCollectionName" type="hidden"><input id="lclCollectionCode" type="hidden">
               <input id="lclPodName" type="hidden"><input id="lclPodCode" type="hidden">
@@ -806,19 +825,14 @@
               <label class="field currency-field">Currency<select class="eq-input" data-key="freightCurrency"><option>USD</option><option>EUR</option><option>SEK</option></select></label>
               <label class="field supplier-field carrier-field">Carrier<select class="eq-input" data-key="carrier"><option>MSC</option><option>HAPAG-LLOYD</option><option>CMA CGM</option><option>MAERSK</option><option>OOCL</option><option>ONE</option><option>COSCO</option><option>YANG MING</option><option>EVERGREEN</option><option>HMM</option></select></label>
             </div>
+            <div class="freight-free-days-host"></div>
           </div>
         </div>
 
         <div class="equipment-option-row">
-          <label class="waiting-check"><input class="eq-input origin-toggle" data-key="includeOriginCharges" type="checkbox"> Origin charges</label>
           <label class="waiting-check stuffing-field"><input class="eq-input stuff-toggle" data-key="includeStuff" type="checkbox"> Stuff / lash / shunt</label>
-          <button type="button" class="btn small add-custom-charge">+ Add custom charge</button>
         </div>
 
-        <div class="cost-grid origin-fields hidden">
-          <label class="field">Origin charges buying<input class="eq-input" data-key="originAmount" type="number" min="0" step="0.01"></label>
-          <label class="field">Currency<select class="eq-input" data-key="originCurrency"><option>SEK</option><option>USD</option><option>EUR</option></select></label>
-        </div>
         <div class="cost-grid stuffing-fields stuffing-field hidden">
           <label class="field">Stuffing buying<input class="eq-input" data-key="stuffAmount" type="number" min="0" step="0.01"></label>
           <label class="field">Currency<select class="eq-input" data-key="stuffCurrency"><option>SEK</option><option>USD</option><option>EUR</option></select></label>
@@ -832,15 +846,27 @@
               <label class="waiting-check"><input class="sync-toggle" data-sync-kind="freight" type="checkbox"> Keep freight buying synced between routes</label>
               <label class="waiting-check precarriage-field"><input class="sync-toggle" data-sync-kind="precarriage" type="checkbox"> Keep precarriage buying synced between routes</label>
             </div>
+          </div>
+        </details>
+        <details class="compact-details calculation-details">
+          <summary>Calculation for details row</summary>
+          <div class="calculation-detail-body">
+            <div class="calculation-detail-controls">
+              <div class="origin-charge-control">
+                <label class="waiting-check"><input class="eq-input origin-toggle" data-key="includeOriginCharges" type="checkbox"> Origin charges</label>
+                <div class="cost-grid origin-fields hidden">
+                  <label class="field">Origin charges buying<input class="eq-input" data-key="originAmount" type="number" min="0" step="0.01"></label>
+                  <label class="field">Currency<select class="eq-input" data-key="originCurrency"><option>SEK</option><option>USD</option><option>EUR</option></select></label>
+                </div>
+              </div>
+              <button type="button" class="btn small add-custom-charge">+ Add custom charge</button>
+            </div>
+            <div class="preview-box"></div>
             <div class="custom-charge-section">
               <div class="custom-charge-head"><strong>Custom Other charges for this details row</strong></div>
               <div class="custom-charge-list"></div>
             </div>
           </div>
-        </details>
-        <details class="compact-details calculation-details">
-          <summary>Calculation for details row</summary>
-          <div class="preview-box"></div>
         </details>
       </div>
     </article>
@@ -2329,7 +2355,7 @@
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v9.1.2
+; Generated by BLU Auto Quote → AutoHotkey v9.2.1
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR | 1 SEK = ${$("sekNok").value} NOK | 1 SEK = ${$("sekDkk").value} DKK
 ; Selling currency: ${$("targetCurrency").value}
@@ -3310,7 +3336,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL AutoHotkey v9.1.2
+; Generated by BLU Auto Quote - LCL AutoHotkey v9.2.1
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -4027,7 +4053,7 @@ RestoreClipboard(*) {
     }
 
     // ==============================
-    // v9.1.2 FCL route/detail overrides
+    // v9.2.1 FCL route/detail overrides
     // ==============================
 
     function makeStableId(prefix = "id") {
@@ -4526,7 +4552,7 @@ RestoreClipboard(*) {
         const collectionCountry = Object.prototype.hasOwnProperty.call(route, "collectionCountry") ? route.collectionCountry : (countryCode(route.collectionCode) || "SE");
         route.collectionCountry = collectionCountry;
         locationCombos.collectionCountry.setOptions(countryOptions(countries), collectionCountry);
-        const collectionCodes = [...state.locations.keys()].filter((code) => !collectionCountry || countryCode(code) === collectionCountry);
+        const collectionCodes = [...state.locations.keys()];
         collectionCombo.setOptions(locationOptions(collectionCodes, false), route.collectionCode);
         if (route.collectionCode && collectionCombo.selectedOption()) {
           collectionCombo.value = route.collectionCode;
@@ -4576,7 +4602,8 @@ RestoreClipboard(*) {
         route.collectionCode = code;
         route.collectionName = name;
         route.collectionCity = collectionCombo.input.value.trim();
-        route.collectionCountry = locationCombos.collectionCountry.value;
+        route.collectionCountry = countryCode(code) || route.collectionCountry || "";
+        if (route.collectionCountry) locationCombos.collectionCountry.value = route.collectionCountry;
       }
       renderRouteTabs();
       updateAllPreviews();
@@ -4584,10 +4611,7 @@ RestoreClipboard(*) {
 
     function updateCollectionLocationOptions(preferredCode) {
       if (!state.locations.size) return;
-      const country = locationCombos.collectionCountry.value;
-      const route = activeRoute();
-      if (route && !state.loadingRoute) route.collectionCountry = country;
-      const codes = [...state.locations.keys()].filter((code) => !country || countryCode(code) === country);
+      const codes = [...state.locations.keys()];
       const current = preferredCode ?? collectionCombo.value;
       const preferred = codes.includes(current) ? current : "";
       collectionCombo.setOptions(locationOptions(codes, false), preferred);
@@ -4609,6 +4633,8 @@ RestoreClipboard(*) {
       if (route && !state.loadingRoute) {
         route[`${kind}Code`] = code;
         route[`${kind}Name`] = name;
+        route[`${kind}Country`] = countryCode(code) || route[`${kind}Country`] || "";
+        if (route[`${kind}Country`]) locationCombos[`${kind}Country`].value = route[`${kind}Country`];
       }
       const stuffDefaultsChanged = kind === "pol" && route ? applyDefaultStuffSuppliers(route) : false;
       if (stuffDefaultsChanged && !state.loadingRoute) renderEquipment();
@@ -4619,12 +4645,8 @@ RestoreClipboard(*) {
 
     function updateLocationOptions(kind, preferredCode) {
       if (!state.locations.size) return;
-      const countryCombo = locationCombos[`${kind}Country`];
       const locationCombo = locationCombos[kind];
-      const country = countryCombo.value;
-      const route = activeRoute();
-      if (route && !state.loadingRoute) route[`${kind}Country`] = country;
-      const codes = [...state.locations.keys()].filter((code) => !country || countryCode(code) === country);
+      const codes = [...state.locations.keys()];
       const current = preferredCode ?? locationCombo.value;
       let preferred = codes.includes(current) ? current : "";
       if (kind === "pol" && !preferred && codes.includes("SEGOT")) preferred = "SEGOT";
@@ -4704,8 +4726,8 @@ RestoreClipboard(*) {
         const firstIndex = route.equipment.findIndex((equipment, index) => detailRowNumber(equipment, index + 1) === detailRow);
         renderEquipment();
         const card = document.querySelector(`.equipment-card[data-index="${firstIndex}"]`);
-        const advanced = card?.querySelector(".equipment-advanced");
-        if (advanced) advanced.open = true;
+        const calculation = card?.querySelector(".calculation-details");
+        if (calculation) calculation.open = true;
         const rows = card?.querySelectorAll(".custom-charge-row");
         rows?.[rows.length - 1]?.querySelector("input")?.focus();
         updateAllPreviews();
@@ -4750,7 +4772,9 @@ RestoreClipboard(*) {
       const route = activeRoute();
       applyDefaultStuffSuppliers(route);
       const waitingOptionNode = $("waitingOption");
+      const freeDaysNode = document.querySelector(".free-days-grid");
       if (waitingOptionNode) waitingOptionNode.remove();
+      if (freeDaysNode) freeDaysNode.remove();
       const list = $("equipmentList");
       const groups = groupRouteEquipment(route);
       const groupByEquipment = new Map();
@@ -4765,6 +4789,9 @@ RestoreClipboard(*) {
         const waitingHost = card.querySelector(".precarriage-waiting-host");
         if (index === 0 && waitingOptionNode && waitingHost) waitingHost.append(waitingOptionNode);
         else waitingHost?.remove();
+        const freeDaysHost = card.querySelector(".freight-free-days-host");
+        if (index === 0 && freeDaysNode && freeDaysHost) freeDaysHost.append(freeDaysNode);
+        else freeDaysHost?.remove();
         card.querySelector(".equipment-title strong").textContent = `Equipment ${index + 1}`;
         const updateHeader = () => {
           const row = detailRowNumber(equipment, index + 1);
@@ -5419,7 +5446,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote → AutoHotkey v9.1.2
+; Generated by BLU Auto Quote → AutoHotkey v9.2.1
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD | 1 SEK = ${$("sekEur").value} EUR | 1 SEK = ${$("sekNok").value} NOK | 1 SEK = ${$("sekDkk").value} DKK
 ; Selling currency: ${$("targetCurrency").value}
@@ -6016,7 +6043,7 @@ RestoreClipboard(*) {
     }
 
     // =====================================
-    // v9.1.2 Nordicon / LCL compatibility work
+    // v9.2.1 Nordicon / LCL compatibility work
     // =====================================
 
     function parseNordiconCharge(lines, pattern) {
@@ -6489,7 +6516,7 @@ RestoreClipboard(*) {
 
 
     // =====================================
-    // v9.1.2 effective LCL / Nordicon overrides
+    // v9.2.1 effective LCL / Nordicon overrides
     // =====================================
 
     function newLclState(overrides = {}) {
@@ -7234,7 +7261,7 @@ RestoreClipboard(*) {
 
 
     // =====================================
-    // v9.1.2 import, Unicode and wording overrides
+    // v9.2.1 import, Unicode and wording overrides
     // =====================================
 
     const V910_DIRECTION_EXPORT = "export";
@@ -7832,8 +7859,8 @@ RestoreClipboard(*) {
       const totalQuantity = rows.reduce((sum, row) => sum + row.quantity, 0);
       const fixedProfit =
         (terminalSelling - terminalCost) +
-        (75 - forwardingFeeCost) +
-        (includeCustoms ? 100 : 0) +
+        (90 - forwardingFeeCost) +
+        (includeCustoms ? 75 : 0) +
         (50 * totalQuantity) +
         customSellingTotal;
       const remainingProfit = desiredProfitTarget - fixedProfit;
@@ -7869,7 +7896,7 @@ RestoreClipboard(*) {
     function previewFclImportRowsV910(route, group, calc) {
       const rows = [
         ["Terminal handling charge", calc.terminalCost, calc.terminalSelling, 1, calc.terminalSelling - calc.terminalCost],
-        ["Forwarding fee", calc.forwardingFeeCost, 75, 1, 75 - calc.forwardingFeeCost]
+        ["Forwarding fee", calc.forwardingFeeCost, 90, 1, 90 - calc.forwardingFeeCost]
       ];
       if (calc.commonDelivery) {
         const row = calc.rows[0];
@@ -7879,7 +7906,7 @@ RestoreClipboard(*) {
         calc.rows.forEach((row) => rows.push([`Delivery (${row.quantity}X${row.equipment.type})`, row.deliveryCost * row.quantity, row.deliverySelling, row.quantity, (row.deliverySelling - row.deliveryCost) * row.quantity]));
       }
       if (calc.includeOcean) calc.rows.forEach((row) => rows.push([`Ocean freight (${row.quantity}X${row.equipment.type})`, row.freightCost * row.quantity, row.freightSelling, row.quantity, (row.freightSelling - row.freightCost) * row.quantity]));
-      if (calc.includeCustoms) rows.push(["Customs import clearance", 0, 100, 1, 100]);
+      if (calc.includeCustoms) rows.push(["Customs import clearance", 0, 75, 1, 75]);
       calc.customCharges.forEach((charge) => rows.push([charge.name || "Custom Other charge", 0, numberValue(charge.sellingRate), 1, numberValue(charge.sellingRate)]));
       const profitUnit = calc.hasMultipleTypes ? "CONTAINER" : calc.rows[0].equipment.type;
       rows.push([`Profit (${profitUnit})`, 0, 50, calc.totalQuantity, 50 * calc.totalQuantity]);
@@ -7928,7 +7955,7 @@ RestoreClipboard(*) {
       const carrier = calc.carrier;
       const agent = agentConfig();
       const carrierSupplier = agent ?? carrier;
-      const terminalSupplier = calc.includeOcean ? carrier : null;
+      const terminalSupplier = { supplier: "msc sweden", supplierArrow: 0 };
       const charges = [{
         type: "terminal handling charge",
         description: quoteText("fcl.charges.importTerminalHandling"),
@@ -7942,7 +7969,7 @@ RestoreClipboard(*) {
         buyCurrency: agent?.manualCosts ? agent.forwardingFeeCurrency : "",
         supplier: agent?.manualCosts ? agent.supplier : "",
         supplierArrow: agent?.manualCosts ? agent.supplierArrow : 0,
-        sellingRate: "75", sellingCurrency: target, quantity: "1", quantityDescription: "CONSIGNMENT"
+        sellingRate: "90", sellingCurrency: target, quantity: "1", quantityDescription: "CONSIGNMENT"
       }];
 
       if (calc.commonDelivery) {
@@ -7983,7 +8010,7 @@ RestoreClipboard(*) {
       if (calc.includeCustoms) charges.push({
         type: "customs import clearance", description: quoteText("fcl.charges.importCustomsClearance"),
         buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
-        sellingRate: "100", sellingCurrency: target, quantity: "1", quantityDescription: "CONSIGNMENT"
+        sellingRate: "75", sellingCurrency: target, quantity: "1", quantityDescription: "CONSIGNMENT"
       });
       calc.customCharges.forEach((charge) => charges.push({
         type: "other", description: String(charge.name || "").trim(),
@@ -8050,12 +8077,12 @@ RestoreClipboard(*) {
       if (!isImportMode()) {
         const data = v841.exportFormData();
         data.direction = V910_DIRECTION_EXPORT;
-        data.appVersion = "9.1.2";
+        data.appVersion = "9.2.1";
         return data;
       }
       syncActiveRouteFromForm();
       return {
-        version: 9, mode: "FCL", direction: V910_DIRECTION_IMPORT, appVersion: "9.1.2",
+        version: 9, mode: "FCL", direction: V910_DIRECTION_IMPORT, appVersion: "9.2.1",
         clientName: textValue("clientName"), attentionTo: textValue("attentionTo"), salesOperator: textValue("salesOperator"),
         validTo: $("validTo").value, paymentDays: $("paymentDays").value, incoterm: $("incoterm").value,
         useAgent: $("useAgent").checked, agent: $("agent").value,
@@ -8115,8 +8142,8 @@ RestoreClipboard(*) {
 
     function unicodeSafeAhkV910(script) {
       let output = String(script || "")
-        .replaceAll("v8.4.1", "v9.1.2")
-        .replaceAll("Version 8.4.1", "Version 9.1.2");
+        .replaceAll("v8.4.1", "v9.2.1")
+        .replaceAll("Version 8.4.1", "Version 9.2.1");
       const replacement = `TypeField(name, value, pressEnter := false, clearFirst := false) {
   global FIELD_DELAY, MENU_ENTER_DELAY, MENU_AFTER_DELAY
   ClickField(name)
@@ -8212,7 +8239,7 @@ PasteField(`;
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - FCL Import AutoHotkey v9.1.2
+; Generated by BLU Auto Quote - FCL Import AutoHotkey v9.2.1
 ; ROE date/source: ${roeDate} / Frankfurter (or manual override)
 ; 1 SEK = ${$("sekUsd").value} USD
 ; Desired profit: ${$("profitSek").value} SEK per detail
@@ -8951,8 +8978,8 @@ RestoreClipboard(*) {
       const terminalSellingTotal = terminalIncluded ? (weightBased ? terminalSelling * weightTon : terminalSelling) : 0;
       const serviceSelling = serviceIncluded ? 15 : 0;
       const ispsSelling = ispsIncluded ? 4 : 0;
-      const forwardingSelling = 75;
-      const customsSelling = includeCustoms ? 100 : 0;
+      const forwardingSelling = 90;
+      const customsSelling = includeCustoms ? 75 : 0;
       const profitSelling = 50;
       const buyingOnlyCost = buyingOnly.reduce((sum, charge) => sum + charge.usdCost, 0);
 
@@ -9058,12 +9085,12 @@ RestoreClipboard(*) {
       });
       charges.push({
         type: "forwarding fee", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
-        sellingRate: "75", sellingCurrency: "USD", per: "", weightUnit: ""
+        sellingRate: "90", sellingCurrency: "USD", per: "", weightUnit: ""
       });
       if (calc.includeCustoms) charges.push({
         type: "customs import clearance", description: quoteText("lcl.charges.customsImportClearance"),
         buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
-        sellingRate: "100", sellingCurrency: "USD", per: "", weightUnit: ""
+        sellingRate: "75", sellingCurrency: "USD", per: "", weightUnit: ""
       });
       charges.push({
         type: "profit", description: "", buyRate: "", buyCurrency: "", supplier: "", supplierArrow: 0,
@@ -9104,8 +9131,8 @@ RestoreClipboard(*) {
       if (calc.terminalIncluded) rows.push(["Terminal handling", calc.terminalCost, calc.terminalSelling, (calc.weightBased ? calc.terminalSelling * calc.weightTon : calc.terminalSelling) - calc.terminalCost]);
       if (calc.serviceIncluded) rows.push(["LCL service charge", calc.serviceCost, calc.serviceSelling, calc.serviceSelling - calc.serviceCost]);
       if (calc.ispsIncluded) rows.push(["ISPS", calc.ispsCost, calc.ispsSelling, calc.ispsSelling - calc.ispsCost]);
-      rows.push(["Forwarding fee", 0, 75, 75]);
-      if (calc.includeCustoms) rows.push(["Customs import clearance", 0, 100, 100]);
+      rows.push(["Forwarding fee", 0, 90, 90]);
+      if (calc.includeCustoms) rows.push(["Customs import clearance", 0, 75, 75]);
       calc.buyingOnly.forEach((charge) => rows.push([`${normaliseNordiconDescription(charge.name)} (buying only)`, charge.usdCost, 0, -charge.usdCost]));
       rows.push(["Profit", 0, 50, 50]);
       box.innerHTML = `<table><thead><tr><th>Charge</th><th>Buying total USD</th><th>Selling rate USD</th><th>Profit total USD</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${row[0]}</td><td>${formatMoney(row[1], "USD", 2)}</td><td>${formatMoney(row[2], "USD", 2)}</td><td>${formatMoney(row[3], "USD", 2)}</td></tr>`).join("")}</tbody></table><div class="profit-line"><span>Calculated profit</span><span>${formatMoney(calc.actualProfit, "USD", 2)} <small>(${formatMoney(lclConvert(calc.actualProfit, "USD", "SEK"), "SEK", 0)})</small></span></div>`;
@@ -9215,11 +9242,11 @@ RestoreClipboard(*) {
       if (!isImportMode()) {
         const data = v841.exportLclData();
         data.direction = V910_DIRECTION_EXPORT;
-        data.appVersion = "9.1.2";
+        data.appVersion = "9.2.1";
         return data;
       }
       return {
-        version: 9, mode: "LCL", direction: V910_DIRECTION_IMPORT, appVersion: "9.1.2",
+        version: 9, mode: "LCL", direction: V910_DIRECTION_IMPORT, appVersion: "9.2.1",
         clientName: textValue("lclClientName"), attentionTo: textValue("lclAttentionTo"), salesOperator: textValue("lclSalesOperator"),
         validTo: $("lclValidTo").value, paymentDays: $("lclPaymentDays").value, incoterm: $("lclIncoterm").value,
         supplier: $("lclSupplier").value,
@@ -9333,7 +9360,7 @@ RestoreClipboard(*) {
 #SingleInstance Force
 #Warn
 
-; Generated by BLU Auto Quote - LCL Import AutoHotkey v9.1.2
+; Generated by BLU Auto Quote - LCL Import AutoHotkey v9.2.1
 ; ROE date/source: ${state.rates.date || "manual"} / Frankfurter (or manual override)
 ; 1 SEK = ${$("lclSekUsd").value} USD | 1 SEK = ${$("lclSekEur").value} EUR
 ; Desired profit: ${$("lclProfitSek").value} SEK
@@ -9900,10 +9927,10 @@ RestoreClipboard(*) {
     };
 
     // =====================================
-    // v9.1.2 isolated direction state, route incoterms and editable selling
+    // v9.2.1 isolated direction state, route incoterms and editable selling
     // =====================================
 
-    const V912_APP_VERSION = "9.1.2";
+    const V912_APP_VERSION = "9.2.1";
     const V912_IMPORT_TERMINAL_BUYING_SEK = 3900;
     const V912_IMPORT_TERMINAL_SELLING_USD = 415;
     const v911NewRoute = newRoute;
@@ -10259,8 +10286,8 @@ RestoreClipboard(*) {
       const terminalBuyingSek = terminalBuying.value;
       const terminalCost = convert(terminalBuyingSek, "SEK", target);
       const terminalSelling = overrideValueV912(overrides, "terminal", V912_IMPORT_TERMINAL_SELLING_USD);
-      const forwardingSelling = overrideValueV912(overrides, "forwarding", 75);
-      const customsSelling = overrideValueV912(overrides, "customs", 100);
+      const forwardingSelling = overrideValueV912(overrides, "forwarding", 90);
+      const customsSelling = overrideValueV912(overrides, "customs", 75);
       const profitSelling = overrideValueV912(overrides, "profit", 50);
       const customCharges = customChargesForDetail(route, detailRow);
       const customRates = customCharges.map((charge) => numberValue(charge.sellingRate));
@@ -10952,8 +10979,292 @@ RestoreClipboard(*) {
     };
 
 
-    // Install v9.1.2 controls and migrate the initial LCL state before startup.
+
+    // =====================================
+    // v9.2.1 physical route layout and Advanced mode
+    // =====================================
+
+    function elementShownV920(element) {
+      return Boolean(element) && !element.classList.contains("hidden");
+    }
+
+    function makeRouteStopV920(id, title) {
+      const stop = document.createElement("div");
+      stop.id = id;
+      stop.className = "physical-route-stop";
+      stop.innerHTML = `<div class="physical-route-stop-title">${title}</div><div class="physical-route-stop-host"></div>`;
+      return stop;
+    }
+
+    function updateRouteArrowsV920(track) {
+      if (!track) return;
+      const visible = [...track.querySelectorAll(":scope > .physical-route-stop")].filter(elementShownV920);
+      [...track.querySelectorAll(":scope > .physical-route-stop")].forEach((stop) => stop.classList.remove("route-has-next"));
+      visible.slice(0, -1).forEach((stop) => stop.classList.add("route-has-next"));
+    }
+
+    function installFclPhysicalRouteV920() {
+      const workspace = document.querySelector(".fcl-workspace");
+      const panel = document.querySelector("#fclPane .route-panel");
+      const routeCore = document.querySelector("#fclPane .route-core-grid");
+      if (!workspace || !panel || !routeCore || $("fclPhysicalRoute")) return;
+
+      workspace.prepend(panel);
+      panel.classList.add("physical-route-section");
+      const heading = panel.querySelector(".section-head h2");
+      if (heading) heading.textContent = "Physical route";
+
+      const route = document.createElement("div");
+      route.id = "fclPhysicalRoute";
+      route.className = "physical-route";
+      route.innerHTML = `<div class="physical-route-track" role="group" aria-label="Physical route"></div>`;
+      const track = route.querySelector(".physical-route-track");
+      const collection = makeRouteStopV920("fclCollectionStop", "Collection");
+      const pol = makeRouteStopV920("fclPolStop", "POL");
+      const pod = makeRouteStopV920("fclPodStop", "POD");
+      const delivery = makeRouteStopV920("fclDeliveryStop", "Final delivery");
+      track.append(collection, pol, pod, delivery);
+      routeCore.after(route);
+
+      const polBox = $("fclPolBox") || $("polLocation")?.closest(".location-box");
+      const podBox = $("fclPodBox") || $("podLocation")?.closest(".location-box");
+      if (polBox) pol.querySelector(".physical-route-stop-host").append(polBox);
+      if (podBox) pod.querySelector(".physical-route-stop-host").append(podBox);
+    }
+
+    function installLclPhysicalRouteV920() {
+      const workspace = document.querySelector(".lcl-workspace");
+      const routeGrid = document.querySelector(".lcl-route-grid");
+      if (!workspace || !routeGrid || $("lclPhysicalRouteSection")) return;
+
+      const quoteHeading = document.querySelector(".lcl-quote-panel .section-head h2");
+      if (quoteHeading) quoteHeading.textContent = "Quote & cargo";
+
+      const section = document.createElement("section");
+      section.id = "lclPhysicalRouteSection";
+      section.className = "section physical-route-section lcl-physical-route-section";
+      section.innerHTML = `<div class="section-head"><h2>Physical route</h2></div><div class="section-body"></div>`;
+      workspace.prepend(section);
+      const body = section.querySelector(".section-body");
+
+      const oldTitle = routeGrid.previousElementSibling;
+      if (oldTitle?.classList.contains("lcl-subsection-title") && normaliseSearch(oldTitle.textContent) === "route") oldTitle.remove();
+      routeGrid.classList.add("lcl-route-meta");
+      body.append(routeGrid);
+
+      const route = document.createElement("div");
+      route.id = "lclPhysicalRoute";
+      route.className = "physical-route";
+      route.innerHTML = `<div class="physical-route-track" role="group" aria-label="Physical route"></div>`;
+      const track = route.querySelector(".physical-route-track");
+      const collection = makeRouteStopV920("lclCollectionStop", "Collection");
+      const pol = makeRouteStopV920("lclPolStop", "POL");
+      const pod = makeRouteStopV920("lclPodStop", "POD");
+      const delivery = makeRouteStopV920("lclDeliveryStop", "Final delivery");
+      track.append(collection, pol, pod, delivery);
+      body.append(route);
+
+      const podField = $("lclPodLocation")?.closest("label.field");
+      if (podField) {
+        podField.id ||= "lclPodField";
+        pod.querySelector(".physical-route-stop-host").append(podField);
+      }
+      const fixedPol = $("lclFixedPolField");
+      const importPol = $("lclImportPolField");
+      if (fixedPol) pol.querySelector(".physical-route-stop-host").append(fixedPol);
+      if (importPol) pol.querySelector(".physical-route-stop-host").append(importPol);
+    }
+
+    function syncFclPhysicalRouteV920() {
+      const collectionField = $("collectionField");
+      const collectionHost = $("fclCollectionStop")?.querySelector(".physical-route-stop-host");
+      const deliveryHost = $("fclDeliveryStop")?.querySelector(".physical-route-stop-host");
+      const destinationHost = isImportMode() ? deliveryHost : collectionHost;
+      if (destinationHost && collectionField) destinationHost.append(collectionField);
+
+      const collectionStop = $("fclCollectionStop");
+      const deliveryStop = $("fclDeliveryStop");
+      const polStop = $("fclPolStop");
+      const podStop = $("fclPodStop");
+      const collectionVisible = elementShownV920(collectionField);
+      collectionStop?.classList.toggle("hidden", isImportMode() || !collectionVisible);
+      deliveryStop?.classList.toggle("hidden", !isImportMode() || !collectionVisible);
+      polStop?.classList.toggle("hidden", !elementShownV920($("fclPolBox")));
+      podStop?.classList.toggle("hidden", !elementShownV920($("fclPodBox")));
+      updateRouteArrowsV920($("fclPhysicalRoute")?.querySelector(".physical-route-track"));
+    }
+
+    function syncLclPhysicalRouteV920() {
+      const collectionField = $("lclCollectionField");
+      if (collectionField) collectionField.firstChild.textContent = isImportMode() ? "Delivery city" : "Collection city";
+      const collectionCode = textValue("lclCollectionCode");
+      const collectionName = textValue("lclCollectionName");
+      if (lclCollectionCombo && lclCollectionCombo.value !== collectionCode) {
+        lclCollectionCombo.value = collectionCode;
+        lclCollectionCombo.input.value = collectionCode ? `${collectionCode} - ${collectionName}` : collectionName;
+      }
+      const podCode = textValue("lclPodCode");
+      const podName = textValue("lclPodName");
+      if (lclPodCombo && lclPodCombo.value !== podCode) {
+        lclPodCombo.value = podCode;
+        lclPodCombo.input.value = podCode ? `${podCode} - ${podName}` : podName;
+      }
+      const collectionHost = $("lclCollectionStop")?.querySelector(".physical-route-stop-host");
+      const deliveryHost = $("lclDeliveryStop")?.querySelector(".physical-route-stop-host");
+      const destinationHost = isImportMode() ? deliveryHost : collectionHost;
+      if (destinationHost && collectionField) destinationHost.append(collectionField);
+
+      const collectionStop = $("lclCollectionStop");
+      const deliveryStop = $("lclDeliveryStop");
+      const polStop = $("lclPolStop");
+      const podStop = $("lclPodStop");
+      const fixedPol = $("lclFixedPolField");
+      const importPol = $("lclImportPolField");
+      collectionStop?.classList.toggle("hidden", isImportMode() || !elementShownV920(collectionField));
+      deliveryStop?.classList.toggle("hidden", !isImportMode() || !elementShownV920(collectionField));
+      polStop?.classList.toggle("hidden", !elementShownV920(fixedPol) && !elementShownV920(importPol));
+      podStop?.classList.toggle("hidden", !elementShownV920($("lclPodField")));
+      updateRouteArrowsV920($("lclPhysicalRoute")?.querySelector(".physical-route-track"));
+    }
+
+    function syncPhysicalRoutesV920() {
+      syncFclPhysicalRouteV920();
+      syncLclPhysicalRouteV920();
+    }
+
+    function setAdvancedModeV920(enabled) {
+      const active = Boolean(enabled);
+      document.body.classList.toggle("advanced-mode-enabled", active);
+      if ($("advancedMode")) $("advancedMode").checked = active;
+    }
+
+    function installAdvancedModeV920() {
+      if ($("advancedModeControl")) return;
+      const control = document.createElement("section");
+      control.id = "advancedModeControl";
+      control.className = "advanced-mode-control";
+      control.innerHTML = `<label class="waiting-check"><input id="advancedMode" type="checkbox"> Advanced mode</label><span class="small-note">Shows rate tools and route/equipment syncing. Hidden settings keep their values.</span>`;
+      document.querySelector("main")?.append(control);
+      $("advancedMode")?.addEventListener("change", () => setAdvancedModeV920($("advancedMode").checked));
+      setAdvancedModeV920(false);
+    }
+
+    function installV920Ui() {
+      const style = document.createElement("style");
+      style.id = "v920Styles";
+      style.textContent = `
+        .fcl-workspace > .route-panel { grid-column:1 / -1; grid-row:1; }
+        .fcl-workspace > .fcl-left-stack { grid-column:1; grid-row:2; }
+        .fcl-workspace > .fcl-right-stack { grid-column:2; grid-row:2; }
+        .lcl-workspace > .lcl-physical-route-section { grid-column:1 / -1; grid-row:1; }
+        .lcl-workspace > .lcl-left-stack { grid-column:1; grid-row:2; }
+        .lcl-workspace > .lcl-right-stack { grid-column:2; grid-row:2; }
+        .physical-route-section .route-core-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+        .physical-route { margin-top:10px; }
+        .physical-route-track { display:flex; align-items:stretch; gap:34px; min-width:0; }
+        .physical-route-stop { position:relative; flex:1 1 0; min-width:0; padding:10px; border:1px solid #999; background:#fafafa; }
+        .physical-route-stop.route-has-next::after { content:"→"; position:absolute; top:50%; right:-25px; width:16px; transform:translateY(-50%); color:#555; font-size:20px; font-weight:700; text-align:center; }
+        .physical-route-stop-title { margin:-10px -10px 9px; padding:7px 9px; border-bottom:1px solid #bbb; background:#eee; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+        .physical-route-stop-host { display:grid; gap:7px; min-width:0; }
+        .physical-route-stop .location-box { display:grid; grid-template-columns:1fr; gap:7px; min-width:0; }
+        .physical-route-stop .location-title { display:none; }
+        .physical-route-stop label.field { min-width:0; }
+        .physical-route-stop input, .physical-route-stop select { min-width:0; }
+        .lcl-route-meta { grid-template-columns:repeat(2, minmax(0, 1fr)); margin-bottom:10px; }
+        .calculation-detail-body { padding:7px 0 0; }
+        .calculation-detail-controls { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:8px; border:1px solid #ccc; background:#fafafa; }
+        .origin-charge-control { display:grid; gap:7px; min-width:min(100%, 340px); }
+        .origin-charge-control .origin-fields { margin:0; }
+        .origin-charge-control:has(.origin-toggle + *) { min-width:min(100%, 340px); }
+        .origin-charge-control:has(.origin-toggle:checked) { flex:1 1 340px; }
+        .origin-charge-control:has(.origin-toggle) { flex:1 1 260px; }
+        .origin-charge-control:has(> .waiting-check.hidden) { display:none; }
+        .calculation-detail-controls .add-custom-charge { margin-left:auto; }
+        .calculation-details .custom-charge-section { padding:9px 8px 0; border-top:0; }
+        .calculation-details .preview-box { margin-top:8px; }
+        .equipment-option-row:has(> .stuffing-field.hidden:only-child) { display:none; }
+        body:not(.advanced-mode-enabled) .equipment-advanced,
+        body:not(.advanced-mode-enabled) .route-options-panel { display:none !important; }
+        .advanced-mode-control { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:14px; padding:9px 11px; border:1px solid #999; background:#f5f5f5; }
+        .advanced-mode-control .waiting-check { min-height:24px; }
+        @media (max-width:900px) {
+          .physical-route-track { overflow-x:auto; padding-bottom:4px; }
+          .physical-route-stop { flex:0 0 205px; }
+        }
+        @media (max-width:850px) {
+          .fcl-workspace > .route-panel, .fcl-workspace > .fcl-left-stack, .fcl-workspace > .fcl-right-stack,
+          .lcl-workspace > .lcl-physical-route-section, .lcl-workspace > .lcl-left-stack, .lcl-workspace > .lcl-right-stack { grid-column:1; grid-row:auto; }
+        }
+        @media (max-width:620px) {
+          .physical-route-section .route-core-grid, .lcl-route-meta { grid-template-columns:1fr; }
+          .advanced-mode-control { align-items:flex-start; flex-direction:column; }
+        }
+      `;
+      document.head.append(style);
+      installFclPhysicalRouteV920();
+      installLclPhysicalRouteV920();
+      installAdvancedModeV920();
+      syncPhysicalRoutesV920();
+    }
+
+    const v912ToggleIncotermFieldsV920 = toggleIncotermFields;
+    toggleIncotermFields = function(refresh = true) {
+      v912ToggleIncotermFieldsV920(refresh);
+      syncFclPhysicalRouteV920();
+    };
+
+    const v912ToggleLclIncotermFieldsV920 = toggleLclIncotermFields;
+    toggleLclIncotermFields = function(update = true) {
+      v912ToggleLclIncotermFieldsV920(update);
+      syncLclPhysicalRouteV920();
+    };
+
+    const v912ConfigureDirectionUiV920 = configureDirectionUiV910;
+    configureDirectionUiV910 = function() {
+      v912ConfigureDirectionUiV920();
+      syncPhysicalRoutesV920();
+    };
+
+
+
+    // =====================================
+    // v9.2.1 compact route/payment controls and unified reset
+    // =====================================
+
+    function installV921Ui() {
+      const topReset = $("resetAllSettings");
+      if (topReset) {
+        topReset.classList.add("hidden");
+        topReset.setAttribute("aria-hidden", "true");
+        topReset.tabIndex = -1;
+      }
+
+      const summaryReset = $("resetForm");
+      if (summaryReset && summaryReset.dataset.resetScope !== "global") {
+        summaryReset.dataset.resetScope = "global";
+        summaryReset.textContent = "Reset all";
+        summaryReset.title = "Reset all Export and Import settings to startup defaults";
+        summaryReset.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          resetAllSettings();
+        }, true);
+      }
+
+      if (!$("appCopyright")) {
+        const footer = document.createElement("footer");
+        footer.id = "appCopyright";
+        footer.className = "app-footer";
+        footer.textContent = "© Erik Ståhl 2026";
+        document.querySelector("main")?.append(footer);
+      }
+    }
+
+
+    // Install v9.2.1 controls and migrate the initial LCL state before startup.
     installV910Ui();
+    installV920Ui();
+    installV921Ui();
     state.lcl = newLclState({ ...state.lcl, costs: state.lcl.costs || {} });
 
 
