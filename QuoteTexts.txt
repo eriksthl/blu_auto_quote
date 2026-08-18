@@ -1,6 +1,6 @@
 {
   "_instructions": "Editable quote wording for BLU Auto Quote. Keep this file in the same folder as index.html and LocCodes.xlsx. The file is JSON saved as plain text. Placeholders use {{UPPERCASE_NAME}} syntax and must not be renamed unless index.html is updated too.",
-  "version": "8.4.0",
+  "version": "9.1.1",
   "common": {
     "project": "949",
     "internalComment": "Agent Ocean Export",
@@ -8,17 +8,27 @@
     "coverLetter": "Many thanks for your inquiry. We are pleased to offer the following",
     "salutation": "Dear {{ATTENTION}},",
     "detailBasis": "Based on {{SUPPLIER}} ({{INCOTERM}})",
-    "subjectTo": "Space/equipment and any charge imposed by the line VATOS.\n\nAny additional requirement not previously notified could derive into this quote being reviewed.\n\nShipping line approval of commodity.\n\nAll quotes & tenders are subject to our Middle East Conflict Disclaimer, available on our website.\n\nAny Emergency Conflict/War Risk Surcharges, additional premiums, Route Changes and/or End of Voyage costs, whether existing, increased or newly imposed prior to or during the transport/voyage.",
+    "subjectTo": "Space/equipment and any charge imposed by the line VATOS.\n\nAny additional requirement not previously notified could derive into this quote being reviewed.\n\nShipping line/trucker approval of commodity.\n\nAll quotes & tenders are subject to our Middle East Conflict Disclaimer, available on our website.\n\nAny Emergency Conflict/War Risk Surcharges, additional premiums, Route Changes and/or End of Voyage costs, whether existing, increased or newly imposed prior to or during the transport/voyage.",
     "grossWeight": "25000",
     "transitTime": "{{DAYS}} DAYS // PORT-PORT",
-    "transitTimeTba": "TBA DAYS // PORT-PORT"
+    "transitTimeTba": "TBA DAYS // PORT-PORT",
+    "projectImport": "950",
+    "internalCommentImport": "Agent Ocean Import",
+    "detailIncotermOnly": "({{INCOTERM}})",
+    "subjectToNoOcean": "Any additional requirement not previously notified could derive into this quote being reviewed.\n\nShipping line/trucker approval of commodity.\n\nAll quotes & tenders are subject to our Middle East Conflict Disclaimer, available on our website.\n\nAny Emergency Conflict/War Risk Surcharges, additional premiums, Route Changes and/or End of Voyage costs, whether existing, increased or newly imposed prior to or during the transport/voyage.",
+    "transitTimeImport": "1-3 DAYS FROM VESSEL DISCHARGE"
   },
   "fcl": {
     "subject": "FCL {{EQUIPMENT}} - {{ROUTE}}",
     "cargoDescription": "GENERAL CARGO - NON HAZARDOUS",
     "freeDays": {
       "standard": "Standard free days",
-      "custom": "{{FREE_DAYS}} free days {{FREE_DAYS_TYPE}}"
+      "custom": "{{FREE_DAYS}} free days {{FREE_DAYS_TYPE}}",
+      "detention": "{{FREE_DAYS}} free days detention at destination",
+      "combined": "{{FREE_DAYS}} free days combined at destination",
+      "demurrage": "{{FREE_DAYS}} free days demurrage at destination",
+      "unspecified": "{{FREE_DAYS}} free days at destination",
+      "demurrageDetention": "{{DEMURRAGE_DAYS}}+{{DETENTION_DAYS}} free days demurrage/detention at destination"
     },
     "including": {
       "customFreeDays": "{{FREE_DAYS}} free days {{FREE_DAYS_TYPE}} at POD.",
@@ -28,7 +38,10 @@
       "destinationCharges": "DESTINATION CHARGES",
       "fcaCustomExport": "CUSTOM EXPORT DECLARATION (OPTIONAL ADDL. AT 100 USD)",
       "fobOriginCharges": "ORIGIN CHARGES",
-      "reeferGenset": "GENSET (OPTIONAL ADDL. AT 375 USD)"
+      "reeferGenset": "GENSET (OPTIONAL ADDL. AT 375 USD)",
+      "importVatDuty": "VAT AND IMPORT DUTY",
+      "importCustomsClearance": "CUSTOMS IMPORT CLEARANCE",
+      "importOriginCharges": "ORIGIN CHARGES"
     },
     "remarks": {
       "roe": "Rate of Exchange is subject to fluctuations, quoted amounts will be adjusted to the rate of exchange at time of shipping.",
@@ -36,7 +49,8 @@
       "profitShare": "Our profit share is already INCLUDED in this quotation.",
       "waiting": "Additional waiting time in port of {{POL}} and/or at Shipper's site in {{COLLECTION}} to be charged as per tariff from Truckers. Approx. USD 50 per initiated 0,5h.",
       "shipperStuff": "Quotation based on that shipper stuff & lash cargo into container(s).",
-      "additionalHsCodes": "Additional HS codes to be charged at 4 USD per code."
+      "additionalHsCodes": "Additional HS codes to be charged at 4 USD per code.",
+      "waitingImport": "Additional waiting time in port of {{POD}} and/or at Consignee's site in {{DELIVERY}} to be charged as per tariff from Truckers. Approx. USD 50 per initiated 0,5h."
     },
     "charges": {
       "waitingIncluded": "{{HOURS}}H WAITING TIME INCLUDED, ADDITIONAL TIME TO BE CHARGED AT COST - APPROX. USD 50 PER 0,5H.",
@@ -50,8 +64,13 @@
       "originCharges": "ORIGIN CHARGES",
       "originChargesByEquipment": "ORIGIN CHARGES ({{QUANTITY}}X{{EQUIPMENT}})",
       "exportCustom": "CUSTOM EXPORT DECLARATION INCL. 3 HS CODES",
-      "reeferMonitoring": "REEFER MONITORING COSTS AT PORT (USD 80/DAY PER CONTAINER)"
-    }
+      "reeferMonitoring": "REEFER MONITORING COSTS AT PORT (USD 80/DAY PER CONTAINER)",
+      "delivery": "DELIVERY ({{DELIVERY}}), CHASSIS INCL. FUEL (VATOS - MONTHLY UPDATE)\n\n{{WAITING_TEXT}}",
+      "deliveryByEquipment": "DELIVERY ({{QUANTITY}}X{{EQUIPMENT}}) - {{DELIVERY}}, CHASSIS INCL. FUEL (VATOS - MONTHLY UPDATE)\n\n{{WAITING_TEXT}}",
+      "importTerminalHandling": "TERMINAL HANDLING CHARGES\nINCL. PORT DUES, ISPS AND FAIRWAY DUES",
+      "importCustomsClearance": "CUSTOMS IMPORT CLEARANCE\nINCL. 3 HS CODES"
+    },
+    "subjectImport": "FCL {{INCOTERM}} {{EQUIPMENT}} - {{ROUTE}}"
   },
   "lcl": {
     "subject": "LCL - {{COLLECTION}} - GOTHENBURG - {{POD}} - {{STACKABLE}}",
@@ -59,27 +78,36 @@
     "excluding": {
       "destinationCharges": "DESTINATION CHARGES",
       "fcaCustomExport": "CUSTOM EXPORT DECLARATION (OPTIONAL ADDL. AT 100 USD)",
-      "fobOriginCharges": "ORIGIN CHARGES"
+      "fobOriginCharges": "ORIGIN CHARGES",
+      "importVatDuty": "VAT AND IMPORT DUTY",
+      "importCustomsClearance": "CUSTOMS IMPORT CLEARANCE",
+      "importOriginCharges": "ORIGIN CHARGES"
     },
     "remarks": {
       "carrier": "Rates based on shipment via {{SUPPLIER}}.",
       "profitShare": "Our profit share is already INCLUDED in this quotation.",
       "loadingTime": "*) Inland haulage to shippers premises INCL 30 MINUTES FREE LOADING TIME.",
       "additionalHsCodes": "Additional HS codes to be charged at 4 USD per code.",
-      "directNonStack": "Based on DIRECT routing; NON-STACK is accepted without extra charges."
+      "directNonStack": "Based on DIRECT routing; NON-STACK is accepted without extra charges.",
+      "waitingImport": "Additional waiting time at Consignee's site in {{DELIVERY}} to be charged as per tariff from Truckers. Approx. USD 50 per initiated 0,5h."
     },
     "charges": {
       "inlandHaulage": "INLAND HAULAGE ({{COLLECTION}})*",
       "oceanFreight": "OCEAN FREIGHT",
       "fuelContingency": "FUEL CONTINGENCY SURCHARGE",
       "solasFee": "SOLAS FEE",
-      "customsCheckMrn": "CUSTOMS CHECK MRN"
+      "customsCheckMrn": "CUSTOMS CHECK MRN",
+      "delivery": "DELIVERY ({{DELIVERY}})",
+      "terminalHandlingImport": "TERMINAL HANDLING CHARGE",
+      "lclServiceChargeImport": "LCL SERVICE CHARGE",
+      "customsImportClearance": "CUSTOMS IMPORT CLEARANCE\nINCL. 3 HS CODES"
     },
     "subjectFob": "LCL - GOTHENBURG - {{POD}} - {{STACKABLE}}",
     "cargoDescriptionImo": "IMO CARGO - {{STACKABLE}}\n{{IMO}}",
     "nordiconTranslations": {
       "inrikes": "INLAND",
       "tillagg": "SURCHARGE"
-    }
+    },
+    "subjectImport": "LCL {{INCOTERM}} - {{ROUTE}} - {{STACKABLE}}"
   }
 }
