@@ -1,6 +1,6 @@
 {
   "_instructions": "Editable quote wording for BLU Auto Quote. Keep this file in the same folder as index.html and LocCodes.xlsx. The file is JSON saved as plain text. Placeholders use {{UPPERCASE_NAME}} syntax and must not be renamed unless index.html is updated too.",
-  "version": "9.2.2",
+  "version": "9.2.3",
   "common": {
     "project": "949",
     "internalComment": "Agent Ocean Export",
