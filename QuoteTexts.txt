@@ -1,6 +1,6 @@
 {
   "_instructions": "Editable quote wording for BLU Auto Quote. Keep this file in the same folder as index.html and LocCodes.xlsx. The file is JSON saved as plain text. Placeholders use {{UPPERCASE_NAME}} syntax and must not be renamed unless index.html is updated too.",
-  "version": "9.2.3",
+  "version": "9.3.0",
   "common": {
     "project": "949",
     "internalComment": "Agent Ocean Export",
@@ -68,9 +68,13 @@
       "delivery": "DELIVERY ({{DELIVERY}}), CHASSIS INCL. FUEL (VATOS - MONTHLY UPDATE)\n\n{{WAITING_TEXT}}",
       "deliveryByEquipment": "DELIVERY ({{QUANTITY}}X{{EQUIPMENT}}) - {{DELIVERY}}, CHASSIS INCL. FUEL (VATOS - MONTHLY UPDATE)\n\n{{WAITING_TEXT}}",
       "importTerminalHandling": "TERMINAL HANDLING CHARGES\nINCL. PORT DUES, ISPS AND FAIRWAY DUES",
-      "importCustomsClearance": "CUSTOMS IMPORT CLEARANCE\nINCL. 3 HS CODES"
+      "importCustomsClearance": "CUSTOMS IMPORT CLEARANCE\nINCL. 3 HS CODES",
+      "inlandHazardousSurcharge": "INLAND HAZARDOUS SURCHARGE",
+      "oceanHazardousSurcharge": "OCEAN FREIGHT HAZARDOUS SURCHARGE"
     },
-    "subjectImport": "FCL {{INCOTERM}} {{EQUIPMENT}} - {{ROUTE}}"
+    "subjectImport": "FCL {{INCOTERM}} {{EQUIPMENT}} - {{ROUTE}}",
+    "cargoDescriptionHazardous": "HAZARDOUS CARGO",
+    "cargoDescriptionHazardousImo": "HAZARDOUS CARGO - {{IMO_DETAILS}}"
   },
   "lcl": {
     "subject": "LCL - {{COLLECTION}} - GOTHENBURG - {{POD}} - {{STACKABLE}}",
