@@ -1,6 +1,6 @@
 {
   "_instructions": "Editable quote wording for BLU Auto Quote. Keep this file in the same folder as index.html and LocCodes.xlsx. The file is JSON saved as plain text. Placeholders use {{UPPERCASE_NAME}} syntax and must not be renamed unless index.html is updated too.",
-  "version": "9.5.0",
+  "version": "9.6.2",
   "common": {
     "project": "949",
     "internalComment": "Agent Ocean Export",
@@ -22,7 +22,7 @@
     "subject": "FCL {{EQUIPMENT}} - {{ROUTE}}",
     "cargoDescription": "GENERAL CARGO - NON HAZARDOUS",
     "freeDays": {
-      "standard": "Standard free days",
+      "standard": "Standard free days at destination",
       "custom": "{{FREE_DAYS}} free days {{FREE_DAYS_TYPE}}",
       "detention": "{{FREE_DAYS}} free days detention at destination",
       "combined": "{{FREE_DAYS}} free days combined at destination",
@@ -31,7 +31,7 @@
       "demurrageDetention": "{{DEMURRAGE_DAYS}}+{{DETENTION_DAYS}} free days demurrage/detention at destination"
     },
     "including": {
-      "customFreeDays": "{{FREE_DAYS}} free days {{FREE_DAYS_TYPE}} at POD.",
+      "customFreeDays": "{{FREE_DAYS}} free days {{FREE_DAYS_TYPE}} at destination.",
       "reeferMonitoring": "0 DAYS REEFER MONITORING, ADDL. TO BE CHARGED AT 80 USD/DAY"
     },
     "excluding": {
@@ -45,7 +45,7 @@
     },
     "remarks": {
       "roe": "Rate of Exchange is subject to fluctuations, quoted amounts will be adjusted to the rate of exchange at time of shipping.",
-      "carrierFreeDays": "Rates based on shipment via {{CARRIER}} who offer {{FREE_DAYS}} at POD.",
+      "carrierFreeDays": "Rates based on shipment via {{CARRIER}} who offer {{FREE_DAYS}}.",
       "profitShare": "Our profit share is already INCLUDED in this quotation.",
       "waiting": "Additional waiting time in port of {{POL}} and/or at Shipper's site in {{COLLECTION}} to be charged as per tariff from Truckers. Approx. USD 50 per initiated 0,5h.",
       "shipperStuff": "Quotation based on that shipper stuff & lash cargo into container(s).",
