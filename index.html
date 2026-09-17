@@ -3802,7 +3802,7 @@ RestoreClipboard(*) {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${safeFilename(`${localDateStamp()} - ${textValue("lclClientName")} - ${lclSubject()}`)}.ahk`;
+      link.download = `${safeFilename(`${localDateStamp()} - ${textValue("lclClientName")} - ${lclSubject()}`)} - ${/^; BLU_AUTOMATION_MODE: WEB$/m.test(state.lcl.generatedScript) ? "Web" : "Citrix"}.ahk`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -3955,7 +3955,7 @@ RestoreClipboard(*) {
       const link = document.createElement("a");
       link.href = url;
       const filename = `${localDateStamp()} - ${textValue("clientName")} - ${buildSubject()}`;
-      link.download = `${safeFilename(filename)}.ahk`;
+      link.download = `${safeFilename(filename)} - ${/^; BLU_AUTOMATION_MODE: WEB$/m.test(state.generatedScript) ? "Web" : "Citrix"}.ahk`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -4967,7 +4967,9 @@ RestoreClipboard(*) {
         Math.abs(row.precarriageCost - rows[0].precarriageCost) < 0.0001 &&
         upper(row.equipment.precarriageCurrency) === upper(rows[0].equipment.precarriageCurrency) &&
         upper(row.equipment.precarriageSupplier) === upper(rows[0].equipment.precarriageSupplier) &&
-        Boolean(row.includeStuff) === Boolean(rows[0].includeStuff)
+        Boolean(row.includeStuff) === Boolean(rows[0].includeStuff) &&
+        String(row.equipment.precarriageMode || "CHASSIS") === String(rows[0].equipment.precarriageMode || "CHASSIS") &&
+        Boolean(row.equipment.containerDropOff) === Boolean(rows[0].equipment.containerDropOff)
       );
       const actualProfit = rows.reduce((sum, row) => sum
         + (row.freightSelling - row.freightCost) * row.quantity
@@ -10204,7 +10206,9 @@ RestoreClipboard(*) {
         Math.abs(row.precarriageCost - rows[0].precarriageCost) < 0.0001 &&
         upper(row.equipment.precarriageCurrency) === upper(rows[0].equipment.precarriageCurrency) &&
         upper(row.equipment.precarriageSupplier) === upper(rows[0].equipment.precarriageSupplier) &&
-        Boolean(row.includeStuff) === Boolean(rows[0].includeStuff)
+        Boolean(row.includeStuff) === Boolean(rows[0].includeStuff) &&
+        String(row.equipment.precarriageMode || "CHASSIS") === String(rows[0].equipment.precarriageMode || "CHASSIS") &&
+        Boolean(row.equipment.containerDropOff) === Boolean(rows[0].equipment.containerDropOff)
       );
       const stuffQuantity = rows.filter((row) => row.includeStuff).reduce((sum, row) => sum + row.quantity, 0);
       const hasStuff = includePrecarriage && stuffQuantity > 0;
@@ -11593,7 +11597,7 @@ ${builderFunctions}
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${localDateStamp()} - BLU merged ${mergeScriptFilesV923.length} quotes.ahk`;
+      link.download = `${localDateStamp()} - BLU merged ${mergeScriptFilesV923.length} quotes - ${/^; BLU_AUTOMATION_MODE: WEB$/m.test(mergeGeneratedScriptV923) ? "Web" : "Citrix"}.ahk`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -18059,7 +18063,7 @@ PhysicalRouteMode(fromKind, toKind, deliveryMode) {
       const oldVariableProfit = (includeOrigin ? calc.truckingSelling - calc.truckingCost : 0) +
         (includeOcean ? calc.oceanSelling * volumeMultiplier - calc.oceanCost : 0);
       const fixedProfit = calc.actualProfit - oldVariableProfit;
-      const inlandParts = Number(includeOrigin) + 1;
+      const inlandParts = Number(includeOrigin); // Export delivery stays at cost.
       const oceanShare = lclProfitOceanFractionV961(inlandParts > 0, Boolean(calc.freightCollect), includeOcean);
       const inlandShare = Math.max(0, 1 - oceanShare);
       const inlandPartShare = inlandParts ? inlandShare / inlandParts : 0;
@@ -18411,7 +18415,7 @@ PhysicalRouteMode(fromKind, toKind, deliveryMode) {
       const fixedContainerProfit = calc.containerProfit - oldVariableProfit;
       const fixedTargetProfit = fixedContainerProfit + (calc.includeConsignmentInProfit ? calc.consignmentProfit : 0);
       const remainingProfit = calc.desiredProfitTarget - fixedTargetProfit;
-      const inlandKinds = Number(includePrecarriage) + Number(stuffRows.length > 0) + 1;
+      const inlandKinds = Number(includePrecarriage) + Number(stuffRows.length > 0); // Export delivery stays at cost.
       const oceanShare = includeOcean ? fclProfitOceanFractionV961(route, calc.detailRow, inlandKinds > 0) : 0;
       const inlandPartShare = inlandKinds ? Math.max(0, 1 - oceanShare) / inlandKinds : 0;
       const totalQuantity = Math.max(1, calc.totalQuantity);
@@ -18446,7 +18450,8 @@ PhysicalRouteMode(fromKind, toKind, deliveryMode) {
       const commonDelivery = rows.every((row) =>
         Math.abs(row.deliveryCost - rows[0].deliveryCost) < 0.0001 &&
         upper(row.equipment.deliveryCurrency) === upper(rows[0].equipment.deliveryCurrency) &&
-        upper(row.equipment.deliverySupplier) === upper(rows[0].equipment.deliverySupplier)
+        upper(row.equipment.deliverySupplier) === upper(rows[0].equipment.deliverySupplier) &&
+        String(row.equipment.deliverySellingCurrency || "") === String(rows[0].equipment.deliverySellingCurrency || "")
       );
       if (commonDelivery) {
         const key = "delivery:common";
@@ -20033,6 +20038,7 @@ PhysicalRouteMode(fromKind, toKind, deliveryMode) {
     loadLocCodes();
   </script>
   <script src="v9.7.4.js"></script>
-  <script src="v10.1.3.js"></script>
+  <script src="v10.2.0-features.js"></script>
+  <script src="v10.2.0.js"></script>
 </body>
 </html>
