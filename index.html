@@ -6073,13 +6073,15 @@ RestoreClipboard(*) {
       const last = tokens[tokens.length - 1];
       let totalText = last[0];
       let totalStart = last.index;
-      if (tokens.length > 1) {
-        const previous = tokens[tokens.length - 2];
-        const between = beforeCurrency.slice(previous.index + previous[0].length, last.index);
-        if (/^\s+$/.test(between) && /^\d{1,2}$/.test(previous[0]) && /^\d{3}$/.test(last[0])) {
-          totalText = previous[0] + last[0];
-          totalStart = previous.index;
-        }
+      // v10.2.3: TOTAL may contain several thousands groups and decimals.
+      // Keep the four numeric columns (UNITS, CURR., RATE, MIN.) separate:
+      // e.g. MIN=1 + TOTAL=423 must never become a total of 1423.
+      for (let index = tokens.length - 1; index > 4; index -= 1) {
+        const current = tokens[index], previous = tokens[index - 1];
+        const between = beforeCurrency.slice(previous.index + previous[0].length, current.index);
+        if (!/^[ \t\u00a0\u202f]+$/.test(between) || !/^\d{1,3}$/.test(previous[0]) || !/^\d{3}(?:[.,]\d+)?$/.test(current[0])) break;
+        totalText = previous[0] + totalText;
+        totalStart = previous.index;
       }
       const total = decimalNumber(totalText);
       const beforeTotal = beforeCurrency.slice(0, totalStart);
@@ -20038,7 +20040,7 @@ PhysicalRouteMode(fromKind, toKind, deliveryMode) {
     loadLocCodes();
   </script>
   <script src="v9.7.4.js"></script>
-  <script src="v10.2.2-features.js"></script>
-  <script src="v10.2.2.js"></script>
+  <script src="v10.2.3-features.js"></script>
+  <script src="v10.2.3.js"></script>
 </body>
 </html>
