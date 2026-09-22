@@ -976,7 +976,7 @@
     function newEquipment(overrides = {}) {
       return {
         quantity: 1,
-        type: "20'DV",
+        type: "40'HC",
         freightAmount: "",
         freightCurrency: "USD",
         precarriageAmount: "",
@@ -4073,7 +4073,7 @@ RestoreClipboard(*) {
         id: overrides.id || makeStableId("eq"),
         syncKey: overrides.syncKey || makeStableId("sync"),
         quantity: overrides.quantity ?? 1,
-        type: overrides.type || "20'DV",
+        type: overrides.type || "40'HC",
         detailRow: overrides.detailRow ?? 1,
         carrier: String(overrides.carrier || "MSC").trim().toUpperCase(),
         freightAmount: overrides.freightAmount ?? "",
@@ -20040,7 +20040,9 @@ PhysicalRouteMode(fromKind, toKind, deliveryMode) {
     loadLocCodes();
   </script>
   <script src="v9.7.4.js"></script>
-  <script src="v10.2.3-features.js"></script>
-  <script src="v10.2.3.js"></script>
+  <script src="v10.3.2-features.js"></script>
+  <script src="v10.3.2.js"></script>
+  <script src="v10.3.2-bulk-citrix.js"></script>
+  <script src="v10.3.2-bulk.js"></script>
 </body>
 </html>
