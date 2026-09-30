@@ -23,7 +23,7 @@
   "coordinates": {
     "quotation tab": [
       275,
-      161
+      174
     ],
     "create quotation": [
       351,
